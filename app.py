@@ -6,6 +6,7 @@ CantiereSicuro AI PRO - Generatore POS D.Lgs 81/08
 import streamlit as st
 from fpdf import FPDF
 from datetime import datetime, date, timedelta
+from io import BytesIO
 import re
 import json
 
@@ -15,6 +16,12 @@ try:
 except ImportError:
     OPENAI_AVAILABLE = False
 
+try:
+    from pypdf import PdfReader, PdfWriter
+    PYPDF_AVAILABLE = True
+except ImportError:
+    PYPDF_AVAILABLE = False
+
 # ==============================================================================
 # CONFIGURAZIONE
 # ==============================================================================
@@ -22,29 +29,227 @@ st.set_page_config(page_title="CantiereSicuro AI PRO", page_icon="🏗️", layo
 
 st.markdown("""
 <style>
-    .stApp { background-color: #F5F7FA; }
+    /* ===== RESET FONT SIZE GLOBALE - AGGRESSIVO ===== */
+    html, body, [class*="css"] {
+        font-size: 18px !important;
+    }
+    
+    /* Main container */
+    .main .block-container {
+        font-size: 18px !important;
+    }
+    
+    /* Tutti gli elementi di testo */
+    p, span, div, label, li, td, th {
+        font-size: 18px !important;
+        line-height: 1.5 !important;
+    }
+    
+    /* Titoli h3 (### Fase X) */
+    h3, .stMarkdown h3 {
+        font-size: 28px !important;
+        font-weight: 700 !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    /* Titoli h5 (##### Sezione) */
+    h5, .stMarkdown h5 {
+        font-size: 22px !important;
+        font-weight: 600 !important;
+        margin-top: 1rem !important;
+    }
+    
+    /* INPUT FIELDS - Selettori specifici Streamlit */
+    [data-testid="stTextInput"] input,
+    [data-testid="textInputRootElement"] input,
+    .stTextInput input {
+        font-size: 18px !important;
+        padding: 14px 12px !important;
+        min-height: 50px !important;
+    }
+    
+    /* Text Area */
+    [data-testid="stTextArea"] textarea,
+    .stTextArea textarea {
+        font-size: 18px !important;
+        padding: 14px 12px !important;
+        line-height: 1.5 !important;
+    }
+    
+    /* Number Input */
+    [data-testid="stNumberInput"] input,
+    .stNumberInput input {
+        font-size: 18px !important;
+        padding: 14px 12px !important;
+    }
+    
+    /* LABELS - Sopra gli input */
+    [data-testid="stTextInput"] label,
+    [data-testid="stTextArea"] label,
+    [data-testid="stNumberInput"] label,
+    [data-testid="stSelectbox"] label,
+    .stTextInput label p,
+    .stTextArea label p,
+    .stNumberInput label p {
+        font-size: 17px !important;
+        font-weight: 600 !important;
+        margin-bottom: 6px !important;
+    }
+    
+    /* CHECKBOX */
+    [data-testid="stCheckbox"] label,
+    [data-testid="stCheckbox"] span,
+    .stCheckbox label {
+        font-size: 18px !important;
+    }
+    
+    /* RADIO BUTTONS */
+    [data-testid="stRadio"] label,
+    [data-testid="stRadio"] div[role="radiogroup"] label,
+    .stRadio label {
+        font-size: 18px !important;
+    }
+    
+    /* Placeholder text */
+    input::placeholder, textarea::placeholder {
+        font-size: 16px !important;
+        opacity: 0.7 !important;
+    }
+    
+    /* BOTTONI */
+    button, .stButton button, .stFormSubmitButton button, .stDownloadButton button {
+        font-size: 18px !important;
+        padding: 14px 28px !important;
+        font-weight: 600 !important;
+        min-height: 50px !important;
+    }
+    
+    /* Info/Warning/Success boxes */
+    [data-testid="stAlert"], .stAlert {
+        font-size: 17px !important;
+    }
+    [data-testid="stAlert"] p {
+        font-size: 17px !important;
+    }
+    
+    /* Expander */
+    [data-testid="stExpander"] summary,
+    .streamlit-expanderHeader {
+        font-size: 19px !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Caption e help text */
+    .stCaption, [data-testid="stCaption"], small {
+        font-size: 15px !important;
+    }
+    
+    /* ===== SIDEBAR SEMPRE FISSA ===== */
+    [data-testid="stSidebar"], 
+    [data-testid="stSidebar"] * {
+        font-size: 17px !important;
+    }
+    
+    /* Sidebar FISSA - sempre visibile */
+    [data-testid="stSidebar"] {
+        display: block !important;
+        width: 300px !important;
+        min-width: 300px !important;
+        max-width: 300px !important;
+        transform: none !important;
+        visibility: visible !important;
+        background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%) !important;
+        border-right: 1px solid #E5E7EB !important;
+    }
+    
+    [data-testid="stSidebar"][aria-expanded="false"],
+    [data-testid="stSidebar"][aria-expanded="true"] {
+        display: block !important;
+        width: 300px !important;
+        min-width: 300px !important;
+        max-width: 300px !important;
+        margin-left: 0 !important;
+        transform: none !important;
+        visibility: visible !important;
+    }
+    
+    section[data-testid="stSidebar"] > div {
+        width: 300px !important;
+        padding-top: 1rem !important;
+    }
+    
+    /* NASCONDI SOLO il pulsante freccia di chiusura sidebar (non i pulsanti normali!) */
+    [data-testid="collapsedControl"],
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebar"] > div > div > div > div > button:first-child {
+        display: none !important;
+    }
+    
+    /* Assicurati che i pulsanti di navigazione nella sidebar siano VISIBILI */
+    [data-testid="stSidebar"] .stButton > button {
+        display: flex !important;
+        visibility: visible !important;
+        background: white !important;
+        color: #374151 !important;
+        border: 1px solid #E5E7EB !important;
+        font-size: 0.9rem !important;
+        padding: 10px 15px !important;
+        min-height: 42px !important;
+        width: 100% !important;
+        justify-content: flex-start !important;
+    }
+    
+    [data-testid="stSidebar"] .stButton > button:hover {
+        background: #FFF7ED !important;
+        border-color: #FF6600 !important;
+        color: #FF6600 !important;
+    }
+    
+    /* Stile per pulsanti fasi completate */
+    [data-testid="stSidebar"] .stButton > button[kind="secondary"] {
+        display: flex !important;
+        visibility: visible !important;
+    }
+    
+    /* Form borders - più visibili */
+    [data-testid="stForm"] {
+        border: 2px solid #E0E0E0 !important;
+        border-radius: 12px !important;
+        padding: 20px !important;
+    }
+    
+    /* ===== STILI CUSTOM APP ===== */
+    .stApp { 
+        background-color: #F5F7FA;
+    }
+    
     .main-header {
         background: linear-gradient(135deg, #0E1117 0%, #1E3A5F 100%);
         color: white; padding: 1.5rem 2rem; border-radius: 12px;
         margin-bottom: 1.5rem;
     }
-    .main-header h1 { color: #FF6600; margin: 0; font-size: 2rem; }
-    .main-header p { color: #B0BEC5; margin: 0.3rem 0 0 0; }
+    .main-header h1 { color: #FF6600; margin: 0; font-size: 2.4rem !important; }
+    .main-header p { color: #B0BEC5; margin: 0.3rem 0 0 0; font-size: 18px !important; }
+    
     .card {
         background: white; padding: 1.5rem; border-radius: 10px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid #FF6600; margin-bottom: 1rem;
+        font-size: 18px !important;
     }
     .card-ai {
         background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
         border-left: 4px solid #1976D2; padding: 1rem; border-radius: 8px; margin: 1rem 0;
+        font-size: 18px !important;
     }
     .card-normativa {
         background: #FFF8E1; border-left: 4px solid #FFA000;
         padding: 1rem; border-radius: 8px; margin: 1rem 0;
+        font-size: 18px !important;
     }
     .stButton>button {
         background-color: #FF6600; color: white; font-weight: 600;
-        border: none; padding: 0.7rem 1.5rem; border-radius: 8px;
+        border: none; padding: 0.9rem 1.5rem; border-radius: 8px;
+        font-size: 18px !important;
     }
     .stButton>button:hover { background-color: #E55A00; }
 </style>
@@ -316,44 +521,101 @@ def get_openai_client():
 
 
 def ai_analizza_descrizione(descrizione):
+    """
+    Analizza la descrizione dei lavori con AI e identifica:
+    - Lavorazioni pertinenti
+    - Rischi aggiuntivi specifici
+    - Note per il RSPP
+    - Attrezzature suggerite
+    - DPI consigliati
+    """
     client = get_openai_client()
     if not client or not descrizione.strip():
         return None
     
-    lavorazioni_keys = list(DIZIONARIO_LAVORAZIONI.keys())
-    prompt = f"""Analizza questa descrizione lavori e rispondi in JSON.
-DESCRIZIONE: "{descrizione}"
-LAVORAZIONI DISPONIBILI: {lavorazioni_keys}
-Rispondi SOLO con JSON:
-{{"lavorazioni_identificate": ["chiave1"], "rischi_aggiuntivi": [{{"nome": "Rischio", "gravita": "ALTA", "descrizione": "Desc"}}], "note_rspp": "Note"}}"""
+    lavorazioni_disponibili = {k: v['nome'] for k, v in DIZIONARIO_LAVORAZIONI.items()}
+    
+    prompt = f"""Sei un RSPP esperto in sicurezza cantieri (D.Lgs 81/08).
+Analizza questa descrizione lavori e identifica TUTTE le lavorazioni pertinenti.
+
+DESCRIZIONE LAVORI:
+"{descrizione}"
+
+LAVORAZIONI DISPONIBILI (usa SOLO queste chiavi):
+{json.dumps(lavorazioni_disponibili, ensure_ascii=False, indent=2)}
+
+ISTRUZIONI:
+1. Identifica TUTTE le lavorazioni che si applicano alla descrizione
+2. Aggiungi rischi specifici NON coperti dalle lavorazioni standard
+3. Suggerisci note pratiche per il RSPP
+4. Indica il livello di complessità (basso/medio/alto)
+
+Rispondi SOLO con questo JSON:
+{{
+    "lavorazioni_identificate": ["chiave1", "chiave2"],
+    "rischi_aggiuntivi": [
+        {{"nome": "Nome Rischio", "gravita": "ALTA/MEDIA/BASSA", "descrizione": "Descrizione dettagliata", "misura": "Misura preventiva"}}
+    ],
+    "note_rspp": "Note e raccomandazioni specifiche per questo cantiere",
+    "complessita": "medio",
+    "attrezzature_suggerite": ["Attrezzatura 1", "Attrezzatura 2"],
+    "dpi_specifici": ["DPI 1", "DPI 2"]
+}}"""
 
     try:
-        response = client.chat.completions.create(model="gpt-4o-mini", messages=[{"role": "user", "content": prompt}], temperature=0.3, max_tokens=1000)
+        response = client.chat.completions.create(
+            model="gpt-4o-mini", 
+            messages=[{"role": "user", "content": prompt}], 
+            temperature=0.3, 
+            max_tokens=1500
+        )
         content = response.choices[0].message.content.strip()
         if content.startswith("```"):
             content = re.sub(r'^```json?\n?', '', content)
             content = re.sub(r'\n?```$', '', content)
         return json.loads(content)
-    except:
+    except Exception as e:
         return None
 
 
-def ai_genera_descrizione(tipo_lavoro):
+def ai_genera_descrizione_avanzata(tipo_lavoro, indirizzo="", durata=""):
+    """
+    Genera una descrizione tecnica professionale per il POS
+    con più contesto e dettagli.
+    """
     client = get_openai_client()
     if not client:
         return ""
     try:
+        contesto = f"Cantiere: {indirizzo}" if indirizzo else ""
+        durata_info = f"Durata prevista: {durata}" if durata else ""
+        
         prompt = f"""Sei un Coordinatore della Sicurezza esperto D.Lgs 81/08.
-Genera una DESCRIZIONE TECNICA per un POS.
-TIPO LAVORO: {tipo_lavoro}
-REGOLE:
-1. Stile IMPERSONALE (es: "Esecuzione di...", "Demolizione di...")
-2. VIETATO: frasi commerciali, "team di esperti", "alta qualita"
-3. Elenca le FASI OPERATIVE principali
-4. Max 80 parole
-Rispondi SOLO con la descrizione tecnica."""
+Genera una DESCRIZIONE TECNICA PROFESSIONALE per un Piano Operativo di Sicurezza (POS).
 
-        response = client.chat.completions.create(model="gpt-4o-mini", messages=[{"role": "user", "content": prompt}], temperature=0.3, max_tokens=200)
+TIPO LAVORO: {tipo_lavoro}
+{contesto}
+{durata_info}
+
+REGOLE TASSATIVE:
+1. Stile IMPERSONALE e TECNICO (es: "Esecuzione di...", "Realizzazione di...", "Demolizione di...")
+2. VIETATO: frasi commerciali, "team di esperti", "alta qualità", "professionisti"
+3. Elenca le FASI OPERATIVE principali in ordine cronologico
+4. Includi riferimenti a:
+   - Tipologia di demolizioni (se presenti)
+   - Tipologia di impianti coinvolti
+   - Materiali principali
+   - Finiture previste
+5. Max 100 parole, frasi brevi e tecniche
+
+Rispondi SOLO con la descrizione tecnica, senza introduzioni."""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini", 
+            messages=[{"role": "user", "content": prompt}], 
+            temperature=0.4, 
+            max_tokens=300
+        )
         testo = response.choices[0].message.content.strip()
         return testo.strip('"\'')
     except:
@@ -1108,6 +1370,75 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
     return bytes(pdf.output())
 
 
+def merge_pdfs_with_allegati(pos_bytes, allegati_dict):
+    """
+    Unisce il POS generato con i PDF allegati caricati dall'utente.
+    
+    Args:
+        pos_bytes: bytes del PDF POS generato
+        allegati_dict: dict con chiavi 'visura', 'durc', 'attestati', etc. e valori file-like objects
+    
+    Returns:
+        bytes del PDF unificato
+    """
+    if not PYPDF_AVAILABLE:
+        # Se pypdf non è disponibile, ritorna solo il POS
+        return pos_bytes
+    
+    writer = PdfWriter()
+    
+    # Aggiungi il POS come primo documento
+    pos_reader = PdfReader(BytesIO(pos_bytes))
+    for page in pos_reader.pages:
+        writer.add_page(page)
+    
+    # Ordine degli allegati
+    ordine_allegati = [
+        ('visura', 'Visura Camerale'),
+        ('durc', 'DURC'),
+        ('attestati', 'Attestati Formazione'),
+        ('idoneita', 'Idoneità Sanitarie'),
+        ('libretti', 'Libretti Attrezzature'),
+        ('sds', 'Schede SDS'),
+        ('pimus', 'Pi.M.U.S. / Manuali'),
+        ('dpi', 'Verbali Consegna DPI'),
+        ('altro', 'Altri Allegati')
+    ]
+    
+    # Aggiungi ogni allegato
+    for chiave, nome in ordine_allegati:
+        if chiave in allegati_dict and allegati_dict[chiave] is not None:
+            file_obj = allegati_dict[chiave]
+            try:
+                # Leggi il file
+                file_obj.seek(0)
+                allegato_reader = PdfReader(file_obj)
+                for page in allegato_reader.pages:
+                    writer.add_page(page)
+            except Exception as e:
+                # Se un allegato non è valido, lo saltiamo
+                st.warning(f"⚠️ Impossibile allegare {nome}: {str(e)}")
+                continue
+    
+    # Scrivi il PDF unificato
+    output = BytesIO()
+    writer.write(output)
+    output.seek(0)
+    return output.read()
+
+
+def crea_copertina_allegati():
+    """Crea una pagina di separazione per gli allegati"""
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font('Helvetica', 'B', 24)
+    pdf.set_y(100)
+    pdf.cell(190, 20, 'ALLEGATI', ln=1, align='C')
+    pdf.set_font('Helvetica', '', 12)
+    pdf.cell(190, 10, 'Documentazione a corredo del POS', ln=1, align='C')
+    return bytes(pdf.output())
+
+
 # ==============================================================================
 # SESSION STATE
 # ==============================================================================
@@ -1198,33 +1529,260 @@ def init_session():
 # UI
 # ==============================================================================
 def render_header():
+    # Header principale senza pulsanti toggle (sidebar fissa)
     st.markdown('<div class="main-header"><h1>🏗️ CantiereSicuro AI PRO</h1><p>Generatore POS - D.Lgs 81/08</p></div>', unsafe_allow_html=True)
 
 
 def render_sidebar():
+    """Sidebar professionale con info SaaS"""
     with st.sidebar:
-        st.markdown("## 🏗️ CantiereSicuro")
+        # === BRANDING ===
+        st.markdown("""
+        <div style="text-align: center; padding: 15px 0; border-bottom: 1px solid #E5E7EB; margin-bottom: 20px;">
+            <h2 style="color: #1a1a2e; margin: 0; font-size: 1.5rem;">🏗️ CantiereSicuro</h2>
+            <p style="color: #FF6600; margin: 5px 0 0 0; font-size: 0.9rem; font-weight: 600;">AI PRO</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # === INFO PIANO SAAS ===
+        # Recupera info dal session_state se disponibili (integrazione con license_manager)
+        piano = st.session_state.get('user_plan', 'Free')
+        pos_usati = st.session_state.get('pos_used_this_month', 0)
+        pos_limite = st.session_state.get('pos_limit', 1)
+        user_email = st.session_state.get('user_email', '')
+        
+        # Colori per piano
+        piano_colors = {
+            'Free': '#6B7280',
+            'Base': '#3B82F6',
+            'Pro': '#FF6600',
+            'Unlimited': '#10B981'
+        }
+        piano_color = piano_colors.get(piano, '#6B7280')
+        
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, {piano_color}15, {piano_color}05); 
+                    border: 1px solid {piano_color}40; 
+                    border-radius: 12px; 
+                    padding: 15px; 
+                    margin-bottom: 20px;">
+            <p style="margin: 0 0 5px 0; color: #64748B; font-size: 0.8rem;">PIANO ATTIVO</p>
+            <p style="margin: 0; color: {piano_color}; font-size: 1.3rem; font-weight: 700;">
+                {'⭐ ' if piano == 'Pro' else ''}{'🚀 ' if piano == 'Unlimited' else ''}{piano.upper()}
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # POS Rimanenti
+        if piano != 'Unlimited':
+            pos_rimanenti = max(0, pos_limite - pos_usati)
+            percent_used = min(pos_usati / pos_limite, 1.0) if pos_limite > 0 else 0
+            
+            st.markdown(f"""
+            <div style="background: #F8FAFC; border-radius: 10px; padding: 12px; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: #64748B; font-size: 0.85rem;">POS questo mese</span>
+                    <span style="color: #1a1a2e; font-weight: 700;">{pos_usati}/{pos_limite}</span>
+                </div>
+                <div style="background: #E2E8F0; border-radius: 10px; height: 8px; overflow: hidden;">
+                    <div style="background: {'#EF4444' if percent_used >= 0.9 else '#FF6600'}; 
+                                width: {percent_used * 100}%; 
+                                height: 100%; 
+                                border-radius: 10px;"></div>
+                </div>
+                <p style="margin: 8px 0 0 0; color: {'#EF4444' if pos_rimanenti == 0 else '#10B981'}; 
+                          font-size: 0.85rem; font-weight: 600;">
+                    {'⚠️ Limite raggiunto!' if pos_rimanenti == 0 else f'✅ {pos_rimanenti} POS rimanenti'}
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if pos_rimanenti == 0:
+                if st.button("⬆️ Passa a PRO", use_container_width=True, type="primary"):
+                    st.session_state.show_upgrade = True
+        else:
+            st.markdown("""
+            <div style="background: #ECFDF5; border-radius: 10px; padding: 12px; margin-bottom: 15px; text-align: center;">
+                <p style="margin: 0; color: #10B981; font-weight: 700;">🚀 POS ILLIMITATI</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
         st.markdown("---")
+        
+        # === PROGRESSO WIZARD ===
+        st.markdown("##### 📋 Progresso")
         st.progress(min(st.session_state.step / 5, 1.0))
         st.caption(f"Fase {st.session_state.step} di 5")
+        
         st.markdown("---")
+        
+        # === NAVIGAZIONE FASI ===
+        st.markdown("##### 🧭 Navigazione")
         for num, label in [("1", "Dati Impresa"), ("2", "Organigramma"), ("3", "Dati Cantiere"), ("4", "Analisi Rischi"), ("5", "Genera POS")]:
             step_num = int(num)
             icon = "✅" if step_num < st.session_state.step else ("▶️" if step_num == st.session_state.step else "⬜")
-            if st.button(f"{icon} {num}. {label}", key=f"nav_{num}", use_container_width=True):
-                if step_num <= st.session_state.step + 1:
-                    st.session_state.step = step_num
-                    st.rerun()
+            is_current = step_num == st.session_state.step
+            
+            # Stile per step corrente
+            if is_current:
+                st.markdown(f"""
+                <div style="background: #FFF7ED; border: 1px solid #FF6600; border-radius: 8px; 
+                            padding: 8px 12px; margin: 5px 0;">
+                    <span style="color: #FF6600; font-weight: 600;">{icon} {num}. {label}</span>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                if st.button(f"{icon} {num}. {label}", key=f"nav_{num}", use_container_width=True):
+                    if step_num <= st.session_state.step + 1:
+                        st.session_state.step = step_num
+                        st.rerun()
+        
         st.markdown("---")
-        st.markdown("### 🤖 Assistente")
-        domanda = st.text_input("Chiedi:", placeholder="Es: Quando serve il POS?", key="ai_q")
-        if st.button("Chiedi", key="ask") and domanda:
-            with st.spinner("..."):
-                st.info(ai_assistente(domanda))
+        
+        # === ASSISTENTE AI ===
+        st.markdown("##### 🤖 Assistente AI")
+        domanda = st.text_input("Chiedi:", placeholder="Es: Quando serve il POS?", key="ai_q", label_visibility="collapsed")
+        if st.button("💬 Chiedi all'AI", key="ask", use_container_width=True) and domanda:
+            with st.spinner("Elaboro..."):
+                risposta = ai_assistente(domanda)
+                st.info(risposta)
+        
+        st.markdown("---")
+        
+        # === AZIONI UTENTE ===
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("🏠 Home", use_container_width=True, help="Torna alla landing page"):
+                # Reset per tornare alla home
+                st.session_state.show_auth = False
+                st.session_state.authenticated = False
+                st.rerun()
+        with col2:
+            if st.button("🚪 Esci", use_container_width=True, help="Logout"):
+                # Logout
+                for key in list(st.session_state.keys()):
+                    del st.session_state[key]
+                st.rerun()
+        
+        # === FOOTER SIDEBAR ===
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("""
+        <div style="text-align: center; padding-top: 10px; border-top: 1px solid #E5E7EB;">
+            <p style="color: #94A3B8; font-size: 0.75rem; margin: 0;">
+                CantiereSicuro v2.0<br>
+                <a href="#" style="color: #FF6600; text-decoration: none;">Supporto</a> • 
+                <a href="#" style="color: #FF6600; text-decoration: none;">Guida</a>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 def render_step1():
     st.markdown("### Fase 1: Dati Impresa")
+    
+    # ==========================================================================
+    # CARICAMENTO/SALVATAGGIO ANAGRAFICHE
+    # ==========================================================================
+    db_available = False
+    imprese_salvate = []
+    user_id = st.session_state.get('user_id', '')
+    
+    try:
+        from database import get_user_imprese, get_impresa_by_id, impresa_to_ditta_dict, get_lavoratori_template, get_attrezzature_template, save_impresa, save_lavoratori_template, save_attrezzature_template, ditta_to_impresa_dict
+        db_available = True
+        
+        if user_id:
+            imprese_salvate = get_user_imprese(user_id)
+    except ImportError:
+        pass
+    except Exception as e:
+        print(f"Errore caricamento anagrafiche: {e}")
+    
+    # Mostra sempre la sezione Anagrafiche
+    if db_available and user_id:
+        if imprese_salvate:
+            # CI SONO IMPRESE SALVATE
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%); 
+                        border-radius: 12px; padding: 20px; margin-bottom: 20px; color: white;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5rem;">💾</span>
+                    <div>
+                        <h4 style="margin: 0; color: white;">Anagrafiche Salvate ({len(imprese_salvate)})</h4>
+                        <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.9rem;">
+                            Seleziona un'impresa per caricare automaticamente tutti i dati
+                        </p>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                opzioni = ["-- Seleziona un'impresa salvata --"] + [
+                    f"{imp['ragione_sociale']} ({imp.get('piva_cf', 'N/D')})" for imp in imprese_salvate
+                ]
+                impresa_sel = st.selectbox(
+                    "Impresa:",
+                    options=opzioni,
+                    key="select_impresa_salvata",
+                    label_visibility="collapsed"
+                )
+            
+            with col2:
+                if st.button("📥 Carica", use_container_width=True, key="btn_carica_impresa"):
+                    if impresa_sel != opzioni[0]:
+                        idx = opzioni.index(impresa_sel) - 1
+                        impresa_id = imprese_salvate[idx]['id']
+                        impresa = get_impresa_by_id(impresa_id)
+                        
+                        if impresa:
+                            st.session_state.ditta = impresa_to_ditta_dict(impresa)
+                            
+                            lavoratori_db = get_lavoratori_template(impresa_id)
+                            if lavoratori_db:
+                                st.session_state.lavoratori = [
+                                    {'nome': l.get('nome', ''), 'mansione': l.get('mansione', ''), 'formazione': l.get('formazione', '')}
+                                    for l in lavoratori_db
+                                ]
+                            
+                            attrezzature_db = get_attrezzature_template(impresa_id)
+                            if attrezzature_db:
+                                st.session_state.attrezzature = [
+                                    {'nome': a.get('nome', ''), 'marca': a.get('marca', ''), 'matricola': a.get('matricola', ''), 'verifica': a.get('ultima_verifica', '')}
+                                    for a in attrezzature_db
+                                ]
+                            
+                            if impresa.get('addetto_ps') or impresa.get('addetto_antincendio'):
+                                st.session_state.addetti['primo_soccorso'] = impresa.get('addetto_ps', '')
+                                st.session_state.addetti['antincendio'] = impresa.get('addetto_antincendio', '')
+                            
+                            st.success(f"✅ Dati caricati: **{impresa.get('ragione_sociale')}**")
+                            st.rerun()
+                    else:
+                        st.warning("Seleziona un'impresa dal menu")
+        else:
+            # NESSUNA IMPRESA SALVATA
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%); 
+                        border-radius: 12px; padding: 20px; margin-bottom: 20px; color: white;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5rem;">💾</span>
+                    <div>
+                        <h4 style="margin: 0; color: white;">Nessuna Anagrafica Salvata</h4>
+                        <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.9rem;">
+                            Compila i dati e clicca "💾 Salva Impresa" per riutilizzarli nei prossimi POS
+                        </p>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+    
+    # ==========================================================================
+    # FORM DATI IMPRESA
+    # ==========================================================================
     st.markdown('<div class="card-normativa"><strong>📋 Riferimento:</strong> Art. 89-90, Allegato XV del D.Lgs 81/08</div>', unsafe_allow_html=True)
     
     # Checkbox RSPP
@@ -1293,6 +1851,14 @@ def render_step1():
             st.info("🏛️ **RLST** - L'azienda si avvale del Rappresentante dei Lavoratori per la Sicurezza Territoriale")
             rls_territoriale = st.text_input("Ente RLST di riferimento *", value=st.session_state.ditta.get('rls_territoriale', ''), placeholder="Es: RLST Edilizia - FENEAL UIL Lombardia")
         
+        # Checkbox per salvare l'impresa
+        st.markdown("---")
+        salva_impresa_check = st.checkbox(
+            "💾 Salva questa impresa per riutilizzarla nei prossimi POS",
+            value=False,
+            help="I dati dell'impresa verranno salvati e potrai caricarli automaticamente la prossima volta"
+        )
+        
         if st.form_submit_button("Avanti →", use_container_width=True):
             if ragione and piva and datore and indirizzo:
                 if not rspp_auto and not rspp_esterno:
@@ -1302,6 +1868,7 @@ def render_step1():
                 elif rls_tipo == 'territoriale' and not rls_territoriale:
                     st.error("⚠️ Inserisci l'ente RLST di riferimento")
                 else:
+                    # Salva in session_state
                     st.session_state.ditta = {
                         'ragione_sociale': ragione, 
                         'piva_cf': piva, 
@@ -1317,8 +1884,53 @@ def render_step1():
                         'codice_ateco': codice_ateco,
                         'num_dipendenti': num_dipendenti
                     }
-                    st.session_state.step = 2
-                    st.rerun()
+                    
+                    # Salva nel database se checkbox selezionato
+                    if salva_impresa_check:
+                        if not db_available:
+                            st.error("❌ Database non disponibile - import fallito")
+                        elif not user_id:
+                            st.error(f"❌ User ID mancante: '{user_id}'")
+                        else:
+                            try:
+                                st.info(f"🔍 User ID dalla sessione: `{user_id}`")
+                                impresa_data = ditta_to_impresa_dict(st.session_state.ditta, st.session_state.addetti)
+                                st.info(f"📤 Dati da salvare: {impresa_data.get('ragione_sociale')}, P.IVA: {impresa_data.get('piva_cf')}")
+                                
+                                # Provo a salvare con log dettagliato
+                                from database import get_supabase_client
+                                client = get_supabase_client()
+                                
+                                if not client:
+                                    st.error("❌ Client Supabase non disponibile")
+                                else:
+                                    st.info("✅ Client Supabase OK")
+                                    
+                                    # Provo inserimento diretto con più dettagli
+                                    impresa_data['user_id'] = user_id
+                                    try:
+                                        response = client.table('imprese').insert(impresa_data).execute()
+                                        st.info(f"📋 Response: {response}")
+                                        if response.data:
+                                            saved_id = response.data[0].get('id')
+                                            st.success(f"✅ Impresa salvata! ID: {saved_id}")
+                                            st.session_state.step = 2
+                                            import time
+                                            time.sleep(2)
+                                            st.rerun()
+                                        else:
+                                            st.error(f"❌ Nessun dato nella response: {response}")
+                                    except Exception as insert_err:
+                                        st.error(f"❌ Errore INSERT: {str(insert_err)}")
+                                        
+                            except Exception as e:
+                                st.error(f"❌ Errore generale: {str(e)}")
+                                import traceback
+                                st.code(traceback.format_exc())
+                    else:
+                        # Se non salva, passa direttamente alla fase 2
+                        st.session_state.step = 2
+                        st.rerun()
             else:
                 st.error("⚠️ Compila i campi obbligatori (Ragione Sociale, P.IVA, Sede, Datore)")
 
@@ -1412,71 +2024,243 @@ def render_step2():
 
 
 def render_step3():
+    """
+    Fase 3: Dati Cantiere
+    
+    MODIFICHE IMPLEMENTATE:
+    1. Magic Writer AI POTENZIATO con UI professionale
+    2. Contatori attrezzature/sostanze spostati nelle rispettive sezioni
+    """
     st.markdown("### Fase 3: Dati Cantiere")
+    
+    # ==========================================================================
+    # MAGIC WRITER AI POTENZIATO
+    # ==========================================================================
     client = get_openai_client()
     if client:
-        st.markdown('<div class="card-ai"><strong>🤖 AI:</strong> Genera descrizione tecnica delle opere</div>', unsafe_allow_html=True)
-        c1, c2 = st.columns([3, 1])
-        with c1:
-            tipo = st.text_input("Tipo lavoro", placeholder="Es: Ristrutturazione bagno completo", key="tipo_ai")
-        with c2:
-            st.write(""); st.write("")
-            if st.button("✨ Genera") and tipo:
-                with st.spinner("Generazione descrizione tecnica..."):
-                    desc = ai_genera_descrizione(tipo)
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #FF6600 0%, #FF8533 100%); 
+                    border-radius: 16px; padding: 25px; margin-bottom: 25px; color: white;">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <span style="font-size: 2.5rem;">✨</span>
+                <div>
+                    <h3 style="margin: 0; color: white; font-size: 1.4rem;">Magic Writer AI</h3>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.95rem;">
+                        Genera automaticamente la descrizione tecnica professionale per il POS
+                    </p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Tipi di lavoro comuni
+        tipi_lavoro_comuni = [
+            "-- Seleziona un tipo comune oppure scrivi sotto --",
+            "Ristrutturazione completa appartamento",
+            "Rifacimento bagno completo",
+            "Rifacimento impianto elettrico",
+            "Rifacimento impianto idraulico",
+            "Demolizione e ricostruzione tramezzi",
+            "Cappotto termico esterno",
+            "Rifacimento copertura/tetto",
+            "Nuova pavimentazione",
+            "Tinteggiatura completa",
+            "Manutenzione facciata",
+            "Lavori di scavo e fondazioni"
+        ]
+        
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            tipo_comune = st.selectbox(
+                "Tipo di lavoro comune",
+                tipi_lavoro_comuni,
+                key="select_tipo_lavoro",
+                label_visibility="collapsed"
+            )
+        
+        # Input personalizzato
+        tipo_lavoro = st.text_input(
+            "Oppure descrivi brevemente il tipo di lavoro",
+            value="" if tipo_comune == tipi_lavoro_comuni[0] else tipo_comune,
+            placeholder="Es: Ristrutturazione completa bagno con sostituzione sanitari, rifacimento impianto idraulico e posa nuovi rivestimenti",
+            key="tipo_ai_input"
+        )
+        
+        col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
+        with col_btn2:
+            genera_btn = st.button(
+                "✨ GENERA DESCRIZIONE CON AI", 
+                type="primary", 
+                use_container_width=True, 
+                key="btn_genera_desc_ai"
+            )
+        
+        if genera_btn:
+            testo_da_usare = tipo_lavoro if tipo_lavoro else (tipo_comune if tipo_comune != tipi_lavoro_comuni[0] else "")
+            
+            if testo_da_usare:
+                with st.spinner("✨ Generazione descrizione tecnica professionale..."):
+                    # Usa la funzione avanzata con contesto
+                    indirizzo = st.session_state.cantiere.get('indirizzo', '')
+                    durata = st.session_state.cantiere.get('durata', '')
+                    desc = ai_genera_descrizione_avanzata(testo_da_usare, indirizzo, durata)
+                    
                     if desc:
                         st.session_state.cantiere['descrizione'] = desc
+                        st.success("✅ Descrizione generata! Scorri sotto per visualizzarla e modificarla.")
                         st.rerun()
+                    else:
+                        st.error("❌ Errore nella generazione. Verifica la chiave API.")
+            else:
+                st.warning("⚠️ Seleziona un tipo di lavoro o inserisci una descrizione")
+        
+        # Mostra anteprima se già generata
+        if st.session_state.cantiere.get('descrizione'):
+            st.markdown("##### 📝 Anteprima Descrizione Generata")
+            st.info(st.session_state.cantiere['descrizione'])
+            if st.button("🔄 Rigenera", key="btn_rigenera_desc"):
+                st.session_state.cantiere['descrizione'] = ''
+                st.rerun()
+    else:
+        # Istruzioni per configurare l'API OpenAI
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #FF6600 0%, #FF8533 100%); 
+                    border-radius: 16px; padding: 25px; margin-bottom: 25px; color: white;">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <span style="font-size: 2.5rem;">✨</span>
+                <div>
+                    <h3 style="margin: 0; color: white; font-size: 1.4rem;">Magic Writer AI</h3>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.95rem;">
+                        Genera automaticamente la descrizione tecnica professionale per il POS
+                    </p>
+                </div>
+            </div>
+            <div style="background: rgba(255,255,255,0.15); border-radius: 8px; padding: 12px; margin-top: 10px;">
+                <p style="margin: 0; font-size: 0.9rem;">
+                    🔑 <strong>Configura l'API OpenAI</strong> per abilitare questa funzione.<br>
+                    Aggiungi <code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px;">OPENAI_API_KEY</code> 
+                    in <code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px;">.streamlit/secrets.toml</code>
+                </p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    # Inizializza contatori in session_state
+    # ==========================================================================
+    # INIZIALIZZAZIONE CONTATORI
+    # ==========================================================================
     if 'num_attrezzature' not in st.session_state:
         st.session_state.num_attrezzature = len(st.session_state.attrezzature) if st.session_state.attrezzature else 2
     if 'num_sostanze' not in st.session_state:
         st.session_state.num_sostanze = len(st.session_state.sostanze) if st.session_state.sostanze else 0
     
-    # Selettori numero FUORI dal form
+    # ==========================================================================
+    # CONTATORI NELLE RISPETTIVE SEZIONI (FUORI DAL FORM)
+    # ==========================================================================
+    
     st.markdown("---")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("##### 🔧 Attrezzature")
-        num_attr = st.number_input("Numero attrezzature", min_value=0, max_value=10, value=st.session_state.num_attrezzature, key="num_attr_input")
+    
+    # Sezione Attrezzature - Header con titolo a sinistra e contatore a destra
+    col_title_attr, col_num_attr = st.columns([4, 1])
+    with col_title_attr:
+        st.markdown("##### 🔧 Attrezzature di Cantiere")
+    with col_num_attr:
+        num_attr = st.number_input(
+            "Numero attrezzature",
+            min_value=0,
+            max_value=15,
+            value=st.session_state.num_attrezzature,
+            key="num_attr_input",
+            label_visibility="collapsed",
+            help="Numero di attrezzature da inserire"
+        )
         st.session_state.num_attrezzature = int(num_attr)
-    with col2:
+    
+    # Sezione Sostanze - Header con titolo a sinistra e contatore a destra
+    col_title_sost, col_num_sost = st.columns([4, 1])
+    with col_title_sost:
         st.markdown("##### 🧪 Sostanze Pericolose")
-        num_sost = st.number_input("Numero sostanze", min_value=0, max_value=10, value=st.session_state.num_sostanze, key="num_sost_input")
+    with col_num_sost:
+        num_sost = st.number_input(
+            "Numero sostanze",
+            min_value=0,
+            max_value=15,
+            value=st.session_state.num_sostanze,
+            key="num_sost_input",
+            label_visibility="collapsed",
+            help="Numero di sostanze pericolose da inserire"
+        )
         st.session_state.num_sostanze = int(num_sost)
     
+    st.markdown("---")
+    
+    # ==========================================================================
+    # FORM PRINCIPALE
+    # ==========================================================================
     with st.form("f3"):
         st.markdown("##### 📍 Localizzazione e Tempi")
-        indirizzo = st.text_input("Indirizzo completo cantiere *", value=st.session_state.cantiere['indirizzo'], placeholder="Via, numero civico, CAP, Città (Provincia)")
+        indirizzo = st.text_input(
+            "Indirizzo completo cantiere *",
+            value=st.session_state.cantiere['indirizzo'],
+            placeholder="Via, numero civico, CAP, Città (Provincia)"
+        )
         
         c1, c2, c3 = st.columns(3)
         with c1:
-            committente = st.text_input("Committente", value=st.session_state.cantiere['committente'], placeholder="Nome / Ragione Sociale")
+            committente = st.text_input(
+                "Committente",
+                value=st.session_state.cantiere['committente'],
+                placeholder="Nome / Ragione Sociale"
+            )
         with c2:
-            durata = st.text_input("Durata lavori *", value=st.session_state.cantiere['durata'], placeholder="Es: 15 giorni")
+            durata = st.text_input(
+                "Durata lavori *",
+                value=st.session_state.cantiere['durata'],
+                placeholder="Es: 15 giorni"
+            )
         with c3:
-            data_inizio = st.text_input("Data inizio", value=st.session_state.cantiere.get('data_inizio', date.today().strftime('%d/%m/%Y')))
+            data_inizio = st.text_input(
+                "Data inizio",
+                value=st.session_state.cantiere.get('data_inizio', date.today().strftime('%d/%m/%Y'))
+            )
         
         st.markdown("##### ⏰ Organizzazione Turni")
         c1, c2 = st.columns(2)
         with c1:
-            orario = st.text_input("Orario di lavoro", value=st.session_state.cantiere.get('orario_lavoro', '08:00-12:00 / 13:00-17:00'), placeholder="08:00-12:00 / 13:00-17:00")
+            orario = st.text_input(
+                "Orario di lavoro",
+                value=st.session_state.cantiere.get('orario_lavoro', '08:00-12:00 / 13:00-17:00'),
+                placeholder="08:00-12:00 / 13:00-17:00"
+            )
         with c2:
-            giorni = st.text_input("Giorni lavorativi", value=st.session_state.cantiere.get('giorni_lavoro', 'Lunedi - Venerdi'), placeholder="Lunedi - Venerdi")
+            giorni = st.text_input(
+                "Giorni lavorativi",
+                value=st.session_state.cantiere.get('giorni_lavoro', 'Lunedi - Venerdi'),
+                placeholder="Lunedi - Venerdi"
+            )
         
         st.markdown("##### 🚑 Emergenze")
-        ospedale = st.text_input("Ospedale/Pronto Soccorso più vicino", value=st.session_state.cantiere.get('ospedale_vicino', ''), placeholder="Es: Ospedale San Raffaele - Via Olgettina 60, Milano (3 km)")
+        ospedale = st.text_input(
+            "Ospedale/Pronto Soccorso più vicino",
+            value=st.session_state.cantiere.get('ospedale_vicino', ''),
+            placeholder="Es: Ospedale San Raffaele - Via Olgettina 60, Milano (3 km)"
+        )
         
         st.markdown("##### 📝 Descrizione Opere")
-        descrizione = st.text_area("Descrizione dettagliata lavori *", value=st.session_state.cantiere['descrizione'], height=120, help="Descrivi le fasi lavorative principali")
+        # Il valore viene pre-popolato dal Magic Writer AI se usato
+        descrizione = st.text_area(
+            "Descrizione dettagliata lavori *",
+            value=st.session_state.cantiere['descrizione'],
+            height=120,
+            help="Descrivi le fasi lavorative principali. Usa il Magic Writer AI sopra per generare automaticamente!"
+        )
         
-        # Attrezzature
+        # ==== TABELLA ATTREZZATURE (dentro il form) ====
         attrezzature_temp = []
         if st.session_state.num_attrezzature > 0:
             st.markdown("---")
-            st.markdown("**🔧 Attrezzature di Cantiere**")
-            # Header
+            st.caption("🔧 **Dettaglio Attrezzature** - Compila i dati per ogni attrezzatura")
+            
+            # Header tabella
             hcols = st.columns([3, 2, 2, 2])
             with hcols[0]:
                 st.caption("Attrezzatura")
@@ -1487,35 +2271,45 @@ def render_step3():
             with hcols[3]:
                 st.caption("Ultima verifica")
             
+            # Valori di default per le prime attrezzature
             attr_default = [
                 {'nome': 'Martello demolitore', 'marca': '', 'matricola': '', 'verifica': ''},
-                {'nome': 'Smerigliatrice', 'marca': '', 'matricola': '', 'verifica': ''}
+                {'nome': 'Smerigliatrice angolare', 'marca': '', 'matricola': '', 'verifica': ''}
             ]
+            
             for i in range(st.session_state.num_attrezzature):
                 cols = st.columns([3, 2, 2, 2])
+                
+                # Recupera valori esistenti o default
                 def_nome = st.session_state.attrezzature[i]['nome'] if i < len(st.session_state.attrezzature) else (attr_default[i]['nome'] if i < len(attr_default) else '')
                 def_marca = st.session_state.attrezzature[i].get('marca', '') if i < len(st.session_state.attrezzature) else ''
                 def_matr = st.session_state.attrezzature[i].get('matricola', '') if i < len(st.session_state.attrezzature) else ''
                 def_ver = st.session_state.attrezzature[i].get('verifica', '') if i < len(st.session_state.attrezzature) else ''
                 
                 with cols[0]:
-                    a_nome = st.text_input(f"att_nome_{i}", value=def_nome, key=f"an_{i}", placeholder="Nome", label_visibility="collapsed")
+                    a_nome = st.text_input(f"att_nome_{i}", value=def_nome, key=f"an_{i}", placeholder="Nome attrezzatura", label_visibility="collapsed")
                 with cols[1]:
-                    a_marca = st.text_input(f"att_marca_{i}", value=def_marca, key=f"am_{i}", placeholder="Marca", label_visibility="collapsed")
+                    a_marca = st.text_input(f"att_marca_{i}", value=def_marca, key=f"am_{i}", placeholder="Marca/Modello", label_visibility="collapsed")
                 with cols[2]:
-                    a_matr = st.text_input(f"att_matr_{i}", value=def_matr, key=f"at_{i}", placeholder="Matricola", label_visibility="collapsed")
+                    a_matr = st.text_input(f"att_matr_{i}", value=def_matr, key=f"at_{i}", placeholder="N. matricola", label_visibility="collapsed")
                 with cols[3]:
-                    a_ver = st.text_input(f"att_ver_{i}", value=def_ver, key=f"av_{i}", placeholder="GG/MM/AA", label_visibility="collapsed")
+                    a_ver = st.text_input(f"att_ver_{i}", value=def_ver, key=f"av_{i}", placeholder="GG/MM/AAAA", label_visibility="collapsed")
                 
                 if a_nome:
-                    attrezzature_temp.append({'nome': a_nome, 'marca': a_marca, 'matricola': a_matr, 'verifica': a_ver})
+                    attrezzature_temp.append({
+                        'nome': a_nome,
+                        'marca': a_marca,
+                        'matricola': a_matr,
+                        'verifica': a_ver
+                    })
         
-        # Sostanze
+        # ==== TABELLA SOSTANZE (dentro il form) ====
         sostanze_temp = []
         if st.session_state.num_sostanze > 0:
             st.markdown("---")
-            st.markdown("**🧪 Sostanze Pericolose** (SDS obbligatorie in cantiere)")
-            # Header
+            st.caption("🧪 **Dettaglio Sostanze Pericolose** - Le SDS devono essere disponibili in cantiere")
+            
+            # Header tabella
             hcols = st.columns([3, 2, 3])
             with hcols[0]:
                 st.caption("Prodotto")
@@ -1526,6 +2320,8 @@ def render_step3():
             
             for i in range(st.session_state.num_sostanze):
                 cols = st.columns([3, 2, 3])
+                
+                # Recupera valori esistenti
                 def_nome = st.session_state.sostanze[i]['nome'] if i < len(st.session_state.sostanze) else ''
                 def_prod = st.session_state.sostanze[i].get('produttore', '') if i < len(st.session_state.sostanze) else ''
                 def_h = st.session_state.sostanze[i].get('frasi_h', '') if i < len(st.session_state.sostanze) else ''
@@ -1535,11 +2331,16 @@ def render_step3():
                 with cols[1]:
                     s_prod = st.text_input(f"sost_prod_{i}", value=def_prod, key=f"sp_{i}", placeholder="Produttore", label_visibility="collapsed")
                 with cols[2]:
-                    s_h = st.text_input(f"sost_h_{i}", value=def_h, key=f"sh_{i}", placeholder="Es: H315, H319", label_visibility="collapsed")
+                    s_h = st.text_input(f"sost_h_{i}", value=def_h, key=f"sh_{i}", placeholder="Es: H315, H319, H335", label_visibility="collapsed")
                 
                 if s_nome:
-                    sostanze_temp.append({'nome': s_nome, 'produttore': s_prod, 'frasi_h': s_h})
+                    sostanze_temp.append({
+                        'nome': s_nome,
+                        'produttore': s_prod,
+                        'frasi_h': s_h
+                    })
         
+        # ==== PULSANTI NAVIGAZIONE ====
         st.markdown("---")
         c1, c2 = st.columns(2)
         with c1:
@@ -1550,10 +2351,10 @@ def render_step3():
             if st.form_submit_button("Avanti →", use_container_width=True):
                 if indirizzo and descrizione and durata:
                     st.session_state.cantiere = {
-                        'indirizzo': indirizzo, 
-                        'committente': committente, 
-                        'data_inizio': data_inizio, 
-                        'durata': durata, 
+                        'indirizzo': indirizzo,
+                        'committente': committente,
+                        'data_inizio': data_inizio,
+                        'durata': durata,
                         'descrizione': descrizione,
                         'orario_lavoro': orario,
                         'giorni_lavoro': giorni,
@@ -1570,31 +2371,204 @@ def render_step3():
 
 
 def render_step4():
+    """
+    Fase 4: Analisi Rischi con AI Avanzata
+    - Analisi intelligente della descrizione
+    - Selezione automatica lavorazioni
+    - Visualizzazione rischi aggiuntivi
+    - Note RSPP e suggerimenti
+    """
     st.markdown("### Fase 4: Analisi Rischi")
+    
     client = get_openai_client()
     descrizione = st.session_state.cantiere.get('descrizione', '')
     
-    if client and descrizione:
-        st.markdown('<div class="card-ai"><strong>🤖 Analisi AI</strong></div>', unsafe_allow_html=True)
-        if st.button("🔍 ANALIZZA CON AI", type="primary", use_container_width=True):
-            with st.spinner("Analizzo..."):
-                risultato = ai_analizza_descrizione(descrizione)
-                if risultato:
-                    st.session_state.rischi_ai = risultato
-                    lavorazioni_trovate = risultato.get('lavorazioni_identificate', [])
-                    for key in DIZIONARIO_LAVORAZIONI.keys():
-                        is_sel = key in lavorazioni_trovate
-                        st.session_state.lavorazioni_selezionate[key] = is_sel
-                        st.session_state[f"cb_{key}"] = is_sel
-                    st.session_state.ai_analisi_fatta = True
+    # === SEZIONE AI ANALYSIS ===
+    if client:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                    border-radius: 16px; padding: 25px; margin-bottom: 25px; color: white;">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <span style="font-size: 2.5rem;">🤖</span>
+                <div>
+                    <h3 style="margin: 0; color: white; font-size: 1.4rem;">Analisi Rischi con AI</h3>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.95rem;">
+                        L'intelligenza artificiale analizza la descrizione dei lavori e identifica automaticamente rischi e lavorazioni
+                    </p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if descrizione:
+            # Mostra anteprima descrizione
+            with st.expander("📝 Descrizione lavori da analizzare", expanded=False):
+                st.info(descrizione)
+            
+            # Pulsante analisi
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                analizza_btn = st.button(
+                    "🔍 ANALIZZA CON INTELLIGENZA ARTIFICIALE", 
+                    type="primary", 
+                    use_container_width=True,
+                    key="btn_analizza_ai"
+                )
+            
+            if analizza_btn:
+                with st.spinner("🤖 Analisi in corso... L'AI sta identificando rischi e lavorazioni..."):
+                    risultato = ai_analizza_descrizione(descrizione)
+                    if risultato:
+                        st.session_state.rischi_ai = risultato
+                        lavorazioni_trovate = risultato.get('lavorazioni_identificate', [])
+                        
+                        # Seleziona automaticamente le lavorazioni trovate
+                        for key in DIZIONARIO_LAVORAZIONI.keys():
+                            is_sel = key in lavorazioni_trovate
+                            st.session_state.lavorazioni_selezionate[key] = is_sel
+                            st.session_state[f"cb_{key}"] = is_sel
+                        
+                        st.session_state.ai_analisi_fatta = True
+                        st.rerun()
+                    else:
+                        st.error("❌ Errore durante l'analisi. Verifica la chiave API OpenAI.")
+            
+            # === RISULTATI ANALISI AI ===
+            if st.session_state.get('ai_analisi_fatta') and st.session_state.get('rischi_ai'):
+                rischi_ai = st.session_state.rischi_ai
+                lavorazioni_trovate = rischi_ai.get('lavorazioni_identificate', [])
+                rischi_aggiuntivi = rischi_ai.get('rischi_aggiuntivi', [])
+                note_rspp = rischi_ai.get('note_rspp', '')
+                complessita = rischi_ai.get('complessita', 'medio')
+                attrezzature_sugg = rischi_ai.get('attrezzature_suggerite', [])
+                dpi_specifici = rischi_ai.get('dpi_specifici', [])
+                
+                # Badge complessità
+                complessita_colors = {
+                    'basso': '#10B981',
+                    'medio': '#F59E0B', 
+                    'alto': '#EF4444'
+                }
+                comp_color = complessita_colors.get(complessita, '#F59E0B')
+                
+                st.markdown(f"""
+                <div style="background: #ECFDF5; border: 1px solid #10B981; border-radius: 12px; 
+                            padding: 20px; margin: 20px 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <span style="color: #10B981; font-size: 1.5rem;">✅</span>
+                            <strong style="font-size: 1.2rem; color: #065F46;">Analisi completata!</strong>
+                        </div>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <span style="background: #FF6600; color: white; padding: 5px 15px; border-radius: 20px; font-weight: 600;">
+                                {len(lavorazioni_trovate)} Lavorazioni
+                            </span>
+                            <span style="background: #3B82F6; color: white; padding: 5px 15px; border-radius: 20px; font-weight: 600;">
+                                {len(rischi_aggiuntivi)} Rischi Extra
+                            </span>
+                            <span style="background: {comp_color}; color: white; padding: 5px 15px; border-radius: 20px; font-weight: 600;">
+                                Complessità: {complessita.upper()}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Mostra rischi aggiuntivi se presenti
+                if rischi_aggiuntivi:
+                    st.markdown("#### ⚠️ Rischi Aggiuntivi Identificati")
+                    for i, rischio in enumerate(rischi_aggiuntivi):
+                        gravita = rischio.get('gravita', 'MEDIA')
+                        gravita_color = {'ALTA': '#EF4444', 'MEDIA': '#F59E0B', 'BASSA': '#10B981'}.get(gravita, '#F59E0B')
+                        
+                        st.markdown(f"""
+                        <div style="background: white; border-left: 4px solid {gravita_color}; 
+                                    padding: 15px; margin: 10px 0; border-radius: 0 8px 8px 0;
+                                    box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong style="color: #1a1a2e;">{rischio.get('nome', 'Rischio')}</strong>
+                                <span style="background: {gravita_color}; color: white; padding: 3px 10px; 
+                                             border-radius: 15px; font-size: 0.8rem; font-weight: 600;">
+                                    {gravita}
+                                </span>
+                            </div>
+                            <p style="margin: 8px 0 0 0; color: #64748B; font-size: 0.9rem;">
+                                {rischio.get('descrizione', '')}
+                            </p>
+                            {f'<p style="margin: 8px 0 0 0; color: #10B981; font-size: 0.85rem;"><strong>✓ Misura:</strong> {rischio.get("misura", "")}</p>' if rischio.get('misura') else ''}
+                        </div>
+                        """, unsafe_allow_html=True)
+                
+                # Note RSPP
+                if note_rspp:
+                    st.markdown("#### 📋 Note per il RSPP")
+                    st.info(note_rspp)
+                
+                # Suggerimenti
+                col1, col2 = st.columns(2)
+                with col1:
+                    if attrezzature_sugg:
+                        st.markdown("##### 🔧 Attrezzature Suggerite")
+                        for attr in attrezzature_sugg:
+                            st.markdown(f"• {attr}")
+                with col2:
+                    if dpi_specifici:
+                        st.markdown("##### 🦺 DPI Specifici")
+                        for dpi in dpi_specifici:
+                            st.markdown(f"• {dpi}")
+                
+                # Pulsante per rigenerare
+                if st.button("🔄 Rigenera Analisi", key="btn_rigenera"):
+                    st.session_state.ai_analisi_fatta = False
+                    st.session_state.rischi_ai = None
                     st.rerun()
-                    
-        if st.session_state.ai_analisi_fatta and st.session_state.rischi_ai:
-            lav = st.session_state.rischi_ai.get('lavorazioni_identificate', [])
-            st.success(f"✅ Trovate {len(lav)} lavorazioni")
+        else:
+            st.warning("⚠️ **Descrizione mancante** - Torna alla Fase 3 e compila la descrizione dei lavori per attivare l'analisi AI")
+    else:
+        # Istruzioni dettagliate per configurare l'API OpenAI
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%); 
+                    border-radius: 16px; padding: 25px; margin-bottom: 25px; color: white;">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <span style="font-size: 2.5rem;">🔑</span>
+                <div>
+                    <h3 style="margin: 0; color: white; font-size: 1.4rem;">Configura l'AI per Analisi Automatica</h3>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 0.95rem;">
+                        Aggiungi la chiave API OpenAI per abilitare l'analisi automatica dei rischi
+                    </p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        with st.expander("📋 Come configurare l'API OpenAI", expanded=True):
+            st.markdown("""
+            **1. Crea il file secrets.toml:**
+            
+            Nella cartella `.streamlit` del progetto, crea/modifica il file `secrets.toml`:
+            
+            ```toml
+            OPENAI_API_KEY = "sk-xxxxxxxxxxxxxxxxxxxxx"
+            ```
+            
+            **2. Ottieni la chiave API:**
+            - Vai su [platform.openai.com](https://platform.openai.com)
+            - Crea un account o accedi
+            - Vai in **API Keys** e crea una nuova chiave
+            
+            **3. Riavvia Streamlit:**
+            ```bash
+            streamlit run main.py
+            ```
+            
+            L'AI analizzerà automaticamente la descrizione dei lavori e selezionerà le lavorazioni pertinenti!
+            """)
     
     st.markdown("---")
+    
+    # === SELEZIONE MANUALE LAVORAZIONI ===
     st.markdown("#### ✅ Seleziona Lavorazioni")
+    st.caption("Le lavorazioni vengono selezionate automaticamente dall'AI, ma puoi modificarle manualmente")
     
     cols = st.columns(2)
     for i, (key, data) in enumerate(DIZIONARIO_LAVORAZIONI.items()):
@@ -1605,31 +2579,118 @@ def render_step4():
     
     selected = [k for k, v in st.session_state.lavorazioni_selezionate.items() if v]
     
+    # === ANTEPRIMA LAVORAZIONI SELEZIONATE ===
     if selected:
         st.markdown("---")
-        st.markdown(f"#### 📋 Anteprima ({len(selected)})")
+        st.markdown(f"#### 📋 Dettaglio Lavorazioni Selezionate ({len(selected)})")
+        
         for key in selected:
             data = DIZIONARIO_LAVORAZIONI[key]
             with st.expander(f"📋 {data['nome']}", expanded=False):
-                st.write(data['descrizione_tecnica'])
+                st.markdown(f"**Descrizione:** {data['descrizione_tecnica']}")
+                
+                # Rischi
+                st.markdown("**Rischi principali:**")
+                for rischio in data.get('rischi', [])[:3]:
+                    gravita_color = {'ALTA': '🔴', 'MEDIA': '🟡', 'BASSA': '🟢'}.get(rischio['gravita'], '🟡')
+                    st.markdown(f"- {gravita_color} **{rischio['nome']}** ({rischio['gravita']})")
+                
+                # DPI
+                st.markdown("**DPI obbligatori:**")
+                dpi_list = ", ".join([d['nome'] for d in data.get('dpi_obbligatori', [])[:4]])
+                st.markdown(f"_{dpi_list}_")
     
     st.markdown("---")
+    
+    # === NAVIGAZIONE ===
     c1, c2 = st.columns(2)
     with c1:
         if st.button("← Indietro", use_container_width=True):
             st.session_state.step = 3
             st.rerun()
     with c2:
-        if st.button("Avanti →", use_container_width=True, disabled=(len(selected) == 0)):
+        if st.button("Avanti →", use_container_width=True, disabled=(len(selected) == 0), type="primary"):
             st.session_state.step = 5
             st.rerun()
     
     if not selected:
-        st.warning("⚠️ Seleziona almeno una lavorazione")
+        st.warning("⚠️ Seleziona almeno una lavorazione per continuare")
 
 
 def render_step5():
     st.markdown("### Fase 5: Generazione POS")
+    
+    # ==========================================================================
+    # VERIFICA LIMITE POS - FONDAMENTALE PER MONETIZZAZIONE
+    # ==========================================================================
+    try:
+        from database import can_generate_pos, increment_pos_counter, save_pos_generato, save_impresa, save_lavoratori_template, save_attrezzature_template, ditta_to_impresa_dict
+        db_available = True
+    except ImportError:
+        db_available = False
+    
+    user_id = st.session_state.get('user_id', '')
+    
+    # Verifica limite POS
+    can_generate = True
+    pos_message = ""
+    pos_rimanenti = 1
+    
+    if db_available and user_id:
+        can_generate, pos_message, pos_rimanenti = can_generate_pos(user_id)
+    
+    # Mostra stato abbonamento
+    if can_generate:
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); 
+                    border-radius: 12px; padding: 20px; margin-bottom: 20px; color: white;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h4 style="margin: 0; color: white;">✅ Puoi generare il POS</h4>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9;">{pos_message}</p>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 2rem; font-weight: bold;">{pos_rimanenti}</span>
+                    <p style="margin: 0; font-size: 0.8rem; opacity: 0.8;">POS disponibili</p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); 
+                    border-radius: 12px; padding: 20px; margin-bottom: 20px; color: white;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h4 style="margin: 0; color: white;">🚫 Limite POS Raggiunto</h4>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9;">{pos_message}</p>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Pulsanti upgrade
+        st.markdown("#### 🚀 Passa a un piano superiore")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            checkout_base = st.secrets.get("CHECKOUT_BASE", "#")
+            st.markdown(f'<a href="{checkout_base}" target="_blank" style="text-decoration:none;"><div style="background:#3B82F6;color:white;padding:15px;border-radius:10px;text-align:center;font-weight:600;">⭐ Base - €29,99/mese<br><small>5 POS/mese</small></div></a>', unsafe_allow_html=True)
+        with col2:
+            checkout_pro = st.secrets.get("CHECKOUT_PRO", "#")
+            st.markdown(f'<a href="{checkout_pro}" target="_blank" style="text-decoration:none;"><div style="background:#FF6600;color:white;padding:15px;border-radius:10px;text-align:center;font-weight:600;">💎 Pro - €79,99/mese<br><small>20 POS/mese</small></div></a>', unsafe_allow_html=True)
+        with col3:
+            checkout_unlimited = st.secrets.get("CHECKOUT_UNLIMITED", "#")
+            st.markdown(f'<a href="{checkout_unlimited}" target="_blank" style="text-decoration:none;"><div style="background:#10B981;color:white;padding:15px;border-radius:10px;text-align:center;font-weight:600;">🚀 Unlimited - €119,99/mese<br><small>POS illimitati</small></div></a>', unsafe_allow_html=True)
+        
+        st.markdown("---")
+        if st.button("← Torna indietro", use_container_width=True):
+            st.session_state.step = 4
+            st.rerun()
+        return  # BLOCCA - non può generare
+    
+    # ==========================================================================
+    # RIEPILOGO DATI
+    # ==========================================================================
     selected = [k for k, v in st.session_state.lavorazioni_selezionate.items() if v]
     
     c1, c2 = st.columns(2)
@@ -1657,6 +2718,100 @@ def render_step5():
             st.markdown("**Sostanze:**")
             for sost in st.session_state.sostanze:
                 st.write(f"- {sost['nome']} ({sost.get('frasi_h', 'N.D.')})")
+    
+    # ==========================================================================
+    # OPZIONE SALVATAGGIO ANAGRAFICA
+    # ==========================================================================
+    st.markdown("---")
+    st.markdown("### 💾 Salva Anagrafica per Riutilizzo")
+    
+    salva_anagrafica = st.checkbox(
+        "Salva i dati dell'impresa per POS futuri",
+        value=True,
+        help="I dati dell'impresa, dipendenti e attrezzature saranno salvati e potrai riutilizzarli senza reinserirli"
+    )
+    
+    # ==================== SEZIONE ALLEGATI ====================
+    st.markdown("---")
+    st.markdown("### 📎 Allegati Documentali (Opzionale)")
+    st.info("📌 Carica i documenti PDF da allegare al POS. Verranno uniti in un unico file pronto per l'invio via PEC.")
+    
+    # Verifica se pypdf è disponibile
+    if not PYPDF_AVAILABLE:
+        st.warning("⚠️ La libreria `pypdf` non è installata. Gli allegati non saranno uniti al POS. Installa con: `pip install pypdf`")
+    
+    # File uploaders organizzati in colonne
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**📄 Documenti Aziendali**")
+        allegato_visura = st.file_uploader(
+            "Visura Camerale", 
+            type=['pdf'], 
+            key="upload_visura",
+            help="Visura camerale aggiornata"
+        )
+        allegato_durc = st.file_uploader(
+            "DURC", 
+            type=['pdf'], 
+            key="upload_durc",
+            help="Documento Unico di Regolarità Contributiva"
+        )
+        allegato_attestati = st.file_uploader(
+            "Attestati Formazione", 
+            type=['pdf'], 
+            key="upload_attestati",
+            help="Attestati formazione lavoratori (Art. 37)"
+        )
+        allegato_idoneita = st.file_uploader(
+            "Idoneità Sanitarie", 
+            type=['pdf'], 
+            key="upload_idoneita",
+            help="Certificati idoneità alla mansione"
+        )
+    
+    with col2:
+        st.markdown("**🔧 Documenti Tecnici**")
+        allegato_libretti = st.file_uploader(
+            "Libretti Attrezzature", 
+            type=['pdf'], 
+            key="upload_libretti",
+            help="Libretti d'uso e manutenzione"
+        )
+        allegato_sds = st.file_uploader(
+            "Schede SDS Sostanze", 
+            type=['pdf'], 
+            key="upload_sds",
+            help="Schede Dati di Sicurezza"
+        )
+        allegato_dpi = st.file_uploader(
+            "Verbali Consegna DPI", 
+            type=['pdf'], 
+            key="upload_dpi",
+            help="Verbali di consegna DPI firmati"
+        )
+        allegato_altro = st.file_uploader(
+            "Altri Allegati", 
+            type=['pdf'], 
+            key="upload_altro",
+            help="Eventuali altri documenti"
+        )
+    
+    # Conta allegati caricati
+    allegati = {
+        'visura': allegato_visura,
+        'durc': allegato_durc,
+        'attestati': allegato_attestati,
+        'idoneita': allegato_idoneita,
+        'libretti': allegato_libretti,
+        'sds': allegato_sds,
+        'dpi': allegato_dpi,
+        'altro': allegato_altro
+    }
+    num_allegati = sum(1 for v in allegati.values() if v is not None)
+    
+    if num_allegati > 0:
+        st.success(f"✅ **{num_allegati} allegat{'o' if num_allegati == 1 else 'i'} caricat{'o' if num_allegati == 1 else 'i'}** - Verranno uniti al POS")
     
     # Valutazione AI
     st.markdown("---")
@@ -1688,9 +2843,13 @@ def render_step5():
             st.session_state.step = 4
             st.rerun()
     with c2:
-        if st.button("📄 GENERA POS", use_container_width=True, disabled=(not disclaimer), type="primary"):
+        # Testo pulsante dinamico in base agli allegati
+        btn_text = f"📄 GENERA POS COMPLETO ({num_allegati} allegati)" if num_allegati > 0 else "📄 GENERA POS"
+        
+        if st.button(btn_text, use_container_width=True, disabled=(not disclaimer), type="primary"):
             with st.spinner("Generazione PDF professionale..."):
                 try:
+                    # Genera il POS
                     pdf_bytes = genera_pdf_pos(
                         st.session_state.ditta,
                         st.session_state.cantiere,
@@ -1701,9 +2860,67 @@ def render_step5():
                         st.session_state.attrezzature,
                         st.session_state.sostanze
                     )
-                    st.success("✅ POS generato con successo!")
-                    nome_file = f"POS_{date.today().strftime('%Y%m%d')}.pdf"
-                    st.download_button("📥 SCARICA PDF", pdf_bytes, nome_file, "application/pdf", use_container_width=True)
+                    
+                    # Se ci sono allegati e pypdf è disponibile, unisci i PDF
+                    if num_allegati > 0 and PYPDF_AVAILABLE:
+                        with st.spinner(f"Unione {num_allegati} allegati..."):
+                            pdf_bytes = merge_pdfs_with_allegati(pdf_bytes, allegati)
+                        st.success(f"✅ POS generato con {num_allegati} allegati!")
+                        nome_file = f"POS_COMPLETO_{date.today().strftime('%Y%m%d')}.pdf"
+                    else:
+                        st.success("✅ POS generato con successo!")
+                        nome_file = f"POS_{date.today().strftime('%Y%m%d')}.pdf"
+                    
+                    # ============================================================
+                    # INCREMENTA CONTATORE POS (FONDAMENTALE PER MONETIZZAZIONE!)
+                    # ============================================================
+                    if db_available and user_id:
+                        try:
+                            # Incrementa contatore
+                            increment_pos_counter(user_id)
+                            
+                            # Salva nel log storico
+                            impresa_id = st.session_state.ditta.get('_impresa_id', None)
+                            save_pos_generato(
+                                user_id, 
+                                impresa_id,
+                                st.session_state.cantiere,
+                                selected,
+                                nome_file
+                            )
+                            
+                            # Salva anagrafica se richiesto
+                            if salva_anagrafica:
+                                # Converti ditta nel formato database
+                                impresa_data = ditta_to_impresa_dict(st.session_state.ditta, st.session_state.addetti)
+                                saved_id = save_impresa(user_id, impresa_data)
+                                
+                                if saved_id:
+                                    # Salva lavoratori e attrezzature collegati
+                                    save_lavoratori_template(saved_id, st.session_state.lavoratori)
+                                    save_attrezzature_template(saved_id, st.session_state.attrezzature)
+                                    st.info("💾 Anagrafica salvata! Potrai riutilizzarla per i prossimi POS.")
+                        except Exception as e:
+                            # Non bloccare il download se c'è errore nel contatore
+                            print(f"Errore contatore/salvataggio: {e}")
+                    
+                    # Mostra download button
+                    st.download_button(
+                        "📥 SCARICA PDF" + (" CON ALLEGATI" if num_allegati > 0 else ""), 
+                        pdf_bytes, 
+                        nome_file, 
+                        "application/pdf", 
+                        use_container_width=True
+                    )
+                    
+                    # Messaggio post-generazione
+                    if db_available and user_id:
+                        new_can, new_msg, new_remaining = can_generate_pos(user_id)
+                        if new_remaining > 0:
+                            st.info(f"📊 Ti rimangono ancora **{new_remaining} POS** disponibili.")
+                        elif not new_can:
+                            st.warning("⚠️ Hai esaurito i POS disponibili. Passa a un piano superiore per continuare!")
+                    
                 except Exception as e:
                     st.error(f"Errore: {str(e)}")
 
