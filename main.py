@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-CANTIERE SICURO - Landing Page V10 FINAL
+POS FACILE - Landing Page V10 FINAL
 Fix: Accesso risolto (rimosso menu duplicato)
 """
 
@@ -8,7 +8,7 @@ import streamlit as st
 
 # --- CONFIGURAZIONE PAGINA ---
 st.set_page_config(
-    page_title="CantiereSicuro | Generatore POS con AI",
+    page_title="POS FACILE | Generatore POS con AI",
     page_icon="🏗️",
     layout="wide"
 )
@@ -467,7 +467,7 @@ def render_navbar():
     """Navbar semplice"""
     col1, col2, col3 = st.columns([3, 2, 1])
     with col1:
-        st.markdown("### 🏗️ **CantiereSicuro**")
+        st.markdown("### 🏗️ **POS FACILE**")
     with col3:
         if st.button("🔐 Accedi", key="nav_login"):
             st.session_state.show_auth = True
@@ -539,7 +539,7 @@ def render_mockup():
     <div class="mockup-container">
         <div class="mockup-screen">
             <div class="mockup-header">
-                <div style="font-weight: 700; font-size: 1.1rem;">🏗️ CantiereSicuro - Nuovo POS</div>
+                <div style="font-weight: 700; font-size: 1.1rem;">🏗️ POS FACILE - Nuovo POS</div>
             </div>
             <div class="mockup-body">
                 <div class="mockup-row">
@@ -573,7 +573,7 @@ def render_features():
     with col2:
         st.markdown('<div style="text-align: center;"><span class="section-tag">✨ FUNZIONALITÀ</span></div>', unsafe_allow_html=True)
     
-    st.markdown('<h2 class="section-title">Perché scegliere CantiereSicuro?</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-title">Perché scegliere POS FACILE?</h2>', unsafe_allow_html=True)
     st.markdown('<p class="section-subtitle">Tutto ciò che ti serve per creare POS professionali.</p>', unsafe_allow_html=True)
     
     c1, c2, c3 = st.columns(3)
@@ -778,17 +778,17 @@ def render_pricing():
     with c2:
         st.markdown("""
         <div class="price-card">
-            <div class="price-name">BASE</div>
-            <div class="price-amount">€29<span>,99</span></div>
+            <div class="price-name">STARTER</div>
+            <div class="price-amount">€9<span>,99</span></div>
             <div class="price-period">al mese</div>
-            <div class="price-feature">✅ <b>5 POS</b> al mese</div>
+            <div class="price-feature">✅ <b>3 POS</b> al mese</div>
             <div class="price-feature">✅ Salva anagrafiche</div>
             <div class="price-feature">✅ Storico documenti</div>
-            <div class="price-feature">✅ Unione allegati</div>
-            <div class="price-feature no">✗ AI avanzata</div>
+            <div class="price-feature">✅ Analisi AI</div>
+            <div class="price-feature">✅ Supporto email</div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Scegli Base", key="price_base", use_container_width=True):
+        if st.button("Scegli Starter", key="price_starter", use_container_width=True):
             go_to_register()
             st.rerun()
     
@@ -796,17 +796,17 @@ def render_pricing():
         st.markdown("""
         <div class="price-card featured">
             <div class="price-badge">🔥 PIÙ SCELTO</div>
-            <div class="price-name" style="color: #FF6600;">PRO</div>
-            <div class="price-amount">€79<span>,99</span></div>
+            <div class="price-name" style="color: #FF6600;">PROFESSIONAL</div>
+            <div class="price-amount">€24<span>,99</span></div>
             <div class="price-period">al mese</div>
-            <div class="price-feature">✅ <b>20 POS</b> al mese</div>
+            <div class="price-feature">✅ <b>10 POS</b> al mese</div>
             <div class="price-feature">✅ <b>AI Avanzata</b></div>
             <div class="price-feature">✅ Magic Writer</div>
             <div class="price-feature">✅ Supporto prioritario</div>
-            <div class="price-feature">✅ Template custom</div>
+            <div class="price-feature">✅ Anagrafiche illimitate</div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("🚀 Scegli Pro", key="price_pro", type="primary", use_container_width=True):
+        if st.button("🚀 Scegli Professional", key="price_professional", type="primary", use_container_width=True):
             go_to_register()
             st.rerun()
     
@@ -814,13 +814,13 @@ def render_pricing():
         st.markdown("""
         <div class="price-card">
             <div class="price-name">UNLIMITED</div>
-            <div class="price-amount">€119<span>,99</span></div>
+            <div class="price-amount">€49<span>,99</span></div>
             <div class="price-period">al mese</div>
             <div class="price-feature">✅ <b>POS Illimitati</b></div>
-            <div class="price-feature">✅ Tutto di Pro</div>
-            <div class="price-feature">✅ Priorità server</div>
+            <div class="price-feature">✅ Tutto di Professional</div>
             <div class="price-feature">✅ Supporto WhatsApp</div>
-            <div class="price-feature">✅ Multi-utente (soon)</div>
+            <div class="price-feature">✅ Priorità server</div>
+            <div class="price-feature">✅ Nuove funzioni in anteprima</div>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Scegli Unlimited", key="price_unlimited", use_container_width=True):
@@ -882,9 +882,9 @@ def render_footer():
     """Footer"""
     st.markdown("""
     <div class="site-footer">
-        <div class="footer-brand">🏗️ CantiereSicuro</div>
+        <div class="footer-brand">🏗️ POS FACILE</div>
         <div class="footer-text">Il futuro della sicurezza in cantiere. Semplice, veloce, conforme.</div>
-        <div class="footer-text">© 2025 CantiereSicuro. Tutti i diritti riservati.</div>
+        <div class="footer-text">© 2025 POS FACILE. Tutti i diritti riservati.</div>
     </div>
     """, unsafe_allow_html=True)
 
