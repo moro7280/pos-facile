@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-CANTIERE SICURO - Landing Page
+POS FACILE - Landing Page
 Pagina di presentazione del servizio
 """
 
@@ -241,7 +241,7 @@ def render_landing_page():
     # ==================== HERO SECTION ====================
     st.markdown("""
     <div class="hero">
-        <h1>🏗️ CantiereSicuro</h1>
+        <h1>🏗️ POS FACILE</h1>
         <p>Il Piano Operativo di Sicurezza perfetto in 5 minuti.<br>
         Conforme al D.Lgs 81/08 • Generato con AI • Pronto per l'ASL</p>
         <a href="#pricing" class="hero-btn">🎁 Prova Gratis</a>
@@ -273,7 +273,7 @@ def render_landing_page():
     
     # ==================== FEATURES ====================
     st.markdown("<a name='features'></a>", unsafe_allow_html=True)
-    st.markdown("## ✨ Perché CantiereSicuro?")
+    st.markdown("## ✨ Perché POS FACILE?")
     
     col1, col2, col3 = st.columns(3)
     
@@ -384,8 +384,8 @@ def render_landing_page():
     st.markdown("<p style='text-align: center; color: #666; font-size: 1.1rem;'>Scegli il piano più adatto alle tue esigenze</p>", unsafe_allow_html=True)
     
     # Recupera checkout URLs
-    checkout_base = st.secrets.get("CHECKOUT_BASE", "#")
-    checkout_pro = st.secrets.get("CHECKOUT_PRO", "#")
+    checkout_starter = st.secrets.get("CHECKOUT_STARTER", "#")
+    checkout_professional = st.secrets.get("CHECKOUT_PROFESSIONAL", "#")
     checkout_unlimited = st.secrets.get("CHECKOUT_UNLIMITED", "#")
     
     col1, col2, col3, col4 = st.columns(4)
@@ -408,31 +408,31 @@ def render_landing_page():
     with col2:
         st.markdown(f"""
         <div class="pricing-card">
-            <div class="pricing-title">⭐ Base</div>
-            <div class="pricing-price">€29,99<span>/mese</span></div>
+            <div class="pricing-title">⭐ Starter</div>
+            <div class="pricing-price">€9,99<span>/mese</span></div>
             <ul class="pricing-features">
-                <li>5 POS al mese</li>
+                <li>3 POS al mese</li>
                 <li>Salva anagrafiche</li>
                 <li>Storico documenti</li>
                 <li>Supporto email</li>
             </ul>
-            <a href="{checkout_base}" target="_blank" class="pricing-btn">Acquista</a>
+            <a href="{checkout_starter}" target="_blank" class="pricing-btn">Acquista</a>
         </div>
         """, unsafe_allow_html=True)
     
     with col3:
         st.markdown(f"""
         <div class="pricing-card featured">
-            <div style="background: #FF6600; color: white; padding: 5px 15px; border-radius: 20px; font-size: 11px; margin-bottom: 10px; display: inline-block;">⭐ CONSIGLIATO</div>
-            <div class="pricing-title">💎 Pro</div>
-            <div class="pricing-price">€79,99<span>/mese</span></div>
+            <div style="background: #FF6600; color: white; padding: 5px 15px; border-radius: 20px; font-size: 11px; margin-bottom: 10px; display: inline-block;">⭐ PIÙ SCELTO</div>
+            <div class="pricing-title">💎 Professional</div>
+            <div class="pricing-price">€24,99<span>/mese</span></div>
             <ul class="pricing-features">
-                <li>20 POS al mese</li>
+                <li>10 POS al mese</li>
                 <li>AI avanzata</li>
-                <li>Template custom</li>
+                <li>Magic Writer</li>
                 <li>Supporto prioritario</li>
             </ul>
-            <a href="{checkout_pro}" target="_blank" class="pricing-btn">Acquista</a>
+            <a href="{checkout_professional}" target="_blank" class="pricing-btn">Acquista</a>
         </div>
         """, unsafe_allow_html=True)
     
@@ -440,12 +440,12 @@ def render_landing_page():
         st.markdown(f"""
         <div class="pricing-card">
             <div class="pricing-title">🚀 Unlimited</div>
-            <div class="pricing-price">€119,99<span>/mese</span></div>
+            <div class="pricing-price">€49,99<span>/mese</span></div>
             <ul class="pricing-features">
                 <li>POS illimitati</li>
-                <li>Multi-utente (soon)</li>
-                <li>API access (soon)</li>
-                <li>Supporto dedicato</li>
+                <li>Tutto di Professional</li>
+                <li>Supporto WhatsApp</li>
+                <li>Priorità server</li>
             </ul>
             <a href="{checkout_unlimited}" target="_blank" class="pricing-btn">Acquista</a>
         </div>
@@ -476,7 +476,7 @@ def render_landing_page():
     # ==================== CTA FINALE ====================
     st.markdown("""
     <div class="cta-section">
-        <h2>🎁 Prova CantiereSicuro Gratis</h2>
+        <h2>🎁 Prova POS FACILE Gratis</h2>
         <p>Genera il tuo primo POS gratuitamente. Nessuna carta di credito richiesta.</p>
         <a href="#" class="cta-btn">Inizia ora →</a>
     </div>
@@ -503,7 +503,7 @@ def render_landing_page():
     # ==================== FOOTER ====================
     st.markdown("""
     <div class="footer">
-        <p><strong>CantiereSicuro</strong> - Generatore POS professionale</p>
+        <p><strong>POS FACILE</strong> - Generatore POS professionale</p>
         <p style="font-size: 14px;">© 2025 - Tutti i diritti riservati</p>
         <p style="font-size: 12px; color: #999;">
             <a href="#" style="color: #999;">Privacy Policy</a> • 
