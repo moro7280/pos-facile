@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-CantiereSicuro AI PRO - Generatore POS D.Lgs 81/08
+POS FACILE - Generatore POS D.Lgs 81/08
 """
 
 import streamlit as st
@@ -25,7 +25,7 @@ except ImportError:
 # ==============================================================================
 # CONFIGURAZIONE
 # ==============================================================================
-st.set_page_config(page_title="CantiereSicuro AI PRO", page_icon="🏗️", layout="wide")
+st.set_page_config(page_title="POS FACILE", page_icon="🏗️", layout="wide")
 
 st.markdown("""
 <style>
@@ -1530,7 +1530,7 @@ def init_session():
 # ==============================================================================
 def render_header():
     # Header principale senza pulsanti toggle (sidebar fissa)
-    st.markdown('<div class="main-header"><h1>🏗️ CantiereSicuro AI PRO</h1><p>Generatore POS - D.Lgs 81/08</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header"><h1>🏗️ POS FACILE</h1><p>Generatore POS - D.Lgs 81/08</p></div>', unsafe_allow_html=True)
 
 
 def render_sidebar():
@@ -1539,8 +1539,8 @@ def render_sidebar():
         # === BRANDING ===
         st.markdown("""
         <div style="text-align: center; padding: 15px 0; border-bottom: 1px solid #E5E7EB; margin-bottom: 20px;">
-            <h2 style="color: #1a1a2e; margin: 0; font-size: 1.5rem;">🏗️ CantiereSicuro</h2>
-            <p style="color: #FF6600; margin: 5px 0 0 0; font-size: 0.9rem; font-weight: 600;">AI PRO</p>
+            <h2 style="color: #1a1a2e; margin: 0; font-size: 1.5rem;">🏗️ POS FACILE</h2>
+            <p style="color: #FF6600; margin: 5px 0 0 0; font-size: 0.9rem; font-weight: 600;">Generatore POS con AI</p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -1554,8 +1554,8 @@ def render_sidebar():
         # Colori per piano
         piano_colors = {
             'Free': '#6B7280',
-            'Base': '#3B82F6',
-            'Pro': '#FF6600',
+            'Starter': '#3B82F6',
+            'Professional': '#FF6600',
             'Unlimited': '#10B981'
         }
         piano_color = piano_colors.get(piano, '#6B7280')
@@ -1568,7 +1568,7 @@ def render_sidebar():
                     margin-bottom: 20px;">
             <p style="margin: 0 0 5px 0; color: #64748B; font-size: 0.8rem;">PIANO ATTIVO</p>
             <p style="margin: 0; color: {piano_color}; font-size: 1.3rem; font-weight: 700;">
-                {'⭐ ' if piano == 'Pro' else ''}{'🚀 ' if piano == 'Unlimited' else ''}{piano.upper()}
+                {'⭐ ' if piano == 'Professional' else ''}{'🚀 ' if piano == 'Unlimited' else ''}{piano.upper()}
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -1598,7 +1598,7 @@ def render_sidebar():
             """, unsafe_allow_html=True)
             
             if pos_rimanenti == 0:
-                if st.button("⬆️ Passa a PRO", use_container_width=True, type="primary"):
+                if st.button("⬆️ Passa a Professional", use_container_width=True, type="primary"):
                     st.session_state.show_upgrade = True
         else:
             st.markdown("""
@@ -1669,7 +1669,7 @@ def render_sidebar():
         st.markdown("""
         <div style="text-align: center; padding-top: 10px; border-top: 1px solid #E5E7EB;">
             <p style="color: #94A3B8; font-size: 0.75rem; margin: 0;">
-                CantiereSicuro v2.0<br>
+                POS FACILE v2.0<br>
                 <a href="#" style="color: #FF6600; text-decoration: none;">Supporto</a> • 
                 <a href="#" style="color: #FF6600; text-decoration: none;">Guida</a>
             </p>
@@ -2673,14 +2673,14 @@ def render_step5():
         st.markdown("#### 🚀 Passa a un piano superiore")
         col1, col2, col3 = st.columns(3)
         with col1:
-            checkout_base = st.secrets.get("CHECKOUT_BASE", "#")
-            st.markdown(f'<a href="{checkout_base}" target="_blank" style="text-decoration:none;"><div style="background:#3B82F6;color:white;padding:15px;border-radius:10px;text-align:center;font-weight:600;">⭐ Base - €29,99/mese<br><small>5 POS/mese</small></div></a>', unsafe_allow_html=True)
+            checkout_starter = st.secrets.get("CHECKOUT_STARTER", "#")
+            st.markdown(f'<a href="{checkout_starter}" target="_blank" style="text-decoration:none;"><div style="background:#3B82F6;color:white;padding:15px;border-radius:10px;text-align:center;font-weight:600;">⭐ Starter - €9,99/mese<br><small>3 POS/mese</small></div></a>', unsafe_allow_html=True)
         with col2:
-            checkout_pro = st.secrets.get("CHECKOUT_PRO", "#")
-            st.markdown(f'<a href="{checkout_pro}" target="_blank" style="text-decoration:none;"><div style="background:#FF6600;color:white;padding:15px;border-radius:10px;text-align:center;font-weight:600;">💎 Pro - €79,99/mese<br><small>20 POS/mese</small></div></a>', unsafe_allow_html=True)
+            checkout_professional = st.secrets.get("CHECKOUT_PROFESSIONAL", "#")
+            st.markdown(f'<a href="{checkout_professional}" target="_blank" style="text-decoration:none;"><div style="background:#FF6600;color:white;padding:15px;border-radius:10px;text-align:center;font-weight:600;">💎 Professional - €24,99/mese<br><small>10 POS/mese</small></div></a>', unsafe_allow_html=True)
         with col3:
             checkout_unlimited = st.secrets.get("CHECKOUT_UNLIMITED", "#")
-            st.markdown(f'<a href="{checkout_unlimited}" target="_blank" style="text-decoration:none;"><div style="background:#10B981;color:white;padding:15px;border-radius:10px;text-align:center;font-weight:600;">🚀 Unlimited - €119,99/mese<br><small>POS illimitati</small></div></a>', unsafe_allow_html=True)
+            st.markdown(f'<a href="{checkout_unlimited}" target="_blank" style="text-decoration:none;"><div style="background:#10B981;color:white;padding:15px;border-radius:10px;text-align:center;font-weight:600;">🚀 Unlimited - €49,99/mese<br><small>POS illimitati</small></div></a>', unsafe_allow_html=True)
         
         st.markdown("---")
         if st.button("← Torna indietro", use_container_width=True):
