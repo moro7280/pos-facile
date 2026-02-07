@@ -484,14 +484,14 @@ def render_hero():
     # Badge centrato
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        st.markdown('<div style="text-align: center;"><span class="hero-badge">🚀 Provalo Gratis • 1 POS Omaggio</span></div>', unsafe_allow_html=True)
+        st.markdown('<div style="text-align: center;"><span class="hero-badge">🚀 Provalo Gratis • Il primo POS è Omaggio</span></div>', unsafe_allow_html=True)
     
     # Titoli
-    st.markdown('<h1 class="hero-title">Il Tuo POS Perfetto.</h1>', unsafe_allow_html=True)
-    st.markdown('<h1 class="hero-title-orange">In 5 Minuti. Con l\'AI.</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="hero-title">Basta ore su Word.</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="hero-title-orange">POS conforme in 10 minuti.</h1>', unsafe_allow_html=True)
     
     # Sottotitolo (Centrato via CSS)
-    st.markdown('<p class="hero-subtitle">Il primo software italiano che usa l\'Intelligenza Artificiale per creare Piani Operativi di Sicurezza completi, conformi al D.Lgs 81/08 e pronti per qualsiasi ispezione.</p>', unsafe_allow_html=True)
+    st.markdown('<p class="hero-subtitle">Sei un geometra, un ingegnere o un consulente sicurezza? POS Facile genera Piani Operativi di Sicurezza conformi al D.Lgs 81/08 con l\'AI. Tu selezioni le lavorazioni, l\'app calcola rischi, DPI e misure. PDF pronto per il CSE.</p>', unsafe_allow_html=True)
     
     # CTA
     col1, col2, col3 = st.columns([1, 1, 1])
@@ -509,24 +509,24 @@ def render_stats_bar():
     <div class="stats-bar">
         <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
             <div class="stat-item">
+                <span class="stat-icon">⏱️</span>
+                <p class="stat-number">10 min</p>
+                <p class="stat-label">Invece di 4 ore</p>
+            </div>
+            <div class="stat-item">
                 <span class="stat-icon">📋</span>
                 <p class="stat-number">100%</p>
-                <p class="stat-label">Conforme</p>
+                <p class="stat-label">Conforme D.Lgs 81/08</p>
             </div>
             <div class="stat-item">
-                <span class="stat-icon">⚡</span>
-                <p class="stat-number">5 min</p>
-                <p class="stat-label">Tempo Medio</p>
-            </div>
-            <div class="stat-item">
-                <span class="stat-icon">🏗️</span>
-                <p class="stat-number">500+</p>
-                <p class="stat-label">Lavorazioni</p>
+                <span class="stat-icon">🔧</span>
+                <p class="stat-number">12+</p>
+                <p class="stat-label">Categorie lavorazioni</p>
             </div>
             <div class="stat-item">
                 <span class="stat-icon">🧠</span>
                 <p class="stat-number">AI</p>
-                <p class="stat-label">Powered</p>
+                <p class="stat-label">Analisi rischi</p>
             </div>
         </div>
     </div>
@@ -543,15 +543,15 @@ def render_mockup():
             </div>
             <div class="mockup-body">
                 <div class="mockup-row">
-                    <div class="mockup-field">📋 Ragione Sociale: Edilizia Rossi S.r.l.</div>
-                    <div class="mockup-field">📍 Cantiere: Via Roma 15, Milano</div>
+                    <div class="mockup-field">📋 Cliente: Edilizia Rossi S.r.l.</div>
+                    <div class="mockup-field">📍 Cantiere: Via Roma 15, Macerata</div>
                 </div>
                 <div class="mockup-row">
                     <div class="mockup-field">👷 Datore di Lavoro: Mario Rossi</div>
                     <div class="mockup-field">📅 Durata prevista: 45 giorni</div>
                 </div>
                 <div class="mockup-row">
-                    <div class="mockup-field" style="flex: 2;">🔧 Lavorazioni selezionate: Demolizioni, Scavi, Opere in c.a., Impermeabilizzazioni</div>
+                    <div class="mockup-field" style="flex: 2;">🔧 Lavorazioni: Demolizioni, Scavi, Opere murarie, Impianti elettrici → Rischi, DPI e misure calcolati</div>
                 </div>
                 <div style="background: #FF6600; color: white; display: inline-block; padding: 10px 20px; border-radius: 6px; font-weight: 600; margin-top: 10px; font-size: 0.9rem;">✨ Genera POS con AI</div>
             </div>
@@ -573,32 +573,32 @@ def render_features():
     with col2:
         st.markdown('<div style="text-align: center;"><span class="section-tag">✨ FUNZIONALITÀ</span></div>', unsafe_allow_html=True)
     
-    st.markdown('<h2 class="section-title">Perché scegliere POS FACILE?</h2>', unsafe_allow_html=True)
-    st.markdown('<p class="section-subtitle">Tutto ciò che ti serve per creare POS professionali.</p>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-title">Perché i professionisti scelgono POS FACILE</h2>', unsafe_allow_html=True)
+    st.markdown('<p class="section-subtitle">Meno tempo sulla burocrazia, più tempo per i tuoi clienti.</p>', unsafe_allow_html=True)
     
     c1, c2, c3 = st.columns(3)
     with c1:
         st.markdown("""
         <div class="feature-card">
             <div class="feature-icon">🧠</div>
-            <div class="feature-title">Intelligenza Artificiale</div>
-            <div class="feature-text">L'AI analizza la descrizione del cantiere e genera rischi, misure e DPI appropriati.</div>
+            <div class="feature-title">AI che conosce il D.Lgs 81/08</div>
+            <div class="feature-text">Seleziona le lavorazioni e l'AI genera rischi specifici, DPI con norme EN, misure di prevenzione e valori limite di esposizione.</div>
         </div>
         """, unsafe_allow_html=True)
     with c2:
         st.markdown("""
         <div class="feature-card">
             <div class="feature-icon">⚡</div>
-            <div class="feature-title">Velocità Record</div>
-            <div class="feature-text">Dimentica le ore su Word. Compila una volta, PDF pronto in 5 minuti.</div>
+            <div class="feature-title">Da 4 ore a 10 minuti</div>
+            <div class="feature-text">Basta copiare da vecchi template Word. Compila una volta i dati dell'impresa, li ritrovi per ogni cantiere successivo.</div>
         </div>
         """, unsafe_allow_html=True)
     with c3:
         st.markdown("""
         <div class="feature-card">
             <div class="feature-icon">✅</div>
-            <div class="feature-title">100% Conforme</div>
-            <div class="feature-text">Ogni POS rispetta l'Allegato XV del D.Lgs 81/08. Pronto per ASL.</div>
+            <div class="feature-title">Conforme Allegato XV</div>
+            <div class="feature-text">Struttura completa: premessa, organigramma, valutazione rischi, procedure emergenza, cronoprogramma. Pronto per il CSE e per l'ASL.</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -609,24 +609,24 @@ def render_features():
         st.markdown("""
         <div class="feature-card">
             <div class="feature-icon">📎</div>
-            <div class="feature-title">Allegati Automatici</div>
-            <div class="feature-text">Carica DURC, Visura e Attestati. Li uniamo in un unico PDF.</div>
+            <div class="feature-title">PDF Unico con Allegati</div>
+            <div class="feature-text">Carica DURC, Visura, Attestati e Idoneità. Li uniamo al POS in un unico PDF pronto per la PEC.</div>
         </div>
         """, unsafe_allow_html=True)
     with c5:
         st.markdown("""
         <div class="feature-card">
             <div class="feature-icon">💾</div>
-            <div class="feature-title">Anagrafiche Salvate</div>
-            <div class="feature-text">Inserisci i dati una volta. Li ritrovi per ogni nuovo cantiere.</div>
+            <div class="feature-title">Gestisci più imprese</div>
+            <div class="feature-text">Salvi l'anagrafica di ogni cliente. Al prossimo cantiere carichi i dati in un click: lavoratori, attrezzature, figure della sicurezza.</div>
         </div>
         """, unsafe_allow_html=True)
     with c6:
         st.markdown("""
         <div class="feature-card">
             <div class="feature-icon">☁️</div>
-            <div class="feature-title">Sempre Accessibile</div>
-            <div class="feature-text">Funziona su PC, Mac, Tablet e Smartphone. Ovunque.</div>
+            <div class="feature-title">Sempre con te in cantiere</div>
+            <div class="feature-text">Web app cloud: funziona da PC, tablet e smartphone. Nessuna installazione.</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -641,32 +641,32 @@ def render_how_it_works():
     with col2:
         st.markdown('<div style="text-align: center;"><span class="section-tag">📋 COME FUNZIONA</span></div>', unsafe_allow_html=True)
     
-    st.markdown('<h2 class="section-title">4 semplici passaggi</h2>', unsafe_allow_html=True)
-    st.markdown('<p class="section-subtitle">Dal primo click al PDF in meno di 5 minuti.</p>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-title">Come funziona</h2>', unsafe_allow_html=True)
+    st.markdown('<p class="section-subtitle">Dal primo click al PDF conforme in 4 passaggi.</p>', unsafe_allow_html=True)
     
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         st.markdown("""
         <div class="feature-card">
             <div style="font-size: 2.5rem; margin-bottom: 10px;">1️⃣</div>
-            <div class="feature-title">Registrati Gratis</div>
-            <div class="feature-text">Account in 30 secondi. Nessuna carta.</div>
+            <div class="feature-title">Dati Impresa</div>
+            <div class="feature-text">Inserisci o carica l'anagrafica del cliente.</div>
         </div>
         """, unsafe_allow_html=True)
     with c2:
         st.markdown("""
         <div class="feature-card">
             <div style="font-size: 2.5rem; margin-bottom: 10px;">2️⃣</div>
-            <div class="feature-title">Inserisci i Dati</div>
-            <div class="feature-text">Compila impresa e cantiere.</div>
+            <div class="feature-title">Cantiere e Lavorazioni</div>
+            <div class="feature-text">Seleziona le lavorazioni previste dal cantiere.</div>
         </div>
         """, unsafe_allow_html=True)
     with c3:
         st.markdown("""
         <div class="feature-card">
             <div style="font-size: 2.5rem; margin-bottom: 10px;">3️⃣</div>
-            <div class="feature-title">L'AI Analizza</div>
-            <div class="feature-text">Rischi e misure automatiche.</div>
+            <div class="feature-title">L'AI Analizza i Rischi</div>
+            <div class="feature-text">Rischi, DPI, misure e valori limite generati automaticamente.</div>
         </div>
         """, unsafe_allow_html=True)
     with c4:
@@ -674,7 +674,7 @@ def render_how_it_works():
         <div class="feature-card">
             <div style="font-size: 2.5rem; margin-bottom: 10px;">4️⃣</div>
             <div class="feature-title">Scarica il PDF</div>
-            <div class="feature-text">Pronto per firma e invio.</div>
+            <div class="feature-text">POS completo con allegati. Pronto per firma e invio al CSE.</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -690,7 +690,7 @@ def render_reviews():
         st.markdown('<div style="text-align: center;"><span class="section-tag">⭐ TESTIMONIANZE</span></div>', unsafe_allow_html=True)
     
     st.markdown('<h2 class="section-title">Cosa dicono i professionisti</h2>', unsafe_allow_html=True)
-    st.markdown('<p class="section-subtitle">Centinaia di imprese hanno semplificato il loro lavoro.</p>', unsafe_allow_html=True)
+    st.markdown('<p class="section-subtitle">Chi redige POS ogni settimana ha scelto POS Facile.</p>', unsafe_allow_html=True)
     
     # Immagini avatar (Unsplash stock photos)
     avatar_marco = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=faces"
@@ -705,11 +705,11 @@ def render_reviews():
                 <img src="{avatar_marco}" class="review-avatar">
                 <div class="review-info">
                     <div class="review-author">Marco R.</div>
-                    <div class="review-role">Geometra</div>
+                    <div class="review-role">Geometra libero professionista</div>
                 </div>
             </div>
             <div class="review-stars">★★★★★</div>
-            <div class="review-text">"Finalmente un software che mi fa risparmiare tempo vero. Prima impiegavo ore, ora in 10 minuti ho un documento perfetto."</div>
+            <div class="review-text">"Faccio 6-8 POS al mese per le imprese della zona. Prima ci mettevo mezza giornata ciascuno, adesso in 10 minuti ho un documento che il CSE non mi ha mai contestato."</div>
         </div>
         """, unsafe_allow_html=True)
     with c2:
@@ -719,11 +719,11 @@ def render_reviews():
                 <img src="{avatar_laura}" class="review-avatar">
                 <div class="review-info">
                     <div class="review-author">Ing. Laura B.</div>
-                    <div class="review-role">RSPP</div>
+                    <div class="review-role">CSP/CSE e RSPP</div>
                 </div>
             </div>
             <div class="review-stars">★★★★★</div>
-            <div class="review-text">"L'analisi AI dei rischi è impressionante. Identifica dettagli specifici che sfuggono anche ai più esperti."</div>
+            <div class="review-text">"La parte dei rischi specifici con norme EN e valori limite è quello che fa la differenza. Non è il solito template vuoto — qui c'è sostanza tecnica vera."</div>
         </div>
         """, unsafe_allow_html=True)
     with c3:
@@ -732,12 +732,12 @@ def render_reviews():
             <div class="review-header">
                 <img src="{avatar_paolo}" class="review-avatar">
                 <div class="review-info">
-                    <div class="review-author">Paolo G.</div>
-                    <div class="review-role">Impresa Edile</div>
+                    <div class="review-author">Geom. Paolo G.</div>
+                    <div class="review-role">Consulente sicurezza cantieri</div>
                 </div>
             </div>
             <div class="review-stars">★★★★★</div>
-            <div class="review-text">"Lo uso da 4 mesi. Semplice, veloce, e i Coordinatori non mi hanno mai contestato nulla. Consigliatissimo!"</div>
+            <div class="review-text">"Gestisco la sicurezza per 12 imprese. Il fatto di salvare le anagrafiche e ricaricarle mi fa risparmiare un'enormità di tempo. Il piano Professional si ripaga al primo POS."</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -752,8 +752,8 @@ def render_pricing():
     with col2:
         st.markdown('<div style="text-align: center;"><span class="section-tag">💰 PREZZI</span></div>', unsafe_allow_html=True)
     
-    st.markdown('<h2 class="section-title">Scegli il piano perfetto per te</h2>', unsafe_allow_html=True)
-    st.markdown('<p class="section-subtitle">Inizia gratis. Passa a PRO quando vuoi.</p>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-title">Quanto tempo vuoi risparmiare?</h2>', unsafe_allow_html=True)
+    st.markdown('<p class="section-subtitle">Ogni piano si ripaga con un singolo POS rispetto al tempo che risparmi.</p>', unsafe_allow_html=True)
     
     # Pricing cards
     c1, c2, c3, c4 = st.columns(4)
@@ -767,11 +767,11 @@ def render_pricing():
             <div class="price-feature">✅ 1 POS gratuito</div>
             <div class="price-feature">✅ Tutte le lavorazioni</div>
             <div class="price-feature">✅ PDF professionale</div>
-            <div class="price-feature no">✗ Salvataggio dati</div>
+            <div class="price-feature no">✗ Salvataggio anagrafiche</div>
             <div class="price-feature no">✗ Supporto prioritario</div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Inizia Gratis", key="price_free", use_container_width=True):
+        if st.button("Prova Gratis", key="price_free", use_container_width=True):
             go_to_register()
             st.rerun()
     
@@ -834,8 +834,8 @@ def render_cta():
     
     st.markdown("""
     <div class="cta-box">
-        <div class="cta-title">🎁 Pronto a creare il tuo primo POS?</div>
-        <div class="cta-subtitle">Registrati ora e genera il tuo POS gratuito in meno di 5 minuti.</div>
+        <div class="cta-title">🎁 Prova con un POS reale — è gratis</div>
+        <div class="cta-subtitle">Registrati, genera il tuo primo POS su un cantiere vero, e vedi con i tuoi occhi quanto tempo risparmi.</div>
     </div>
     """, unsafe_allow_html=True)
     
@@ -863,19 +863,22 @@ def render_faq():
     col1, col2, col3 = st.columns([1, 3, 1])
     with col2:
         with st.expander("📋 Il POS generato è conforme alla normativa?"):
-            st.write("**Sì.** Il documento segue l'Allegato XV del D.Lgs 81/08 con tutte le sezioni obbligatorie.")
+            st.write("**Sì.** Il documento segue fedelmente l'Allegato XV del D.Lgs 81/08 con tutte le sezioni obbligatorie: dati impresa, organigramma sicurezza, valutazione rischi specifici per lavorazione, DPI con norme EN, misure di prevenzione, procedure di emergenza e cronoprogramma.")
+        
+        with st.expander("👷 Posso usarlo per gestire più imprese clienti?"):
+            st.write("**Sì.** Con i piani a pagamento puoi salvare le anagrafiche di più imprese (lavoratori, attrezzature, figure della sicurezza) e ricaricarle in un click quando crei un nuovo POS per lo stesso cliente.")
         
         with st.expander("🎁 Come funziona il POS gratuito?"):
-            st.write("Registrandoti ottieni **1 POS gratuito** completo. Per altri POS, scegli un piano.")
+            st.write("Registrandoti ottieni **1 POS gratuito** completo, con tutte le funzionalità. Generalo su un cantiere reale per valutare la qualità del documento.")
         
-        with st.expander("🤖 Come funziona l'AI?"):
-            st.write("L'AI analizza la descrizione e genera rischi, misure e DPI. Tu hai il **controllo finale**.")
+        with st.expander("🤖 Come funziona l'analisi AI dei rischi?"):
+            st.write("L'AI analizza le lavorazioni selezionate e la descrizione del cantiere per generare rischi specifici, misure di prevenzione e DPI. Tu mantieni il **controllo finale** e puoi modificare tutto prima di generare il PDF.")
         
-        with st.expander("💻 Funziona su Tablet e Smartphone?"):
-            st.write("**Sì!** È una web app cloud. Funziona su qualsiasi dispositivo con browser.")
+        with st.expander("📎 Posso allegare documenti al POS?"):
+            st.write("**Sì.** Puoi caricare DURC, Visura Camerale, Attestati di Formazione, Idoneità Sanitarie e Schede SDS. Vengono uniti al POS in un **unico PDF** pronto per l'invio via PEC al Coordinatore.")
         
         with st.expander("💳 Come funzionano i pagamenti?"):
-            st.write("Pagamenti sicuri con **Lemon Squeezy**. Ricevi una licenza via email da inserire nell'app.")
+            st.write("Pagamenti sicuri con **Lemon Squeezy**. Ricevi una licenza via email da inserire nell'app. Puoi annullare in qualsiasi momento.")
 
 
 def render_footer():
@@ -883,8 +886,8 @@ def render_footer():
     st.markdown("""
     <div class="site-footer">
         <div class="footer-brand">🏗️ POS FACILE</div>
-        <div class="footer-text">Il futuro della sicurezza in cantiere. Semplice, veloce, conforme.</div>
-        <div class="footer-text">© 2025 POS FACILE. Tutti i diritti riservati.</div>
+        <div class="footer-text">Lo strumento dei professionisti della sicurezza in cantiere.</div>
+        <div class="footer-text">© 2026 POS FACILE. Tutti i diritti riservati.</div>
     </div>
     """, unsafe_allow_html=True)
 
