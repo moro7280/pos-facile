@@ -731,21 +731,33 @@ def pulisci_testo(text, max_len=200):
 
 
 def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavoratori=None, attrezzature=None, sostanze=None):
-    """Genera PDF POS professionale e completo - Conforme Allegato XV D.Lgs 81/08"""
+    """Genera PDF POS professionale e completo - Conforme Allegato XV D.Lgs 81/08 - V2 GRAFICA MIGLIORATA"""
     
     pdf = FPDF()
     pdf.set_auto_page_break(auto=False)
     
-    # Costanti
-    W = 190
-    ARANCIONE = (255, 102, 0)
-    GRIGIO_SCURO = (50, 50, 50)
-    GRIGIO_CHIARO = (245, 245, 245)
-    BLU_SCURO = (14, 17, 35)
-    ROSSO_CHIARO = (255, 230, 230)
-    GIALLO_CHIARO = (255, 248, 220)
-    VERDE_CHIARO = (230, 255, 230)
-    BLU_CHIARO = (230, 240, 255)
+    # ===================== COSTANTI DESIGN =====================
+    W = 186          # Larghezza utile (margini 12mm)
+    ML = 12          # Margine sinistro
+    MR = 12          # Margine destro
+    
+    # Palette colori professionale
+    ARANCIONE = (230, 92, 0)
+    ARANCIONE_CHIARO = (255, 237, 220)
+    BLU_SCURO = (22, 33, 62)
+    BLU_MEDIO = (44, 62, 103)
+    GRIGIO_SCURO = (55, 55, 65)
+    GRIGIO_MEDIO = (120, 120, 130)
+    GRIGIO_CHIARO = (242, 243, 247)
+    GRIGIO_BORDO = (200, 205, 215)
+    BIANCO = (255, 255, 255)
+    ROSSO_BADGE = (220, 53, 53)
+    ROSSO_CHIARO = (255, 235, 235)
+    GIALLO_BADGE = (217, 152, 11)
+    GIALLO_CHIARO = (255, 250, 230)
+    VERDE_BADGE = (34, 139, 34)
+    VERDE_CHIARO = (232, 250, 232)
+    BLU_CHIARO = (232, 240, 255)
     
     lavoratori = lavoratori or []
     attrezzature = attrezzature or []
@@ -753,150 +765,267 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
     
     num_pagina = [0]
     
+    # ===================== HELPER FUNCTIONS =====================
+    
     def check_spazio(altezza_necessaria=40):
-        if pdf.get_y() > (270 - altezza_necessaria):
+        if pdf.get_y() > (272 - altezza_necessaria):
             nuova_pagina()
     
     def nuova_pagina():
         num_pagina[0] += 1
         pdf.add_page()
-        pdf.set_left_margin(10)
-        pdf.set_right_margin(10)
+        pdf.set_left_margin(ML)
+        pdf.set_right_margin(MR)
         if num_pagina[0] > 1:
+            # Header sottile e elegante
+            pdf.set_fill_color(*BLU_SCURO)
+            pdf.rect(0, 0, 210, 8, 'F')
             pdf.set_fill_color(*ARANCIONE)
-            pdf.rect(0, 0, 210, 10, 'F')
-            pdf.set_font('Helvetica', 'B', 8)
+            pdf.rect(0, 8, 210, 0.8, 'F')
+            pdf.set_font('Helvetica', 'B', 7)
             pdf.set_text_color(255, 255, 255)
-            pdf.set_xy(10, 2)
-            pdf.cell(140, 5, f'PIANO OPERATIVO DI SICUREZZA - {pulisci_testo(ditta.get("ragione_sociale", ""), 35)}', ln=0)
-            pdf.cell(40, 5, f'Pag. {num_pagina[0]}', ln=1, align='R')
+            pdf.set_xy(ML, 1.5)
+            pdf.cell(W * 0.7, 5, f'PIANO OPERATIVO DI SICUREZZA', ln=0)
+            pdf.set_font('Helvetica', '', 7)
+            pdf.cell(W * 0.3, 5, pulisci_testo(ditta.get("ragione_sociale", ""), 30), ln=0, align='R')
             pdf.set_text_color(0, 0, 0)
-            pdf.set_y(15)
+            pdf.set_y(14)
+            # Footer con numero pagina
+            _add_footer()
+    
+    def _add_footer():
+        """Aggiunge footer a ogni pagina"""
+        y_save = pdf.get_y()
+        pdf.set_y(285)
+        pdf.set_draw_color(*GRIGIO_BORDO)
+        pdf.line(ML, 284, ML + W, 284)
+        pdf.set_font('Helvetica', '', 6)
+        pdf.set_text_color(*GRIGIO_MEDIO)
+        pdf.set_x(ML)
+        pdf.cell(W * 0.33, 4, f'POS - {pulisci_testo(ditta.get("ragione_sociale", ""), 30)}', align='L')
+        pdf.cell(W * 0.34, 4, f'Pag. {num_pagina[0]}', align='C')
+        pdf.cell(W * 0.33, 4, 'Generato con POS Facile', align='R')
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_draw_color(0, 0, 0)
+        pdf.set_y(y_save)
     
     def titolo_sezione(num, titolo):
         check_spazio(50)
-        pdf.ln(3)
+        pdf.ln(6)
+        # Barra laterale arancione + testo
+        y = pdf.get_y()
         pdf.set_fill_color(*ARANCIONE)
-        pdf.set_text_color(255, 255, 255)
-        pdf.set_font('Helvetica', 'B', 10)
-        pdf.set_x(10)
-        pdf.cell(W, 6, f'  {num}. {titolo.upper()}', ln=1, fill=True)
+        pdf.rect(ML, y, 3, 8, 'F')
+        pdf.set_fill_color(*GRIGIO_CHIARO)
+        pdf.rect(ML + 3, y, W - 3, 8, 'F')
+        pdf.set_font('Helvetica', 'B', 11)
+        pdf.set_text_color(*BLU_SCURO)
+        pdf.set_xy(ML + 7, y + 1)
+        pdf.cell(W - 10, 6, f'{num}. {titolo.upper()}')
         pdf.set_text_color(0, 0, 0)
-        pdf.ln(2)
+        pdf.set_y(y + 11)
     
     def campo(label, valore):
         check_spazio(8)
         pdf.set_font('Helvetica', 'B', 9)
         pdf.set_text_color(*GRIGIO_SCURO)
-        pdf.set_x(10)
-        pdf.cell(W, 5, pulisci_testo(label, 25) + ': ' + pulisci_testo(valore, 90), ln=1)
+        pdf.set_x(ML + 2)
+        label_w = pdf.get_string_width(pulisci_testo(label, 30) + ':  ')
+        pdf.cell(label_w, 5, pulisci_testo(label, 30) + ':  ', ln=0)
+        pdf.set_font('Helvetica', '', 9)
         pdf.set_text_color(0, 0, 0)
+        pdf.cell(W - label_w - 4, 5, pulisci_testo(valore, 90), ln=1)
     
     def paragrafo(testo, size=9):
         check_spazio(15)
         pdf.set_font('Helvetica', '', size)
-        pdf.set_x(10)
-        pdf.multi_cell(W, 4, pulisci_testo(testo, 800))
+        pdf.set_text_color(*GRIGIO_SCURO)
+        pdf.set_x(ML + 2)
+        pdf.multi_cell(W - 4, 4.5, pulisci_testo(testo, 1200))
+        pdf.set_text_color(0, 0, 0)
     
     def sottotitolo(testo):
         check_spazio(12)
-        pdf.ln(2)
-        pdf.set_font('Helvetica', 'B', 9)
-        pdf.set_text_color(*GRIGIO_SCURO)
-        pdf.set_x(10)
+        pdf.ln(3)
+        pdf.set_font('Helvetica', 'B', 10)
+        pdf.set_text_color(*BLU_SCURO)
+        pdf.set_x(ML + 2)
         pdf.cell(W, 5, pulisci_testo(testo, 70), ln=1)
         pdf.set_text_color(0, 0, 0)
+        pdf.ln(1)
     
-    def riga(testo, size=8):
-        check_spazio(5)
+    def riga(testo, size=9):
+        check_spazio(6)
         pdf.set_font('Helvetica', '', size)
-        pdf.set_x(12)
-        pdf.cell(W-4, 4, pulisci_testo(testo, 120), ln=1)
+        pdf.set_text_color(*GRIGIO_SCURO)
+        pdf.set_x(ML + 4)
+        pdf.cell(W - 6, 4.5, pulisci_testo(testo, 120), ln=1)
+        pdf.set_text_color(0, 0, 0)
+    
+    def tabella_header(colonne):
+        """Disegna header tabella moderno"""
+        pdf.set_fill_color(*BLU_SCURO)
+        pdf.set_text_color(255, 255, 255)
+        pdf.set_font('Helvetica', 'B', 8)
+        pdf.set_x(ML)
+        for nome, larghezza in colonne:
+            pdf.cell(larghezza, 6, '  ' + nome, fill=True)
+        pdf.ln()
+        pdf.set_text_color(0, 0, 0)
+    
+    def tabella_riga(valori, colonne, indice=0):
+        """Disegna riga tabella con colori alternati"""
+        check_spazio(8)
+        if indice % 2 == 0:
+            pdf.set_fill_color(*BIANCO)
+        else:
+            pdf.set_fill_color(*GRIGIO_CHIARO)
+        pdf.set_font('Helvetica', '', 8)
+        pdf.set_x(ML)
+        for i, (nome, larghezza) in enumerate(colonne):
+            val = valori[i] if i < len(valori) else ''
+            pdf.cell(larghezza, 6, '  ' + pulisci_testo(val, int(larghezza * 0.45)), fill=True)
+        pdf.ln()
+        # Linea sottile di separazione
+        pdf.set_draw_color(*GRIGIO_BORDO)
+        pdf.line(ML, pdf.get_y(), ML + W, pdf.get_y())
+        pdf.set_draw_color(0, 0, 0)
     
     # ==================== COPERTINA ====================
     num_pagina[0] = 1
     pdf.add_page()
-    pdf.set_left_margin(10)
-    pdf.set_right_margin(10)
+    pdf.set_left_margin(ML)
+    pdf.set_right_margin(MR)
     
+    # Banda superiore blu scuro
     pdf.set_fill_color(*BLU_SCURO)
-    pdf.rect(0, 0, 210, 60, 'F')
-    pdf.set_fill_color(*ARANCIONE)
-    pdf.rect(0, 60, 210, 3, 'F')
+    pdf.rect(0, 0, 210, 75, 'F')
     
-    pdf.set_font('Helvetica', 'B', 26)
+    # Linea decorativa arancione
+    pdf.set_fill_color(*ARANCIONE)
+    pdf.rect(0, 75, 210, 3, 'F')
+    
+    # Titolo grande
+    pdf.set_font('Helvetica', 'B', 32)
     pdf.set_text_color(255, 255, 255)
-    pdf.set_xy(10, 15)
-    pdf.cell(W, 12, 'PIANO OPERATIVO DI SICUREZZA', ln=1)
+    pdf.set_xy(ML + 5, 18)
+    pdf.cell(W - 10, 14, 'PIANO OPERATIVO', ln=1)
+    pdf.set_xy(ML + 5, 32)
+    pdf.cell(W - 10, 14, 'DI SICUREZZA', ln=1)
+    
+    # Sottotitolo normativo
     pdf.set_font('Helvetica', '', 11)
     pdf.set_text_color(*ARANCIONE)
-    pdf.set_xy(10, 38)
-    pdf.cell(W, 6, 'ai sensi del D.Lgs 81/2008 - Titolo IV - Allegato XV', ln=1)
+    pdf.set_xy(ML + 5, 52)
+    pdf.cell(W - 10, 6, 'ai sensi del D.Lgs 81/2008', ln=1)
+    pdf.set_font('Helvetica', '', 9)
+    pdf.set_text_color(180, 190, 210)
+    pdf.set_xy(ML + 5, 59)
+    pdf.cell(W - 10, 5, 'Titolo IV - Capo I - Allegato XV', ln=1)
+    
     pdf.set_text_color(0, 0, 0)
-    pdf.set_y(72)
+    pdf.set_y(88)
     
-    # Box info copertina
-    for label, values in [
-        ('IMPRESA ESECUTRICE', [
-            ditta.get('ragione_sociale', ''), 
-            f"P.IVA: {ditta.get('piva_cf', '')}",
-            ditta.get('indirizzo', '')
-        ]),
-        ('CANTIERE', [
-            cantiere.get('indirizzo', ''), 
-            f"Committente: {cantiere.get('committente', '')}",
-            f"Durata: {cantiere.get('durata', '')}"
-        ]),
-        ('RESPONSABILI', [
-            f"Datore di Lavoro: {ditta.get('datore_lavoro', '')}", 
-            f"RSPP: {ditta.get('rspp', '') or ditta.get('datore_lavoro', '')}"
-        ])
-    ]:
-        pdf.set_fill_color(*GRIGIO_CHIARO)
-        pdf.set_font('Helvetica', 'B', 8)
-        pdf.set_x(10)
-        pdf.cell(W, 5, f'  {label}', ln=1, fill=True)
-        pdf.set_font('Helvetica', '', 9)
-        for v in values:
-            if v:  # Solo se non vuoto
-                pdf.set_x(10)
-                pdf.cell(W, 5, f'  {pulisci_testo(v, 70)}', ln=1)
-        pdf.ln(1)
+    # Box informativi copertina - design card
+    def box_copertina(etichetta, righe_dati, y_start):
+        pdf.set_y(y_start)
+        # Etichetta
+        pdf.set_font('Helvetica', 'B', 7)
+        pdf.set_text_color(*ARANCIONE)
+        pdf.set_x(ML + 5)
+        pdf.cell(W, 4, etichetta.upper(), ln=1)
+        # Linea
+        pdf.set_draw_color(*GRIGIO_BORDO)
+        pdf.line(ML + 5, pdf.get_y(), ML + 80, pdf.get_y())
+        pdf.set_draw_color(0, 0, 0)
+        pdf.ln(2)
+        # Dati
+        pdf.set_text_color(*GRIGIO_SCURO)
+        first = True
+        for v in righe_dati:
+            if v:
+                if first:
+                    pdf.set_font('Helvetica', 'B', 11)
+                    first = False
+                else:
+                    pdf.set_font('Helvetica', '', 9)
+                pdf.set_x(ML + 5)
+                pdf.cell(W, 5, pulisci_testo(v, 80), ln=1)
+        pdf.set_text_color(0, 0, 0)
+        return pdf.get_y() + 4
     
-    pdf.set_y(250)
-    pdf.set_font('Helvetica', 'B', 10)
-    pdf.set_x(10)
-    pdf.cell(W, 6, f'Data: {date.today().strftime("%d/%m/%Y")}', ln=1, align='C')
+    y = 88
+    y = box_copertina('IMPRESA ESECUTRICE', [
+        ditta.get('ragione_sociale', ''),
+        f"P.IVA/C.F.: {ditta.get('piva_cf', '')}",
+        ditta.get('indirizzo', '')
+    ], y)
     
-    # ==================== PAGINA 2: DATI ====================
+    y = box_copertina('CANTIERE', [
+        cantiere.get('indirizzo', ''),
+        f"Committente: {cantiere.get('committente', '')}",
+        f"Durata prevista: {cantiere.get('durata', '')}"
+    ], y)
+    
+    y = box_copertina('RESPONSABILI SICUREZZA', [
+        f"Datore di Lavoro: {ditta.get('datore_lavoro', '')}",
+        f"RSPP: {ditta.get('rspp', '') or ditta.get('datore_lavoro', '')}",
+        f"Medico Competente: {ditta.get('medico', '') or 'Non previsto'}"
+    ], y)
+    
+    # Data e revisione in fondo copertina
+    pdf.set_y(255)
+    pdf.set_draw_color(*GRIGIO_BORDO)
+    pdf.line(ML, 254, ML + W, 254)
+    pdf.set_draw_color(0, 0, 0)
+    
+    pdf.set_font('Helvetica', '', 9)
+    pdf.set_text_color(*GRIGIO_MEDIO)
+    pdf.set_x(ML)
+    pdf.cell(W * 0.5, 5, f"Data emissione: {date.today().strftime('%d/%m/%Y')}", align='L')
+    pdf.cell(W * 0.5, 5, f"Rev. 00", align='R', ln=1)
+    pdf.set_text_color(0, 0, 0)
+    
+    # Footer copertina
+    pdf.set_y(275)
+    pdf.set_font('Helvetica', '', 6)
+    pdf.set_text_color(*GRIGIO_MEDIO)
+    pdf.set_x(ML)
+    pdf.cell(W, 4, 'Documento generato con POS Facile - www.posfacile.it', align='C')
+    pdf.set_text_color(0, 0, 0)
+    
+    # ==================== PAGINA 2: DATI IMPRESA ====================
     nuova_pagina()
     
     titolo_sezione('1', 'Identificazione Impresa Esecutrice')
     campo('Ragione Sociale', ditta.get('ragione_sociale', ''))
     campo('P.IVA / C.F.', ditta.get('piva_cf', ''))
     campo('Sede Legale', ditta.get('indirizzo', ''))
-    campo('Telefono', ditta.get('telefono', ''))
+    campo('Telefono', ditta.get('telefono', '') or 'N.D.')
     if ditta.get('codice_ateco'):
         campo('Codice ATECO', ditta.get('codice_ateco', ''))
     if ditta.get('num_dipendenti'):
-        campo('N. Dipendenti medi', ditta.get('num_dipendenti', ''))
+        campo('N. Dipendenti', ditta.get('num_dipendenti', ''))
+    
+    pdf.ln(2)
+    sottotitolo('Figure della Sicurezza')
     campo('Datore di Lavoro', ditta.get('datore_lavoro', ''))
-    rspp = f"{ditta.get('datore_lavoro', '')} (Art. 34)" if ditta.get('rspp_autonomo', True) else ditta.get('rspp', '')
+    rspp = f"{ditta.get('datore_lavoro', '')} (Art. 34 D.Lgs 81/08)" if ditta.get('rspp_autonomo', True) else ditta.get('rspp', '')
     campo('RSPP', rspp)
     campo('Medico Competente', ditta.get('medico', '') or 'Non previsto')
-    campo('Addetto PS', addetti.get('primo_soccorso', ''))
+    campo('Addetto Primo Soccorso', addetti.get('primo_soccorso', ''))
     campo('Addetto Antincendio', addetti.get('antincendio', ''))
     
-    # RLS - gestione 3 casi
     rls_tipo = ditta.get('rls_tipo', 'non_eletto')
     if rls_tipo == 'interno_eletto':
         campo('RLS', ditta.get('rls_nome', ''))
     elif rls_tipo == 'territoriale':
         campo('RLST', ditta.get('rls_territoriale', ''))
-    else:  # non_eletto
-        campo('RLS', 'Non eletto (< 15 dip.) - Funzioni svolte da RLST')
+    else:
+        campo('RLS', 'Non eletto (< 15 dip.) - Funzioni RLST')
     
-    pdf.ln(2)
+    # ==================== CANTIERE ====================
+    pdf.ln(3)
     titolo_sezione('2', 'Identificazione Cantiere')
     campo('Indirizzo', cantiere.get('indirizzo', ''))
     campo('Committente', cantiere.get('committente', ''))
@@ -912,76 +1041,62 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
     if lavoratori:
         titolo_sezione('3', 'Elenco Lavoratori Impiegati')
         
-        # Intestazione tabella - colonne più larghe
-        pdf.set_fill_color(*GRIGIO_CHIARO)
-        pdf.set_font('Helvetica', 'B', 8)
-        pdf.set_x(10)
-        pdf.cell(55, 5, ' Nome e Cognome', border=1, fill=True)
-        pdf.cell(40, 5, ' Mansione', border=1, fill=True)
-        pdf.cell(50, 5, ' Formazione', border=1, fill=True)
-        pdf.cell(45, 5, ' Idoneita Sanitaria', border=1, ln=1, fill=True)
+        cols = [('Nome e Cognome', 52), ('Mansione', 38), ('Formazione', 50), ('Idoneita Sanitaria', 46)]
+        tabella_header(cols)
         
-        pdf.set_font('Helvetica', '', 8)
-        for lav in lavoratori:
-            check_spazio(8)
-            pdf.set_x(10)
-            pdf.cell(55, 5, ' ' + pulisci_testo(lav.get('nome', ''), 28), border=1)
-            pdf.cell(40, 5, ' ' + pulisci_testo(lav.get('mansione', ''), 20), border=1)
-            pdf.cell(50, 5, ' ' + pulisci_testo(lav.get('formazione', ''), 25), border=1)
-            pdf.cell(45, 5, ' ' + pulisci_testo(lav.get('idoneita', 'In corso'), 22), border=1, ln=1)
+        for idx, lav in enumerate(lavoratori):
+            tabella_riga([
+                lav.get('nome', ''),
+                lav.get('mansione', ''),
+                lav.get('formazione', ''),
+                lav.get('idoneita', 'In corso')
+            ], cols, idx)
         
-        pdf.ln(3)
+        pdf.ln(4)
     
     # ==================== ATTREZZATURE ====================
     if attrezzature:
         titolo_sezione('4', 'Attrezzature di Cantiere')
         
-        pdf.set_fill_color(*GRIGIO_CHIARO)
-        pdf.set_font('Helvetica', 'B', 8)
-        pdf.set_x(10)
-        pdf.cell(60, 5, ' Attrezzatura', border=1, fill=True)
-        pdf.cell(50, 5, ' Marca/Modello', border=1, fill=True)
-        pdf.cell(40, 5, ' Matricola', border=1, fill=True)
-        pdf.cell(40, 5, ' Ultima Verifica', border=1, ln=1, fill=True)
+        cols = [('Attrezzatura', 56), ('Marca/Modello', 48), ('Matricola', 40), ('Ultima Verifica', 42)]
+        tabella_header(cols)
         
-        pdf.set_font('Helvetica', '', 8)
-        for attr in attrezzature:
-            check_spazio(8)
-            pdf.set_x(10)
-            pdf.cell(60, 5, ' ' + pulisci_testo(attr.get('nome', ''), 30), border=1)
-            pdf.cell(50, 5, ' ' + pulisci_testo(attr.get('marca', ''), 25), border=1)
-            pdf.cell(40, 5, ' ' + pulisci_testo(attr.get('matricola', 'N.D.'), 20), border=1)
-            pdf.cell(40, 5, ' ' + pulisci_testo(attr.get('verifica', 'Conforme'), 20), border=1, ln=1)
+        for idx, attr in enumerate(attrezzature):
+            tabella_riga([
+                attr.get('nome', ''),
+                attr.get('marca', ''),
+                attr.get('matricola', 'N.D.'),
+                attr.get('verifica', 'Conforme')
+            ], cols, idx)
         
         pdf.ln(2)
         pdf.set_font('Helvetica', 'I', 7)
-        pdf.set_x(10)
+        pdf.set_text_color(*GRIGIO_MEDIO)
+        pdf.set_x(ML)
         pdf.cell(W, 4, 'I libretti d\'uso e manutenzione sono disponibili in cantiere.', ln=1)
+        pdf.set_text_color(0, 0, 0)
         pdf.ln(2)
     
     # ==================== SOSTANZE ====================
     if sostanze:
         titolo_sezione('5', 'Sostanze Pericolose Utilizzate')
         
-        pdf.set_fill_color(*GIALLO_CHIARO)
-        pdf.set_font('Helvetica', 'B', 8)
-        pdf.set_x(10)
-        pdf.cell(70, 5, ' Prodotto', border=1, fill=True)
-        pdf.cell(50, 5, ' Produttore', border=1, fill=True)
-        pdf.cell(70, 5, ' Frasi H (Pericolo)', border=1, ln=1, fill=True)
+        cols = [('Prodotto', 68), ('Produttore', 50), ('Frasi H (Pericolo)', 68)]
+        tabella_header(cols)
         
-        pdf.set_font('Helvetica', '', 8)
-        for sost in sostanze:
-            check_spazio(8)
-            pdf.set_x(10)
-            pdf.cell(70, 5, ' ' + pulisci_testo(sost.get('nome', ''), 28), border=1)
-            pdf.cell(50, 5, ' ' + pulisci_testo(sost.get('produttore', ''), 20), border=1)
-            pdf.cell(70, 5, ' ' + pulisci_testo(sost.get('frasi_h', 'Vedere SDS'), 28), border=1, ln=1)
+        for idx, sost in enumerate(sostanze):
+            tabella_riga([
+                sost.get('nome', ''),
+                sost.get('produttore', ''),
+                sost.get('frasi_h', 'Vedere SDS')
+            ], cols, idx)
         
         pdf.ln(2)
         pdf.set_font('Helvetica', 'I', 7)
-        pdf.set_x(10)
+        pdf.set_text_color(*GRIGIO_MEDIO)
+        pdf.set_x(ML)
         pdf.cell(W, 4, 'Le Schede Dati di Sicurezza (SDS) sono disponibili in cantiere e sono state consegnate ai lavoratori.', ln=1)
+        pdf.set_text_color(0, 0, 0)
         pdf.ln(2)
     
     # ==================== ORGANIZZAZIONE ====================
@@ -995,7 +1110,7 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
     paragrafo(TESTI_LEGALI['obblighi_impresa'])
     
     sottotitolo('Documentazione in Cantiere')
-    docs = ["POS vidimato", "PSC (se previsto)", "DUVRI (se previsto)", "Registro infortuni", 
+    docs = ["POS vidimato", "PSC (se previsto)", "DUVRI (se previsto)", "Registro infortuni",
             "Libretti attrezzature", "SDS prodotti", "Attestati formazione", "Idoneita sanitarie"]
     for doc in docs:
         riga('- ' + doc)
@@ -1005,26 +1120,19 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
         num_sez += 1
         titolo_sezione(str(num_sez), 'Cronoprogramma Lavori')
         
-        pdf.set_font('Helvetica', 'I', 7)
-        pdf.set_x(10)
+        pdf.set_font('Helvetica', 'I', 8)
+        pdf.set_text_color(*GRIGIO_MEDIO)
+        pdf.set_x(ML)
         pdf.cell(W, 4, 'Sequenza indicativa delle fasi lavorative (da adattare in base all\'avanzamento effettivo):', ln=1)
-        pdf.ln(2)
+        pdf.set_text_color(0, 0, 0)
+        pdf.ln(3)
         
-        # Header tabella
-        pdf.set_fill_color(*GRIGIO_CHIARO)
-        pdf.set_font('Helvetica', 'B', 8)
-        pdf.set_x(10)
-        pdf.cell(10, 5, ' #', border=1, fill=True)
-        pdf.cell(80, 5, ' Fase Lavorativa', border=1, fill=True)
-        pdf.cell(50, 5, ' Periodo Indicativo', border=1, fill=True)
-        pdf.cell(50, 5, ' Note', border=1, ln=1, fill=True)
+        cols = [('#', 10), ('Fase Lavorativa', 80), ('Periodo Indicativo', 48), ('Note', 48)]
+        tabella_header(cols)
         
-        pdf.set_font('Helvetica', '', 8)
         durata_totale = cantiere.get('durata', '30 giorni')
-        # Estrai numero giorni dalla durata
         match = re.search(r'(\d+)', durata_totale)
         giorni_totali = int(match.group(1)) if match else 30
-        
         giorni_per_fase = max(3, giorni_totali // len(lavorazioni)) if lavorazioni else 5
         giorno_corrente = 1
         
@@ -1032,24 +1140,19 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
             if lav_key not in DIZIONARIO_LAVORAZIONI:
                 continue
             dati = DIZIONARIO_LAVORAZIONI[lav_key]
-            nome_fase = pulisci_testo(dati.get('nome', ''), 38)
-            
+            nome_fase = dati.get('nome', '')
             giorno_fine = min(giorno_corrente + giorni_per_fase - 1, giorni_totali)
             periodo = f"Giorno {giorno_corrente} - {giorno_fine}"
             
-            check_spazio(8)
-            pdf.set_x(10)
-            pdf.cell(10, 5, f' {idx+1}', border=1)
-            pdf.cell(80, 5, ' ' + nome_fase, border=1)
-            pdf.cell(50, 5, ' ' + periodo, border=1)
-            pdf.cell(50, 5, ' ', border=1, ln=1)
-            
+            tabella_riga([str(idx + 1), nome_fase, periodo, ''], cols, idx)
             giorno_corrente = giorno_fine + 1
         
-        pdf.ln(2)
+        pdf.ln(3)
         pdf.set_font('Helvetica', 'I', 7)
-        pdf.set_x(10)
+        pdf.set_text_color(*GRIGIO_MEDIO)
+        pdf.set_x(ML)
         pdf.cell(W, 4, 'Nota: Le fasi possono sovrapporsi. Il cronoprogramma effettivo sara concordato con il CSE (ove previsto).', ln=1)
+        pdf.set_text_color(0, 0, 0)
     
     # ==================== VALUTAZIONE RISCHI ====================
     num_sez += 1
@@ -1060,85 +1163,142 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
             continue
         dati = DIZIONARIO_LAVORAZIONI[lav_key]
         
-        check_spazio(70)
+        check_spazio(80)
+        pdf.ln(4)
+        
+        # Nome lavorazione con barra laterale
+        y = pdf.get_y()
+        pdf.set_fill_color(*ARANCIONE)
+        pdf.rect(ML, y, 3, 7, 'F')
+        pdf.set_fill_color(*ARANCIONE_CHIARO)
+        pdf.rect(ML + 3, y, W - 3, 7, 'F')
+        pdf.set_font('Helvetica', 'B', 10)
+        pdf.set_text_color(*BLU_SCURO)
+        pdf.set_xy(ML + 7, y + 1)
+        pdf.cell(W - 10, 5, pulisci_testo(dati.get('nome', ''), 70))
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_y(y + 9)
+        
+        # Descrizione tecnica
+        pdf.set_font('Helvetica', 'I', 8)
+        pdf.set_text_color(*GRIGIO_MEDIO)
+        pdf.set_x(ML + 2)
+        pdf.multi_cell(W - 4, 3.5, pulisci_testo(dati.get('descrizione_tecnica', ''), 300))
+        pdf.set_text_color(0, 0, 0)
         pdf.ln(2)
         
-        pdf.set_fill_color(*GRIGIO_CHIARO)
-        pdf.set_font('Helvetica', 'B', 9)
-        pdf.set_x(10)
-        pdf.cell(W, 5, ' ' + pulisci_testo(dati.get('nome', ''), 55), ln=1, fill=True)
-        
-        pdf.set_font('Helvetica', 'I', 7)
-        pdf.set_text_color(100, 100, 100)
-        pdf.set_x(10)
-        pdf.multi_cell(W, 3, pulisci_testo(dati.get('descrizione_tecnica', ''), 200))
-        pdf.set_text_color(0, 0, 0)
-        
+        # Valori esposizione (se presenti)
         if dati.get('valori_esposizione'):
-            pdf.set_fill_color(255, 250, 230)
-            pdf.set_font('Helvetica', 'B', 7)
-            pdf.set_x(10)
-            pdf.cell(W, 4, ' VALORI ESPOSIZIONE', ln=1, fill=True)
-            pdf.set_font('Helvetica', '', 7)
+            check_spazio(20)
+            pdf.set_fill_color(*GIALLO_CHIARO)
+            pdf.set_font('Helvetica', 'B', 8)
+            pdf.set_text_color(*GIALLO_BADGE)
+            pdf.set_x(ML)
+            pdf.cell(W, 5, '  VALORI ESPOSIZIONE', ln=1, fill=True)
+            pdf.set_font('Helvetica', '', 8)
+            pdf.set_text_color(*GRIGIO_SCURO)
             for t, v in dati['valori_esposizione'].items():
-                pdf.set_x(12)
-                pdf.cell(W-4, 3, f'{t.upper()}: {v}', ln=1)
+                pdf.set_x(ML + 4)
+                pdf.cell(W - 6, 4, f'{t.upper()}: {v}', ln=1)
+            pdf.set_text_color(0, 0, 0)
+            pdf.ln(2)
         
-        # Rischi
-        check_spazio(30)
-        pdf.set_fill_color(*ARANCIONE)
+        # --- RISCHI ---
+        check_spazio(35)
+        pdf.set_fill_color(*BLU_SCURO)
         pdf.set_text_color(255, 255, 255)
-        pdf.set_font('Helvetica', 'B', 7)
-        pdf.set_x(10)
-        pdf.cell(W, 4, ' RISCHI', ln=1, fill=True)
+        pdf.set_font('Helvetica', 'B', 8)
+        pdf.set_x(ML)
+        pdf.cell(W, 5, '  RISCHI IDENTIFICATI', ln=1, fill=True)
         pdf.set_text_color(0, 0, 0)
-        pdf.set_font('Helvetica', '', 7)
+        pdf.ln(1)
         
         for r in dati.get('rischi', []):
-            check_spazio(5)
+            check_spazio(8)
             grav = r.get('gravita', 'M')[0]
-            colore = ROSSO_CHIARO if grav == 'A' else (GIALLO_CHIARO if grav == 'M' else VERDE_CHIARO)
-            pdf.set_fill_color(*colore)
-            txt = f" [{grav}] {pulisci_testo(r.get('nome', ''), 25)}: {pulisci_testo(r.get('descrizione', ''), 60)}"
-            norm = r.get('normativa', '')
-            if norm:
-                txt += f" ({pulisci_testo(norm, 25)})"
-            pdf.set_x(10)
-            pdf.cell(W, 4, txt[:120], ln=1, fill=True)
-        
-        # DPI
-        check_spazio(25)
-        pdf.set_fill_color(*BLU_CHIARO)
-        pdf.set_font('Helvetica', 'B', 7)
-        pdf.set_x(10)
-        pdf.cell(W, 4, ' DPI OBBLIGATORI', ln=1, fill=True)
-        pdf.set_font('Helvetica', '', 7)
-        for dpi in dati.get('dpi_obbligatori', []):
-            check_spazio(4)
-            if isinstance(dpi, dict):
-                txt = f"  - {pulisci_testo(dpi.get('nome', ''), 30)} [{pulisci_testo(dpi.get('norma', ''), 22)}]"
+            
+            # Badge gravita con colori
+            if grav == 'A':
+                badge_color = ROSSO_BADGE
+                row_color = ROSSO_CHIARO
+            elif grav == 'M':
+                badge_color = GIALLO_BADGE
+                row_color = GIALLO_CHIARO
             else:
-                txt = f"  - {pulisci_testo(str(dpi), 60)}"
-            pdf.set_x(10)
-            pdf.cell(W, 3, txt[:100], ln=1)
-        
-        # Misure
-        check_spazio(25)
-        pdf.set_fill_color(*VERDE_CHIARO)
-        pdf.set_font('Helvetica', 'B', 7)
-        pdf.set_x(10)
-        pdf.cell(W, 4, ' MISURE PREVENZIONE', ln=1, fill=True)
-        pdf.set_font('Helvetica', '', 7)
-        for m in dati.get('misure_prevenzione', []):
-            check_spazio(4)
-            pdf.set_x(10)
-            pdf.cell(W, 3, f"  - {pulisci_testo(str(m), 90)}", ln=1)
+                badge_color = VERDE_BADGE
+                row_color = VERDE_CHIARO
+            
+            y = pdf.get_y()
+            # Sfondo riga
+            pdf.set_fill_color(*row_color)
+            pdf.rect(ML, y, W, 6, 'F')
+            # Badge
+            pdf.set_fill_color(*badge_color)
+            pdf.rect(ML + 1, y + 0.8, 8, 4.4, 'F')
+            pdf.set_font('Helvetica', 'B', 7)
+            pdf.set_text_color(255, 255, 255)
+            pdf.set_xy(ML + 1, y + 0.8)
+            pdf.cell(8, 4.4, f' {grav}', align='C')
+            
+            # Testo rischio
+            pdf.set_text_color(*GRIGIO_SCURO)
+            pdf.set_font('Helvetica', 'B', 8)
+            pdf.set_xy(ML + 11, y)
+            nome_rischio = pulisci_testo(r.get('nome', ''), 30)
+            desc_rischio = pulisci_testo(r.get('descrizione', ''), 65)
+            norm = pulisci_testo(r.get('normativa', ''), 30)
+            testo = f"{nome_rischio}: "
+            pdf.cell(pdf.get_string_width(testo), 6, testo, ln=0)
+            pdf.set_font('Helvetica', '', 8)
+            testo_desc = desc_rischio
+            if norm:
+                testo_desc += f" ({norm})"
+            pdf.cell(W - 13 - pdf.get_string_width(testo), 6, testo_desc[:90], ln=1)
+            pdf.set_text_color(0, 0, 0)
+            pdf.ln(0.5)
         
         pdf.ln(2)
+        
+        # --- DPI OBBLIGATORI ---
+        check_spazio(30)
+        pdf.set_fill_color(*BLU_CHIARO)
+        pdf.set_font('Helvetica', 'B', 8)
+        pdf.set_text_color(44, 82, 160)
+        pdf.set_x(ML)
+        pdf.cell(W, 5, '  DPI OBBLIGATORI', ln=1, fill=True)
+        pdf.set_text_color(*GRIGIO_SCURO)
+        pdf.set_font('Helvetica', '', 8)
+        pdf.ln(1)
+        for dpi in dati.get('dpi_obbligatori', []):
+            check_spazio(5)
+            if isinstance(dpi, dict):
+                txt = f"  - {pulisci_testo(dpi.get('nome', ''), 35)} [{pulisci_testo(dpi.get('norma', ''), 25)}]"
+            else:
+                txt = f"  - {pulisci_testo(str(dpi), 70)}"
+            pdf.set_x(ML + 2)
+            pdf.cell(W - 4, 4.5, txt[:100], ln=1)
+        
+        pdf.ln(2)
+        
+        # --- MISURE PREVENZIONE ---
+        check_spazio(30)
+        pdf.set_fill_color(*VERDE_CHIARO)
+        pdf.set_font('Helvetica', 'B', 8)
+        pdf.set_text_color(*VERDE_BADGE)
+        pdf.set_x(ML)
+        pdf.cell(W, 5, '  MISURE DI PREVENZIONE E PROTEZIONE', ln=1, fill=True)
+        pdf.set_text_color(*GRIGIO_SCURO)
+        pdf.set_font('Helvetica', '', 8)
+        pdf.ln(1)
+        for m in dati.get('misure_prevenzione', []):
+            check_spazio(5)
+            pdf.set_x(ML + 2)
+            pdf.cell(W - 4, 4.5, f"  - {pulisci_testo(str(m), 100)}", ln=1)
+        
+        pdf.ln(3)
     
     # Rischi AI - CON FILTRO ANTI-DUPLICATI
     if rischi_ai and rischi_ai.get('rischi_aggiuntivi'):
-        # Raccogli tutti i nomi dei rischi già presenti nelle lavorazioni selezionate
         rischi_esistenti = set()
         keywords_esistenti = set()
         for lav_key in lavorazioni:
@@ -1146,59 +1306,58 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
                 for r in DIZIONARIO_LAVORAZIONI[lav_key].get('rischi', []):
                     nome_lower = (r.get('nome', '') or '').lower()
                     rischi_esistenti.add(nome_lower)
-                    # Estrai parole chiave
-                    for kw in ['caduta', 'rumore', 'polveri', 'vibrazioni', 'chimico', 'elettrico', 
+                    for kw in ['caduta', 'rumore', 'polveri', 'vibrazioni', 'chimico', 'elettrico',
                                'schegge', 'ustioni', 'tagli', 'crollo', 'inalazione', 'dermatiti',
                                'posture', 'scivolamento', 'urti', 'abrasioni']:
                         if kw in nome_lower:
                             keywords_esistenti.add(kw)
         
-        # Filtra rischi AI rimuovendo duplicati
         rischi_filtrati = []
         for r in rischi_ai['rischi_aggiuntivi']:
             nome_ai = (r.get('nome', '') or '').lower()
             desc_ai = (r.get('descrizione', '') or '').lower()
-            
-            # Verifica se è un duplicato
             is_duplicato = False
             for kw in keywords_esistenti:
-                if kw in nome_ai or kw in desc_ai[:50]:  # Controlla nome e inizio descrizione
+                if kw in nome_ai or kw in desc_ai[:50]:
                     is_duplicato = True
                     break
-            
             if not is_duplicato:
                 rischi_filtrati.append(r)
         
-        # Mostra solo se ci sono rischi non duplicati
         if rischi_filtrati:
             check_spazio(40)
-            pdf.ln(2)
-            pdf.set_fill_color(100, 150, 220)
+            pdf.ln(3)
+            pdf.set_fill_color(*BLU_MEDIO)
             pdf.set_text_color(255, 255, 255)
-            pdf.set_font('Helvetica', 'B', 8)
-            pdf.set_x(10)
-            pdf.cell(W, 5, ' RISCHI AGGIUNTIVI SPECIFICI DEL CANTIERE', ln=1, fill=True)
+            pdf.set_font('Helvetica', 'B', 9)
+            pdf.set_x(ML)
+            pdf.cell(W, 6, '  RISCHI AGGIUNTIVI SPECIFICI DEL CANTIERE', ln=1, fill=True)
             pdf.set_text_color(0, 0, 0)
             
             pdf.set_font('Helvetica', 'I', 7)
-            pdf.set_x(10)
+            pdf.set_text_color(*GRIGIO_MEDIO)
+            pdf.set_x(ML)
             pdf.cell(W, 4, 'Rischi specifici identificati dall\'analisi della descrizione lavori:', ln=1)
+            pdf.set_text_color(0, 0, 0)
+            pdf.ln(1)
             
-            pdf.set_font('Helvetica', '', 7)
+            pdf.set_font('Helvetica', '', 8)
             for r in rischi_filtrati:
-                check_spazio(6)
+                check_spazio(8)
                 grav = (r.get('gravita', 'M') or 'M')[0]
                 colore = ROSSO_CHIARO if grav == 'A' else (GIALLO_CHIARO if grav == 'M' else VERDE_CHIARO)
                 pdf.set_fill_color(*colore)
-                pdf.set_x(10)
-                pdf.multi_cell(W, 4, f" [{grav}] {pulisci_testo(r.get('nome', ''), 35)}: {pulisci_testo(r.get('descrizione', ''), 120)}", fill=True)
+                pdf.set_x(ML)
+                pdf.multi_cell(W, 5, f" [{grav}] {pulisci_testo(r.get('nome', ''), 35)}: {pulisci_testo(r.get('descrizione', ''), 120)}", fill=True)
+                pdf.ln(0.5)
         
-        # Note RSPP sempre visibili se presenti
         if rischi_ai.get('note_rspp'):
-            pdf.ln(1)
-            pdf.set_font('Helvetica', 'I', 7)
-            pdf.set_x(10)
-            pdf.multi_cell(W, 3, 'Note RSPP: ' + pulisci_testo(rischi_ai.get('note_rspp', ''), 200))
+            pdf.ln(2)
+            pdf.set_font('Helvetica', 'I', 8)
+            pdf.set_text_color(*GRIGIO_MEDIO)
+            pdf.set_x(ML)
+            pdf.multi_cell(W, 4, 'Note RSPP: ' + pulisci_testo(rischi_ai.get('note_rspp', ''), 300))
+            pdf.set_text_color(0, 0, 0)
     
     # ==================== COORDINAMENTO ====================
     num_sez += 1
@@ -1210,37 +1369,52 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
     titolo_sezione(str(num_sez), 'Gestione Emergenze')
     paragrafo(TESTI_LEGALI['emergenza'])
     
-    pdf.ln(2)
-    check_spazio(45)
-    pdf.set_fill_color(255, 235, 235)
-    pdf.set_font('Helvetica', 'B', 9)
-    pdf.set_x(10)
-    pdf.cell(W, 5, ' NUMERI EMERGENZA', ln=1, fill=True)
-    pdf.set_font('Helvetica', 'B', 10)
-    for num, desc in [('112', 'EMERGENZE'), ('115', 'VV.FF.'), ('118', 'SOCCORSO')]:
-        pdf.set_x(10)
-        pdf.cell(W, 5, f'   {num} - {desc}', ln=1)
+    pdf.ln(3)
+    check_spazio(50)
     
-    # Ospedale più vicino - con multi_cell per testi lunghi
+    # Box numeri emergenza
+    y = pdf.get_y()
+    pdf.set_fill_color(*ROSSO_CHIARO)
+    pdf.rect(ML, y, W, 28, 'F')
+    pdf.set_fill_color(*ROSSO_BADGE)
+    pdf.rect(ML, y, 3, 28, 'F')
+    
+    pdf.set_font('Helvetica', 'B', 10)
+    pdf.set_text_color(*ROSSO_BADGE)
+    pdf.set_xy(ML + 7, y + 2)
+    pdf.cell(W, 5, 'NUMERI EMERGENZA', ln=1)
+    
+    pdf.set_font('Helvetica', 'B', 11)
+    pdf.set_text_color(*GRIGIO_SCURO)
+    for num, desc in [('112', 'Numero Unico Emergenze'), ('115', 'Vigili del Fuoco'), ('118', 'Soccorso Sanitario')]:
+        pdf.set_x(ML + 7)
+        pdf.cell(15, 5, num, ln=0)
+        pdf.set_font('Helvetica', '', 9)
+        pdf.cell(W - 22, 5, f'  -  {desc}', ln=1)
+        pdf.set_font('Helvetica', 'B', 11)
+    
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_y(y + 30)
+    
+    # Ospedale
     ospedale = cantiere.get('ospedale_vicino', '')
     if ospedale:
-        pdf.set_font('Helvetica', 'B', 8)
-        pdf.set_x(10)
-        pdf.multi_cell(W, 4, f'PRONTO SOCCORSO: {pulisci_testo(ospedale, 150)}')
+        pdf.set_font('Helvetica', 'B', 9)
+        pdf.set_x(ML)
+        pdf.multi_cell(W, 4.5, f'PRONTO SOCCORSO PIU VICINO: {pulisci_testo(ospedale, 150)}')
+        pdf.ln(1)
     
-    pdf.set_font('Helvetica', 'B', 8)
-    pdf.set_x(10)
-    pdf.cell(W, 5, 'PUNTO RACCOLTA: Ingresso cantiere', ln=1)
+    pdf.set_font('Helvetica', 'B', 9)
+    pdf.set_x(ML)
+    pdf.cell(W, 5, 'PUNTO DI RACCOLTA: Ingresso cantiere', ln=1)
     
     # ==================== CHECKLIST ALLEGATI ====================
     num_sez += 1
     titolo_sezione(str(num_sez), 'Checklist Allegati')
     
-    # Verifica SEPARATA per ponteggi fissi vs trabattelli (Art. 136 D.Lgs 81/08)
     ha_ponteggio_fisso = any('ponteggio' in (a.get('nome', '') or '').lower() and 'trabattello' not in (a.get('nome', '') or '').lower() for a in attrezzature)
     ha_trabattello = any('trabattello' in (a.get('nome', '') or '').lower() for a in attrezzature)
     
-    # Pi.M.U.S. solo per ponteggi fissi (Art. 136), per trabattelli basta il manuale
     if ha_ponteggio_fisso:
         pimus_doc = "Pi.M.U.S. (ponteggi fissi Art. 136)"
         pimus_stato = "Da allegare"
@@ -1251,9 +1425,8 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
         pimus_doc = "Pi.M.U.S. / Manuale trabattello"
         pimus_stato = "N.A."
     
-    pdf.set_font('Helvetica', '', 8)
     allegati = [
-        ("Visura camerale", "Da allegare"),
+        ("Visura Camerale", "Da allegare"),
         ("DURC in corso di validita", "Da allegare"),
         ("Attestati formazione lavoratori", "Da allegare"),
         ("Idoneita sanitarie", "Da allegare"),
@@ -1263,142 +1436,188 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
         ("Verbale consegna DPI", "Da allegare")
     ]
     
-    pdf.set_fill_color(*GRIGIO_CHIARO)
-    pdf.set_font('Helvetica', 'B', 8)
-    pdf.set_x(10)
-    pdf.cell(120, 5, ' Documento', border=1, fill=True)
-    pdf.cell(70, 5, ' Stato', border=1, ln=1, fill=True)
+    cols = [('Documento', 126), ('Stato', 60)]
+    tabella_header(cols)
     
-    pdf.set_font('Helvetica', '', 8)
-    for doc, stato in allegati:
-        pdf.set_x(10)
-        pdf.cell(120, 5, ' [ ] ' + doc, border=1)
-        pdf.cell(70, 5, ' ' + stato, border=1, ln=1)
+    for idx, (doc, stato) in enumerate(allegati):
+        check_spazio(8)
+        if idx % 2 == 0:
+            pdf.set_fill_color(*BIANCO)
+        else:
+            pdf.set_fill_color(*GRIGIO_CHIARO)
+        pdf.set_font('Helvetica', '', 9)
+        pdf.set_x(ML)
+        # Checkbox grafico
+        simbolo = '[ ]' if stato == 'Da allegare' else '[--]'
+        pdf.cell(126, 6, f'  {simbolo}  {doc}', fill=True)
+        # Stato con colore
+        if stato == 'N.A.':
+            pdf.set_text_color(*GRIGIO_MEDIO)
+        else:
+            pdf.set_text_color(*ARANCIONE)
+        pdf.set_font('Helvetica', 'I', 8)
+        pdf.cell(60, 6, f'  {stato}', fill=True, ln=1)
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_draw_color(*GRIGIO_BORDO)
+        pdf.line(ML, pdf.get_y(), ML + W, pdf.get_y())
+        pdf.set_draw_color(0, 0, 0)
     
     # ==================== FIRME ====================
     num_sez += 1
     titolo_sezione(str(num_sez), 'Dichiarazione e Firme')
     
-    pdf.set_font('Helvetica', '', 8)
-    pdf.set_x(10)
-    pdf.multi_cell(W, 4, "Il sottoscritto DICHIARA che il presente POS e conforme all'Allegato XV D.Lgs 81/08, che i lavoratori sono informati/formati sui rischi specifici, e che i DPI saranno forniti e ne sara verificato l'utilizzo.")
-    
-    pdf.ln(6)
-    check_spazio(50)
-    
-    # Due colonne firme
-    pdf.set_fill_color(*GRIGIO_CHIARO)
-    pdf.set_font('Helvetica', 'B', 8)
-    pdf.set_x(10)
-    pdf.cell(90, 5, ' IL DATORE DI LAVORO', fill=True)
-    pdf.cell(10, 5, '')
-    
-    # Intestazione firma RLS in base al tipo
-    rls_tipo = ditta.get('rls_tipo', 'non_eletto')
-    if rls_tipo == 'interno_eletto':
-        pdf.cell(90, 5, ' PER PRESA VISIONE RLS', ln=1, fill=True)
-        firma_rls_nome = ditta.get('rls_nome', '')
-    elif rls_tipo == 'territoriale':
-        pdf.cell(90, 5, ' PER PRESA VISIONE RLST', ln=1, fill=True)
-        firma_rls_nome = ditta.get('rls_territoriale', '')
-    else:  # non_eletto
-        pdf.cell(90, 5, ' PER PRESA VISIONE (RLS)', ln=1, fill=True)
-        firma_rls_nome = 'Non eletto - Funzioni RLST'
-    
-    pdf.ln(12)
-    pdf.set_x(10)
-    pdf.cell(90, 5, ' _____________________________')
-    pdf.cell(10, 5, '')
-    pdf.cell(90, 5, ' _____________________________', ln=1)
-    
-    pdf.set_font('Helvetica', 'I', 7)
-    pdf.set_x(10)
-    pdf.cell(90, 4, f" ({pulisci_testo(ditta.get('datore_lavoro', ''), 30)})")
-    pdf.cell(10, 4, '')
-    pdf.cell(90, 4, f" ({pulisci_testo(firma_rls_nome, 35)})", ln=1)
+    pdf.set_font('Helvetica', '', 9)
+    pdf.set_text_color(*GRIGIO_SCURO)
+    pdf.set_x(ML)
+    pdf.multi_cell(W, 4.5, "Il sottoscritto DICHIARA che il presente POS e conforme all'Allegato XV D.Lgs 81/08, che i lavoratori sono informati/formati sui rischi specifici, e che i DPI saranno forniti e ne sara verificato l'utilizzo.")
+    pdf.set_text_color(0, 0, 0)
     
     pdf.ln(8)
+    check_spazio(55)
+    
+    # Due colonne firme
+    pdf.set_font('Helvetica', 'B', 9)
+    pdf.set_text_color(*BLU_SCURO)
+    pdf.set_x(ML)
+    pdf.cell(90, 5, 'IL DATORE DI LAVORO')
+    pdf.cell(6, 5, '')
+    
+    rls_tipo = ditta.get('rls_tipo', 'non_eletto')
+    if rls_tipo == 'interno_eletto':
+        pdf.cell(90, 5, 'PER PRESA VISIONE RLS', ln=1)
+        firma_rls_nome = ditta.get('rls_nome', '')
+    elif rls_tipo == 'territoriale':
+        pdf.cell(90, 5, 'PER PRESA VISIONE RLST', ln=1)
+        firma_rls_nome = ditta.get('rls_territoriale', '')
+    else:
+        pdf.cell(90, 5, 'PER PRESA VISIONE (RLS)', ln=1)
+        firma_rls_nome = 'Non eletto - Funzioni RLST'
+    
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(14)
+    
+    # Linee firma
+    pdf.set_draw_color(*GRIGIO_BORDO)
+    pdf.set_x(ML)
+    pdf.line(ML, pdf.get_y(), ML + 85, pdf.get_y())
+    pdf.line(ML + 96, pdf.get_y(), ML + W, pdf.get_y())
+    pdf.set_draw_color(0, 0, 0)
+    pdf.ln(2)
+    
+    pdf.set_font('Helvetica', 'I', 8)
+    pdf.set_text_color(*GRIGIO_MEDIO)
+    pdf.set_x(ML)
+    pdf.cell(90, 4, f"({pulisci_testo(ditta.get('datore_lavoro', ''), 35)})")
+    pdf.cell(6, 4, '')
+    pdf.cell(90, 4, f"({pulisci_testo(firma_rls_nome, 40)})", ln=1)
+    pdf.set_text_color(0, 0, 0)
+    
+    pdf.ln(10)
     pdf.set_font('Helvetica', '', 9)
-    pdf.set_x(10)
-    pdf.cell(W, 5, f"Data: {date.today().strftime('%d/%m/%Y')}                    Luogo: {pulisci_testo(cantiere.get('indirizzo', ''), 50)}", ln=1)
+    pdf.set_x(ML)
+    pdf.cell(W * 0.5, 5, f"Data: {date.today().strftime('%d/%m/%Y')}", align='L')
+    pdf.cell(W * 0.5, 5, f"Luogo: {pulisci_testo(cantiere.get('indirizzo', ''), 50)}", align='R', ln=1)
     
-    # Data revisione
-    pdf.ln(5)
+    pdf.ln(6)
+    pdf.set_draw_color(*GRIGIO_BORDO)
+    pdf.line(ML, pdf.get_y(), ML + W, pdf.get_y())
+    pdf.set_draw_color(0, 0, 0)
+    pdf.ln(3)
     pdf.set_font('Helvetica', 'B', 8)
-    pdf.set_x(10)
+    pdf.set_text_color(*ARANCIONE)
+    pdf.set_x(ML)
     data_rev = (date.today() + timedelta(days=365)).strftime('%d/%m/%Y')
-    pdf.cell(W, 5, f"PROSSIMA REVISIONE POS: {data_rev} (o in caso di modifiche significative)", ln=1)
+    pdf.cell(W, 5, f"PROSSIMA REVISIONE POS: {data_rev} (o in caso di modifiche significative al cantiere)", ln=1)
+    pdf.set_text_color(0, 0, 0)
     
-    # ==================== VERBALE PRESA VISIONE LAVORATORI ====================
+    # ==================== VERBALE PRESA VISIONE ====================
     if lavoratori:
         nuova_pagina()
         num_sez += 1
         titolo_sezione(str(num_sez), 'Verbale di Presa Visione e Consegna DPI')
         
-        pdf.set_font('Helvetica', '', 8)
-        pdf.set_x(10)
-        pdf.multi_cell(W, 4, "I sottoscritti lavoratori dichiarano di aver preso visione del presente Piano Operativo di Sicurezza, di essere stati informati sui rischi specifici delle lavorazioni e sulle misure di prevenzione e protezione adottate, e di aver ricevuto i Dispositivi di Protezione Individuale (DPI) necessari per lo svolgimento delle attivita lavorative.")
+        pdf.set_font('Helvetica', '', 9)
+        pdf.set_text_color(*GRIGIO_SCURO)
+        pdf.set_x(ML)
+        pdf.multi_cell(W, 4.5, "I sottoscritti lavoratori dichiarano di aver preso visione del presente Piano Operativo di Sicurezza, di essere stati informati sui rischi specifici delle lavorazioni e sulle misure di prevenzione e protezione adottate, e di aver ricevuto i Dispositivi di Protezione Individuale (DPI) necessari per lo svolgimento delle attivita lavorative.")
+        pdf.set_text_color(0, 0, 0)
         
-        pdf.ln(3)
+        pdf.ln(2)
         pdf.set_font('Helvetica', 'I', 7)
-        pdf.set_x(10)
+        pdf.set_text_color(*GRIGIO_MEDIO)
+        pdf.set_x(ML)
         pdf.cell(W, 4, 'Riferimento normativo: Art. 36, 37, 77 e 78 D.Lgs 81/08', ln=1)
-        
+        pdf.set_text_color(0, 0, 0)
         pdf.ln(4)
         
-        # Tabella firme lavoratori
-        pdf.set_fill_color(*GRIGIO_CHIARO)
-        pdf.set_font('Helvetica', 'B', 7)
-        pdf.set_x(10)
-        pdf.cell(45, 6, ' Nome e Cognome', border=1, fill=True)
-        pdf.cell(30, 6, ' Mansione', border=1, fill=True)
-        pdf.cell(40, 6, ' Firma Presa Visione', border=1, fill=True)
-        pdf.cell(40, 6, ' Firma Ricevuta DPI', border=1, fill=True)
-        pdf.cell(35, 6, ' Data', border=1, ln=1, fill=True)
+        # Tabella firme
+        cols = [('Nome e Cognome', 42), ('Mansione', 28), ('Firma Presa Visione', 40), ('Firma Ricevuta DPI', 40), ('Data', 36)]
+        tabella_header(cols)
         
-        pdf.set_font('Helvetica', '', 8)
-        for lav in lavoratori:
-            check_spazio(12)
-            pdf.set_x(10)
-            pdf.cell(45, 10, ' ' + pulisci_testo(lav.get('nome', ''), 22), border=1)
-            pdf.cell(30, 10, ' ' + pulisci_testo(lav.get('mansione', ''), 14), border=1)
-            pdf.cell(40, 10, ' ', border=1)  # Spazio per firma presa visione
-            pdf.cell(40, 10, ' ', border=1)  # Spazio per firma DPI
-            pdf.cell(35, 10, ' ___/___/______', border=1, ln=1)
+        for idx, lav in enumerate(lavoratori):
+            check_spazio(14)
+            if idx % 2 == 0:
+                pdf.set_fill_color(*BIANCO)
+            else:
+                pdf.set_fill_color(*GRIGIO_CHIARO)
+            pdf.set_font('Helvetica', '', 8)
+            pdf.set_x(ML)
+            pdf.cell(42, 12, '  ' + pulisci_testo(lav.get('nome', ''), 20), fill=True)
+            pdf.cell(28, 12, '  ' + pulisci_testo(lav.get('mansione', ''), 14), fill=True)
+            pdf.cell(40, 12, '', fill=True)
+            pdf.cell(40, 12, '', fill=True)
+            pdf.cell(36, 12, '  ___/___/______', fill=True, ln=1)
+            pdf.set_draw_color(*GRIGIO_BORDO)
+            pdf.line(ML, pdf.get_y(), ML + W, pdf.get_y())
+            pdf.set_draw_color(0, 0, 0)
         
-        # Righe vuote per eventuali lavoratori aggiuntivi
+        # Righe vuote extra
         righe_extra = max(0, 5 - len(lavoratori))
-        for _ in range(righe_extra):
-            check_spazio(12)
-            pdf.set_x(10)
-            pdf.cell(45, 10, ' ', border=1)
-            pdf.cell(30, 10, ' ', border=1)
-            pdf.cell(40, 10, ' ', border=1)
-            pdf.cell(40, 10, ' ', border=1)
-            pdf.cell(35, 10, ' ___/___/______', border=1, ln=1)
+        for i in range(righe_extra):
+            check_spazio(14)
+            idx_fill = len(lavoratori) + i
+            if idx_fill % 2 == 0:
+                pdf.set_fill_color(*BIANCO)
+            else:
+                pdf.set_fill_color(*GRIGIO_CHIARO)
+            pdf.set_x(ML)
+            pdf.cell(42, 12, '', fill=True)
+            pdf.cell(28, 12, '', fill=True)
+            pdf.cell(40, 12, '', fill=True)
+            pdf.cell(40, 12, '', fill=True)
+            pdf.cell(36, 12, '  ___/___/______', fill=True, ln=1)
+            pdf.set_draw_color(*GRIGIO_BORDO)
+            pdf.line(ML, pdf.get_y(), ML + W, pdf.get_y())
+            pdf.set_draw_color(0, 0, 0)
         
         pdf.ln(5)
         pdf.set_font('Helvetica', 'I', 7)
-        pdf.set_x(10)
-        pdf.multi_cell(W, 3, "NOTA: La firma del presente verbale attesta l'avvenuta informazione e formazione sui contenuti del POS e la consegna dei DPI. Il lavoratore si impegna ad utilizzare correttamente i DPI forniti e a segnalare eventuali anomalie al preposto o al Datore di Lavoro.")
+        pdf.set_text_color(*GRIGIO_MEDIO)
+        pdf.set_x(ML)
+        pdf.multi_cell(W, 3.5, "NOTA: La firma del presente verbale attesta l'avvenuta informazione e formazione sui contenuti del POS e la consegna dei DPI. Il lavoratore si impegna ad utilizzare correttamente i DPI forniti e a segnalare eventuali anomalie al preposto o al Datore di Lavoro.")
+        pdf.set_text_color(0, 0, 0)
         
         pdf.ln(5)
-        pdf.set_font('Helvetica', '', 8)
-        pdf.set_x(10)
+        pdf.set_font('Helvetica', '', 9)
+        pdf.set_x(ML)
         pdf.cell(W, 5, f"Luogo: {pulisci_testo(cantiere.get('indirizzo', ''), 60)}", ln=1)
         
-        # Spazio per firma del Datore che attesta la consegna
-        pdf.ln(8)
-        pdf.set_fill_color(*GRIGIO_CHIARO)
-        pdf.set_font('Helvetica', 'B', 8)
-        pdf.set_x(10)
-        pdf.cell(95, 5, ' IL DATORE DI LAVORO (per consegna DPI)', ln=1, fill=True)
         pdf.ln(10)
-        pdf.set_x(10)
-        pdf.cell(95, 5, ' _________________________________', ln=1)
-        pdf.set_font('Helvetica', 'I', 7)
-        pdf.set_x(10)
-        pdf.cell(95, 4, f" ({pulisci_testo(ditta.get('datore_lavoro', ''), 35)})", ln=1)
+        pdf.set_font('Helvetica', 'B', 9)
+        pdf.set_text_color(*BLU_SCURO)
+        pdf.set_x(ML)
+        pdf.cell(W * 0.5, 5, 'IL DATORE DI LAVORO (per consegna DPI)', ln=1)
+        pdf.set_text_color(0, 0, 0)
+        pdf.ln(12)
+        pdf.set_draw_color(*GRIGIO_BORDO)
+        pdf.line(ML, pdf.get_y(), ML + 90, pdf.get_y())
+        pdf.set_draw_color(0, 0, 0)
+        pdf.ln(2)
+        pdf.set_font('Helvetica', 'I', 8)
+        pdf.set_text_color(*GRIGIO_MEDIO)
+        pdf.set_x(ML)
+        pdf.cell(90, 4, f"({pulisci_testo(ditta.get('datore_lavoro', ''), 35)})", ln=1)
+        pdf.set_text_color(0, 0, 0)
     
     return bytes(pdf.output())
 
@@ -2988,5 +3207,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
