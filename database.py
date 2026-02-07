@@ -15,10 +15,19 @@ except ImportError:
 
 
 def get_supabase_client() -> Client:
-    """Restituisce il client Supabase"""
+    """
+    Restituisce il client Supabase.
+    Priorità: client autenticato (dopo login) > client anon (nuovo).
+    """
     if not SUPABASE_AVAILABLE:
         return None
     
+    # 1. Se esiste un client autenticato in session_state (post-login), usa quello
+    #    Questo è fondamentale per le RLS policies che richiedono auth.uid()
+    if hasattr(st, 'session_state') and 'supabase_client' in st.session_state:
+        return st.session_state.supabase_client
+    
+    # 2. Altrimenti crea un client anonimo (per operazioni pre-login)
     try:
         url = st.secrets.get("SUPABASE_URL", "")
         key = st.secrets.get("SUPABASE_ANON_KEY", "")
@@ -26,7 +35,7 @@ def get_supabase_client() -> Client:
         if url and key:
             return create_client(url, key)
     except Exception as e:
-        st.error(f"Errore connessione Supabase: {e}")
+        print(f"Errore connessione Supabase: {e}")
     
     return None
 
@@ -47,6 +56,30 @@ def get_user_profile(user_id: str) -> dict:
     except Exception as e:
         print(f"Errore get_user_profile: {e}")
         return None
+
+
+def create_user_profile(user_id: str, email: str = None) -> bool:
+    """Crea un profilo utente se non esiste (fallback se il trigger Supabase non lo crea)"""
+    client = get_supabase_client()
+    if not client:
+        return False
+    
+    try:
+        data = {
+            'id': user_id,
+            'email': email or '',
+            'piano': 'free',
+            'pos_generati_totale': 0,
+            'pos_generati_mese': 0
+        }
+        client.table('profiles').insert(data).execute()
+        return True
+    except Exception as e:
+        # Se esiste già (duplicate key), non è un errore
+        if 'duplicate' in str(e).lower() or '23505' in str(e):
+            return True
+        print(f"Errore create_user_profile: {e}")
+        return False
 
 
 def update_user_profile(user_id: str, data: dict) -> bool:
