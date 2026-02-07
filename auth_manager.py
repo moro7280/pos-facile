@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-CANTIERE SICURO - Auth Manager (Supabase Auth)
+POS FACILE - Auth Manager (Supabase Auth)
 Gestisce login, registrazione e sessioni utente
 Fix: Rimossa chiave statica per evitare crash DuplicateElementKey
 """
@@ -150,7 +150,7 @@ def get_current_user_email() -> str:
 def render_auth_page(default_mode='login'):
     st.markdown("""<style>.auth-container {max-width: 400px; margin: 0 auto; padding: 2rem;} .auth-header {text-align: center; margin-bottom: 2rem;} .auth-header h1 {color: #FF6600; font-size: 2.5rem;}</style>""", unsafe_allow_html=True)
     
-    st.markdown("""<div class="auth-header"><h1>🏗️ CantiereSicuro</h1><p style="color: #666; font-size: 18px;">Generatore POS professionale</p></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class="auth-header"><h1>🏗️ POS FACILE</h1><p style="color: #666; font-size: 18px;">Generatore POS per professionisti della sicurezza</p></div>""", unsafe_allow_html=True)
     
     tab1, tab2, tab3 = st.tabs(["🔐 Accedi", "📝 Registrati", "🔑 Recupero"])
     
