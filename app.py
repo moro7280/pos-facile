@@ -525,7 +525,102 @@ Il POS costituisce documento di valutazione dei rischi specifici dell'impresa es
 In caso di INFORTUNIO GRAVE: Chiamare immediatamente il 112, non spostare l'infortunato (salvo pericolo imminente), l'addetto al Primo Soccorso presta le prime cure in attesa dei soccorsi.
 In caso di INCENDIO: Dare l'allarme, utilizzare gli estintori solo se addestrati, evacuare verso il punto di raccolta, chiamare il 115.
 In caso di EVACUAZIONE: Abbandonare ordinatamente il cantiere seguendo le vie di fuga, recarsi al punto di raccolta, attendere il censimento.
-Il Datore di Lavoro verifica periodicamente l'efficienza dei presidi antincendio e di primo soccorso."""
+Il Datore di Lavoro verifica periodicamente l'efficienza dei presidi antincendio e di primo soccorso.""",
+
+    "premessa_estesa": """Il presente Piano Operativo di Sicurezza (POS) e redatto ai sensi dell'Art. 17, comma 1, lett. a), dell'Art. 26, comma 3, dell'Art. 89, comma 1, lett. h), dell'Art. 96, comma 1, lett. g) e dell'Allegato XV, punto 3.2 del D.Lgs 81/2008 e s.m.i.
+Il POS costituisce il documento di valutazione dei rischi specifici dell'impresa esecutrice, con riferimento al singolo cantiere interessato, e rappresenta il piano complementare e di dettaglio del Piano di Sicurezza e Coordinamento (PSC), ove previsto ai sensi dell'Art. 100.
+Il presente documento e stato redatto tenendo conto delle specifiche attivita e delle singole lavorazioni previste in cantiere, nonche del loro contestuale ambiente di lavoro.
+Il POS contiene i seguenti elementi minimi come richiesto dall'Allegato XV, punto 3.2, lettere da a) a l), del D.Lgs 81/2008.""",
+
+    "contenuti_allegato_xv": """Il presente POS e strutturato secondo i contenuti minimi richiesti dall'Allegato XV, punto 3.2 del D.Lgs 81/2008:
+a) Dati identificativi dell'impresa esecutrice (nominativi, indirizzi, recapiti)
+a.1) Nominativo del Datore di Lavoro, indirizzi e riferimenti telefonici
+a.2) Specifica attivita e singole lavorazioni svolte in cantiere
+a.3) Nominativi addetti al Primo Soccorso, Antincendio ed Evacuazione, e del RLS/RLST
+a.4) Nominativo del Medico Competente
+a.5) Nominativo del RSPP
+a.6) Nominativo del Direttore Tecnico e del Capocantiere
+a.7) Numero e qualifiche dei lavoratori dipendenti con specifiche mansioni
+b) Specifiche mansioni inerenti la sicurezza svolte in cantiere da ogni figura
+c) Descrizione dell'attivita di cantiere, delle modalita organizzative e dei turni di lavoro
+d) Elenco dei ponteggi, ponti su ruote a torre e altre opere provvisionali, attrezzature, macchine e impianti
+e) Elenco delle sostanze e miscele pericolose utilizzate con le relative Schede di Sicurezza
+f) Esito del rapporto di valutazione del rumore e, ove applicabile, delle vibrazioni
+g) Individuazione delle misure preventive e protettive integrative rispetto a quelle contenute nel PSC
+h) Procedure complementari e di dettaglio richieste dal PSC
+i) Elenco dei DPI forniti ai lavoratori
+l) Documentazione in merito all'informazione e formazione fornite ai lavoratori""",
+
+    "mansioni_ddl": """Il Datore di Lavoro ha la responsabilita dell'organizzazione del cantiere, della valutazione dei rischi, della designazione degli addetti alla sicurezza, della fornitura dei DPI, della formazione dei lavoratori. Vigila sull'osservanza delle misure di sicurezza e sul rispetto del POS. Coordina i lavori con le altre imprese presenti in cantiere.""",
+
+    "mansioni_rspp": """Il Responsabile del Servizio di Prevenzione e Protezione collabora con il Datore di Lavoro nella valutazione dei rischi e nella redazione del POS. Propone i programmi di informazione e formazione dei lavoratori. Partecipa alle riunioni periodiche di prevenzione (Art. 35 D.Lgs 81/08). Effettua sopralluoghi periodici in cantiere.""",
+
+    "mansioni_preposto": """Il Preposto (Direttore Tecnico / Capocantiere) sovrintende all'attivita lavorativa e garantisce l'attuazione delle direttive ricevute, controllandone la corretta esecuzione da parte dei lavoratori. Verifica che solo i lavoratori autorizzati accedano alle zone di rischio. Segnala tempestivamente al DdL le deficienze dei mezzi, delle attrezzature e dei DPI (Art. 19 D.Lgs 81/08).""",
+
+    "mansioni_ps": """L'Addetto al Primo Soccorso, designato ai sensi dell'Art. 45 D.Lgs 81/08, interviene in caso di infortunio o malore. Verifica periodicamente il contenuto della cassetta di primo soccorso (DM 388/2003). E in possesso di attestato di formazione di 12 ore (Gruppo B/C) o 16 ore (Gruppo A) con aggiornamento triennale.""",
+
+    "mansioni_antincendio": """L'Addetto Antincendio, designato ai sensi dell'Art. 46 D.Lgs 81/08, interviene con i mezzi di estinzione disponibili, coordina l'evacuazione, verifica l'agibilita delle vie di fuga e l'efficienza degli estintori. E in possesso di attestato di formazione secondo il DM 02/09/2021.""",
+
+    "mansioni_rls": """Il Rappresentante dei Lavoratori per la Sicurezza (RLS/RLST) e consultato preventivamente in ordine alla valutazione dei rischi, alla designazione degli addetti alla sicurezza, all'organizzazione della formazione. Ha diritto di accesso ai luoghi di lavoro e riceve le informazioni provenienti dai servizi di vigilanza (Art. 50 D.Lgs 81/08).""",
+
+    "mansioni_lavoratore": """Il lavoratore si prende cura della propria salute e sicurezza e di quella delle altre persone presenti in cantiere. Osserva le disposizioni e le istruzioni impartite dal DdL e dai preposti. Utilizza correttamente le attrezzature di lavoro e i DPI. Segnala immediatamente le condizioni di pericolo. Non rimuove i dispositivi di sicurezza (Art. 20 D.Lgs 81/08).""",
+
+    "organizzazione_accessi": """L'accesso al cantiere e consentito esclusivamente al personale autorizzato, dotato di DPI e identificato con tesserino di riconoscimento (Art. 26 comma 8, D.Lgs 81/08). L'ingresso e segnalato con cartellonistica conforme al D.Lgs 81/08 Allegato XXV (segnale di divieto di accesso ai non addetti, obbligo DPI, pericoli specifici). La recinzione del cantiere e realizzata con pannelli metallici di altezza minima 2 m o rete arancione su paletti.""",
+
+    "organizzazione_viabilita": """La viabilita interna al cantiere e organizzata per separare, ove possibile, i percorsi pedonali da quelli veicolari. Le aree di transito sono mantenute sgombre da materiali e detriti. I percorsi sono segnalati e, se necessario, illuminati. In caso di utilizzo di mezzi meccanici, e prevista la presenza di un moviere per le manovre in spazi ristretti.""",
+
+    "organizzazione_depositi": """Le aree di deposito materiali sono individuate in zone stabili e accessibili ai mezzi di trasporto. I materiali sono stoccati in modo ordinato, evitando altezze eccessive e garantendo la stabilita dei depositi. I materiali pericolosi (vernici, solventi, bombole gas) sono depositati in aree dedicate, ventilate e protette da fonti di calore, conformemente alle indicazioni delle Schede di Sicurezza.""",
+
+    "organizzazione_servizi": """Servizi igienico-assistenziali (Allegato XIII D.Lgs 81/08):
+- Servizi igienici: gabinetti e lavabi in numero adeguato, mantenuti puliti e in buone condizioni
+- Spogliatoi: armadietti individuali per indumenti di lavoro, separati dagli effetti personali
+- Acqua potabile: disponibile in quantita sufficiente, in recipienti chiusi e con rubinetto
+- Locale refettorio/consumo pasti: area coperta e attrezzata (ove necessario per la durata dei lavori)
+In caso di cantieri di breve durata e modesta entita, previo accordo con i lavoratori, si potra utilizzare il servizio igienico presente nell'immobile oggetto dei lavori o nei locali limitrofi.""",
+
+    "macroclima_estate": """LAVORI IN PERIODO ESTIVO (Rischio colpo di calore):
+In caso di temperature elevate (WBGT > 25 C o temperatura percepita > 33 C), il Datore di Lavoro adotta le seguenti misure:
+- Previsione di pause supplementari in aree ombreggiate (min. 15 min ogni 2 ore);
+- Disponibilita di acqua fresca e sali minerali in cantiere;
+- Evitare lavorazioni pesanti nelle ore piu calde (12:00-15:00);
+- Monitoraggio condizioni meteo mediante bollettini INAIL/Worklimate;
+- Formazione specifica dei lavoratori sul riconoscimento dei sintomi del colpo di calore;
+- Organizzazione del lavoro in modo da favorire le lavorazioni all'ombra nelle ore centrali.""",
+
+    "macroclima_inverno": """LAVORI IN PERIODO INVERNALE (Rischio ipotermia e ghiaccio):
+In caso di basse temperature, il Datore di Lavoro adotta le seguenti misure:
+- Fornitura di DPI adeguati (indumenti termici, guanti imbottiti);
+- Pause riscaldamento in locale riscaldato;
+- Trattamento antighiaccio su percorsi e rampe;
+- Verifica stabilita strutture in caso di nevicate o gelate;
+- Sospensione lavori in caso di condizioni meteo avverse (ghiaccio, vento forte > 60 km/h).""",
+
+    "metodologia_rischi": """La valutazione dei rischi e condotta con metodo semi-quantitativo, secondo la matrice Probabilita x Gravita (P x G).
+La Probabilita (P) tiene conto della frequenza di esposizione, delle condizioni operative, della formazione e delle misure gia in atto, ed e espressa su scala 1-4:
+P=1 Improbabile: evento possibile solo in circostanze eccezionali;
+P=2 Poco probabile: evento che potrebbe verificarsi con bassa frequenza;
+P=3 Probabile: evento atteso in alcune circostanze;
+P=4 Molto probabile: evento atteso nella maggior parte delle circostanze.
+La Gravita (G) del danno atteso e espressa su scala 1-4:
+G=1 Lieve: lesioni rapidamente reversibili (abrasioni, contusioni lievi);
+G=2 Medio: lesioni reversibili (fratture semplici, ustioni 1 grado);
+G=3 Grave: lesioni con effetti irreversibili parziali (fratture complesse, amputazioni parziali);
+G=4 Molto grave: lesioni mortali o invalidita permanente totale.
+Il Rischio R = P x G produce un valore da 1 a 16, classificato come:
+R = 1-2: BASSO (accettabile, mantenere le misure in atto);
+R = 3-4: MEDIO (programmazione interventi migliorativi);
+R = 6-8: ALTO (interventi urgenti di riduzione del rischio);
+R = 9-16: MOLTO ALTO (interventi immediati, eventuale sospensione attivita).""",
+
+    "procedure_psc": """In presenza di Piano di Sicurezza e Coordinamento (PSC), l'impresa esecutrice si impegna a:
+- Recepire integralmente le prescrizioni del PSC e le eventuali prescrizioni complementari;
+- Attuare le procedure di coordinamento previste dal CSP/CSE;
+- Partecipare alle riunioni di coordinamento e verbalizzare le decisioni assunte;
+- Comunicare al CSE eventuali proposte di modifica al PSC per meglio garantire la sicurezza;
+- Sottoporre il presente POS all'approvazione del CSE prima dell'inizio dei lavori;
+- Segnalare tempestivamente al CSE situazioni di pericolo grave e immediato;
+- Informare il CSE sull'ingresso in cantiere di eventuali subappaltatori.
+Qualora il PSC non sia previsto (cantieri con unica impresa e senza rischi particolari di cui all'Allegato XI), l'impresa opera in conformita al presente POS."""
 }
 
 # ==============================================================================
@@ -884,7 +979,7 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
         pdf.set_x(ML)
         for i, (nome, larghezza) in enumerate(colonne):
             val = valori[i] if i < len(valori) else ''
-            pdf.cell(larghezza, 6, '  ' + pulisci_testo(val, int(larghezza * 0.45)), fill=True)
+            pdf.cell(larghezza, 6, '  ' + pulisci_testo(val, int(larghezza * 0.6)), fill=True)
         pdf.ln()
         # Linea sottile di separazione
         pdf.set_draw_color(*GRIGIO_BORDO)
@@ -921,7 +1016,7 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
     pdf.set_font('Helvetica', '', 9)
     pdf.set_text_color(180, 190, 210)
     pdf.set_xy(ML + 5, 59)
-    pdf.cell(W - 10, 5, 'Titolo IV - Capo I - Allegato XV', ln=1)
+    pdf.cell(W - 10, 5, 'Titolo IV - Capo I - Allegato XV, punto 3.2', ln=1)
     
     pdf.set_text_color(0, 0, 0)
     pdf.set_y(88)
@@ -994,10 +1089,84 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
     pdf.cell(W, 4, 'Documento generato con POS Facile - www.posfacile.it', align='C')
     pdf.set_text_color(0, 0, 0)
     
-    # ==================== PAGINA 2: DATI IMPRESA ====================
+    # ==================== SOMMARIO ====================
     nuova_pagina()
     
-    titolo_sezione('1', 'Identificazione Impresa Esecutrice')
+    pdf.ln(2)
+    pdf.set_font('Helvetica', 'B', 14)
+    pdf.set_text_color(*BLU_SCURO)
+    pdf.set_x(ML)
+    pdf.cell(W, 8, 'SOMMARIO', ln=1)
+    pdf.set_text_color(0, 0, 0)
+    
+    pdf.set_draw_color(*ARANCIONE)
+    pdf.line(ML, pdf.get_y(), ML + 40, pdf.get_y())
+    pdf.set_draw_color(0, 0, 0)
+    pdf.ln(6)
+    
+    # Build sommario entries - numbered sections
+    sommario_voci = [
+        ('1', 'Premessa Normativa'),
+        ('2', 'Identificazione Impresa Esecutrice'),
+        ('3', 'Identificazione Cantiere'),
+        ('4', 'Mansioni Inerenti la Sicurezza'),
+        ('5', 'Elenco Lavoratori Impiegati'),
+        ('6', 'Formazione e Addestramento'),
+        ('7', 'Attrezzature di Cantiere'),
+        ('8', 'Sostanze e Miscele Pericolose'),
+        ('9', 'Organizzazione del Cantiere'),
+        ('10', 'Condizioni Climatiche - Macroclima'),
+        ('11', 'Cronoprogramma Lavori'),
+        ('12', 'Metodologia di Valutazione dei Rischi'),
+        ('13', 'Valutazione dei Rischi per Fase Lavorativa'),
+        ('14', 'Esiti Valutazione Rumore e Vibrazioni'),
+        ('15', 'Matrice DPI per Mansione'),
+        ('16', 'Coordinamento e Procedure PSC'),
+        ('17', 'Gestione Emergenze'),
+        ('18', 'Checklist Allegati'),
+        ('19', 'Dichiarazione e Firme'),
+        ('20', 'Verbale di Presa Visione e Consegna DPI'),
+    ]
+    
+    for num, titolo_voce in sommario_voci:
+        pdf.set_font('Helvetica', 'B', 9)
+        pdf.set_text_color(*BLU_SCURO)
+        pdf.set_x(ML + 2)
+        num_txt = f"Sez. {num}"
+        pdf.cell(18, 5.5, num_txt, ln=0)
+        pdf.set_font('Helvetica', '', 9)
+        pdf.set_text_color(*GRIGIO_SCURO)
+        # Dots leader
+        titolo_corto = pulisci_testo(titolo_voce, 60)
+        pdf.cell(W - 20, 5.5, titolo_corto, ln=1)
+        pdf.set_text_color(0, 0, 0)
+    
+    pdf.ln(4)
+    pdf.set_draw_color(*GRIGIO_BORDO)
+    pdf.line(ML, pdf.get_y(), ML + W, pdf.get_y())
+    pdf.set_draw_color(0, 0, 0)
+    pdf.ln(3)
+    pdf.set_font('Helvetica', 'I', 7)
+    pdf.set_text_color(*GRIGIO_MEDIO)
+    pdf.set_x(ML)
+    pdf.cell(W, 4, 'Contenuti minimi conformi all\'Allegato XV, punto 3.2, lettere da a) a l), D.Lgs 81/2008 e s.m.i.', ln=1)
+    pdf.set_text_color(0, 0, 0)
+    
+    # ==================== SEZ. 1: PREMESSA NORMATIVA ====================
+    nuova_pagina()
+    num_sez = 1
+    titolo_sezione(str(num_sez), 'Premessa Normativa')
+    
+    sottotitolo('Riferimenti Legislativi')
+    paragrafo(TESTI_LEGALI['premessa_estesa'])
+    
+    pdf.ln(2)
+    sottotitolo('Contenuti del POS - Allegato XV, punto 3.2')
+    paragrafo(TESTI_LEGALI['contenuti_allegato_xv'], size=8)
+    
+    # ==================== SEZ. 2: DATI IMPRESA ====================
+    num_sez += 1
+    titolo_sezione(str(num_sez), 'Identificazione Impresa Esecutrice')
     campo('Ragione Sociale', ditta.get('ragione_sociale', ''))
     campo('P.IVA / C.F.', ditta.get('piva_cf', ''))
     campo('Sede Legale', ditta.get('indirizzo', ''))
@@ -1016,6 +1185,9 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
     campo('Addetto Primo Soccorso', addetti.get('primo_soccorso', ''))
     campo('Addetto Antincendio', addetti.get('antincendio', ''))
     
+    dtc = ditta.get('direttore_tecnico', '') or ditta.get('datore_lavoro', '')
+    campo('Direttore Tecnico / Capocantiere', dtc)
+    
     rls_tipo = ditta.get('rls_tipo', 'non_eletto')
     if rls_tipo == 'interno_eletto':
         campo('RLS', ditta.get('rls_nome', ''))
@@ -1024,22 +1196,87 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
     else:
         campo('RLS', 'Non eletto (< 15 dip.) - Funzioni RLST')
     
-    # ==================== CANTIERE ====================
-    pdf.ln(3)
-    titolo_sezione('2', 'Identificazione Cantiere')
+    # ==================== SEZ. 3: CANTIERE ====================
+    num_sez += 1
+    titolo_sezione(str(num_sez), 'Identificazione Cantiere')
     campo('Indirizzo', cantiere.get('indirizzo', ''))
     campo('Committente', cantiere.get('committente', ''))
     campo('Durata', cantiere.get('durata', ''))
     campo('Data Inizio', cantiere.get('data_inizio', ''))
     campo('Orario Lavoro', cantiere.get('orario_lavoro', '08:00-12:00 / 13:00-17:00'))
     campo('Giorni', cantiere.get('giorni_lavoro', 'Lun-Ven'))
+    if cantiere.get('cse'):
+        campo('CSE', cantiere.get('cse', ''))
+    if cantiere.get('csp'):
+        campo('CSP', cantiere.get('csp', ''))
     
     sottotitolo('Descrizione Opere')
     paragrafo(cantiere.get('descrizione', ''))
     
-    # ==================== LAVORATORI ====================
+    # ==================== SEZ. 4: MANSIONI SICUREZZA ====================
+    num_sez += 1
+    titolo_sezione(str(num_sez), 'Mansioni Inerenti la Sicurezza')
+    
+    pdf.set_font('Helvetica', 'I', 8)
+    pdf.set_text_color(*GRIGIO_MEDIO)
+    pdf.set_x(ML)
+    pdf.cell(W, 4, 'Allegato XV, punto 3.2, lettera b): Specifiche mansioni inerenti la sicurezza svolte in cantiere da ogni figura.', ln=1)
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(2)
+    
+    # Tabella mansioni sicurezza
+    mansioni_data = [
+        ('Datore di Lavoro', ditta.get('datore_lavoro', ''), TESTI_LEGALI['mansioni_ddl']),
+        ('RSPP', rspp, TESTI_LEGALI['mansioni_rspp']),
+        ('Preposto / DTC', dtc, TESTI_LEGALI['mansioni_preposto']),
+        ('Addetto Primo Soccorso', addetti.get('primo_soccorso', ''), TESTI_LEGALI['mansioni_ps']),
+        ('Addetto Antincendio', addetti.get('antincendio', ''), TESTI_LEGALI['mansioni_antincendio']),
+    ]
+    
+    rls_tipo = ditta.get('rls_tipo', 'non_eletto')
+    if rls_tipo == 'interno_eletto':
+        mansioni_data.append(('RLS', ditta.get('rls_nome', ''), TESTI_LEGALI['mansioni_rls']))
+    elif rls_tipo == 'territoriale':
+        mansioni_data.append(('RLST', ditta.get('rls_territoriale', ''), TESTI_LEGALI['mansioni_rls']))
+    
+    mansioni_data.append(('Lavoratori', f"{len(lavoratori)} impiegati in cantiere", TESTI_LEGALI['mansioni_lavoratore']))
+    
+    for figura, nome_persona, compiti in mansioni_data:
+        check_spazio(35)
+        # Header figura
+        y = pdf.get_y()
+        pdf.set_fill_color(*BLU_CHIARO)
+        pdf.rect(ML, y, W, 6, 'F')
+        pdf.set_fill_color(*BLU_SCURO)
+        pdf.rect(ML, y, 3, 6, 'F')
+        pdf.set_font('Helvetica', 'B', 8)
+        pdf.set_text_color(*BLU_SCURO)
+        pdf.set_xy(ML + 6, y + 0.5)
+        pdf.cell(60, 5, pulisci_testo(figura, 30))
+        pdf.set_font('Helvetica', '', 8)
+        pdf.set_text_color(*GRIGIO_SCURO)
+        pdf.cell(W - 68, 5, pulisci_testo(nome_persona, 60))
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_y(y + 7)
+        # Compiti
+        pdf.set_font('Helvetica', '', 7)
+        pdf.set_text_color(*GRIGIO_SCURO)
+        pdf.set_x(ML + 4)
+        pdf.multi_cell(W - 8, 3.2, pulisci_testo(compiti, 500))
+        pdf.set_text_color(0, 0, 0)
+        pdf.ln(2)
+    
+    # ==================== SEZ. 5: LAVORATORI ====================
+    num_sez += 1
+    titolo_sezione(str(num_sez), 'Elenco Lavoratori Impiegati')
+    
     if lavoratori:
-        titolo_sezione('3', 'Elenco Lavoratori Impiegati')
+        pdf.set_font('Helvetica', 'I', 8)
+        pdf.set_text_color(*GRIGIO_MEDIO)
+        pdf.set_x(ML)
+        pdf.cell(W, 4, 'Allegato XV, punto 3.2, lettera a.7): Numero e relative qualifiche dei lavoratori dipendenti.', ln=1)
+        pdf.set_text_color(0, 0, 0)
+        pdf.ln(2)
         
         cols = [('Nome e Cognome', 52), ('Mansione', 38), ('Formazione', 50), ('Idoneita Sanitaria', 46)]
         tabella_header(cols)
@@ -1053,12 +1290,100 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
             ], cols, idx)
         
         pdf.ln(4)
+    else:
+        paragrafo('Lavoratori da definire prima dell\'inizio dei lavori.')
     
-    # ==================== ATTREZZATURE ====================
-    if attrezzature:
-        titolo_sezione('4', 'Attrezzature di Cantiere')
+    # ==================== SEZ. 6: FORMAZIONE ====================
+    num_sez += 1
+    titolo_sezione(str(num_sez), 'Formazione e Addestramento')
+    
+    pdf.set_font('Helvetica', 'I', 8)
+    pdf.set_text_color(*GRIGIO_MEDIO)
+    pdf.set_x(ML)
+    pdf.cell(W, 4, 'Allegato XV, punto 3.2, lettera l): Documentazione in merito all\'informazione e formazione fornite ai lavoratori.', ln=1)
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(2)
+    
+    paragrafo("Tutti i lavoratori impiegati in cantiere sono in possesso degli attestati di formazione previsti dall'Accordo Stato-Regioni del 21/12/2011 e s.m.i. La formazione comprende il modulo generale (4 ore) e il modulo specifico rischio alto (12 ore) per il settore edile (ATECO F). L'aggiornamento quinquennale e regolarmente effettuato.", size=8)
+    
+    if lavoratori:
+        pdf.ln(2)
+        sottotitolo('Matrice Formazione Lavoratori')
         
-        cols = [('Attrezzatura', 56), ('Marca/Modello', 48), ('Matricola', 40), ('Ultima Verifica', 42)]
+        # Colonne matrice formazione
+        form_cols = [('Lavoratore', 40), ('Base', 15), ('Spec.', 15), ('PS', 14), ('AI', 14), ('RLS', 14), ('Gru', 14), ('Quota', 15), ('Pont.', 15), ('Macc.', 15), ('DPI 3a', 15)]
+        
+        # Header
+        pdf.set_fill_color(*BLU_SCURO)
+        pdf.set_text_color(255, 255, 255)
+        pdf.set_font('Helvetica', 'B', 6)
+        pdf.set_x(ML)
+        for nome, larg in form_cols:
+            pdf.cell(larg, 6, nome, fill=True, align='C')
+        pdf.ln()
+        pdf.set_text_color(0, 0, 0)
+        
+        for idx, lav in enumerate(lavoratori):
+            check_spazio(8)
+            if idx % 2 == 0:
+                pdf.set_fill_color(*BIANCO)
+            else:
+                pdf.set_fill_color(*GRIGIO_CHIARO)
+            pdf.set_font('Helvetica', '', 6)
+            pdf.set_x(ML)
+            nome = pulisci_testo(lav.get('nome', ''), 18)
+            mansione = lav.get('mansione', '').lower()
+            
+            # Determine formation based on role
+            is_ps = addetti.get('primo_soccorso', '').lower() in lav.get('nome', '').lower() if addetti.get('primo_soccorso') else False
+            is_ai = addetti.get('antincendio', '').lower() in lav.get('nome', '').lower() if addetti.get('antincendio') else False
+            is_rls = (rls_tipo == 'interno_eletto' and ditta.get('rls_nome', '').lower() in lav.get('nome', '').lower())
+            
+            valori = [
+                nome,       # Nome
+                'Si',       # Base (always)
+                'Si',       # Specifico (always for construction)
+                'Si' if is_ps else '--',  # PS
+                'Si' if is_ai else '--',  # AI
+                'Si' if is_rls else '--', # RLS
+                'Si' if 'gru' in mansione else '--',  # Gru
+                'Si' if any(k in mansione for k in ['quota', 'pont', 'coperto', 'tetto']) else '--',  # Quota
+                'Si' if 'pont' in mansione else '--',  # Ponteggi
+                'Si' if any(k in mansione for k in ['escavat', 'macchina', 'operatore']) else '--',  # Macchine
+                '--',  # DPI 3a cat
+            ]
+            
+            for i, (_, larg) in enumerate(form_cols):
+                val = valori[i] if i < len(valori) else ''
+                align = 'L' if i == 0 else 'C'
+                pdf.cell(larg, 5.5, val, fill=True, align=align)
+            pdf.ln()
+            pdf.set_draw_color(*GRIGIO_BORDO)
+            pdf.line(ML, pdf.get_y(), ML + W, pdf.get_y())
+            pdf.set_draw_color(0, 0, 0)
+        
+        pdf.ln(2)
+        pdf.set_font('Helvetica', 'I', 6)
+        pdf.set_text_color(*GRIGIO_MEDIO)
+        pdf.set_x(ML)
+        pdf.cell(W, 3.5, 'Legenda: Base=Formazione generale 4h | Spec.=Rischio specifico 12h edilizia | PS=Primo Soccorso | AI=Antincendio | Quota=Lavori in quota h>2m', ln=1)
+        pdf.set_x(ML)
+        pdf.cell(W, 3.5, 'Pont.=Montaggio ponteggi | Macc.=Macchine movimento terra | DPI 3a=DPI terza categoria | Gli attestati sono allegati al presente POS.', ln=1)
+        pdf.set_text_color(0, 0, 0)
+    
+    # ==================== SEZ. 7: ATTREZZATURE ====================
+    num_sez += 1
+    titolo_sezione(str(num_sez), 'Attrezzature di Cantiere')
+    
+    pdf.set_font('Helvetica', 'I', 8)
+    pdf.set_text_color(*GRIGIO_MEDIO)
+    pdf.set_x(ML)
+    pdf.cell(W, 4, 'Allegato XV, punto 3.2, lettera d): Elenco ponteggi, ponti su ruote a torre, opere provvisionali, attrezzature, macchine e impianti.', ln=1)
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(2)
+    
+    if attrezzature:
+        cols = [('Attrezzatura', 50), ('Marca/Modello', 36), ('Matricola', 26), ('Libretti', 18), ('Verifica', 28), ('Uso Com.', 28)]
         tabella_header(cols)
         
         for idx, attr in enumerate(attrezzature):
@@ -1066,56 +1391,101 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
                 attr.get('nome', ''),
                 attr.get('marca', ''),
                 attr.get('matricola', 'N.D.'),
-                attr.get('verifica', 'Conforme')
+                'Si',
+                attr.get('verifica', 'Conforme'),
+                attr.get('uso_comune', 'No')
             ], cols, idx)
         
         pdf.ln(2)
         pdf.set_font('Helvetica', 'I', 7)
         pdf.set_text_color(*GRIGIO_MEDIO)
         pdf.set_x(ML)
-        pdf.cell(W, 4, 'I libretti d\'uso e manutenzione sono disponibili in cantiere.', ln=1)
+        pdf.multi_cell(W, 3.5, "I libretti d'uso e manutenzione sono disponibili in cantiere. Le verifiche periodiche delle attrezzature soggette (Art. 71, comma 11, D.Lgs 81/08 e Allegato VII) sono regolarmente effettuate. I certificati di collaudo e le verifiche ASL/INAIL sono allegati al presente POS.")
         pdf.set_text_color(0, 0, 0)
         pdf.ln(2)
+    else:
+        paragrafo('Attrezzature da definire prima dell\'inizio dei lavori. I libretti saranno resi disponibili in cantiere.')
     
-    # ==================== SOSTANZE ====================
+    # ==================== SEZ. 8: SOSTANZE PERICOLOSE ====================
+    num_sez += 1
+    titolo_sezione(str(num_sez), 'Sostanze e Miscele Pericolose')
+    
+    pdf.set_font('Helvetica', 'I', 8)
+    pdf.set_text_color(*GRIGIO_MEDIO)
+    pdf.set_x(ML)
+    pdf.cell(W, 4, 'Allegato XV, punto 3.2, lettera e): Elenco delle sostanze e miscele pericolose utilizzate con relative SDS.', ln=1)
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(2)
+    
     if sostanze:
-        titolo_sezione('5', 'Sostanze Pericolose Utilizzate')
-        
-        cols = [('Prodotto', 68), ('Produttore', 50), ('Frasi H (Pericolo)', 68)]
+        cols = [('Prodotto', 46), ('Produttore', 34), ('Frasi H', 44), ('Fase Utilizzo', 30), ('SDS', 32)]
         tabella_header(cols)
         
         for idx, sost in enumerate(sostanze):
             tabella_riga([
                 sost.get('nome', ''),
                 sost.get('produttore', ''),
-                sost.get('frasi_h', 'Vedere SDS')
+                sost.get('frasi_h', 'Vedere SDS'),
+                sost.get('fase_utilizzo', 'Varie'),
+                'Allegata'
             ], cols, idx)
         
         pdf.ln(2)
         pdf.set_font('Helvetica', 'I', 7)
         pdf.set_text_color(*GRIGIO_MEDIO)
         pdf.set_x(ML)
-        pdf.cell(W, 4, 'Le Schede Dati di Sicurezza (SDS) sono disponibili in cantiere e sono state consegnate ai lavoratori.', ln=1)
+        pdf.multi_cell(W, 3.5, "Le Schede Dati di Sicurezza (SDS) conformi al Reg. CE 1907/2006 (REACH) e al Reg. CE 1272/2008 (CLP) sono disponibili in cantiere e sono state consegnate ai lavoratori esposti. Le misure di prevenzione specifiche sono riportate nella sezione Valutazione Rischi.")
         pdf.set_text_color(0, 0, 0)
-        pdf.ln(2)
+    else:
+        paragrafo("Non e previsto l'utilizzo di sostanze o miscele pericolose classificate ai sensi del Reg. CE 1272/2008 (CLP). Qualora nel corso dei lavori si rendesse necessario l'uso di tali prodotti, il presente POS sara aggiornato con le relative SDS.")
     
-    # ==================== ORGANIZZAZIONE ====================
-    num_sez = 6 if sostanze else (5 if attrezzature else (4 if lavoratori else 3))
+    # ==================== SEZ. 9: ORGANIZZAZIONE CANTIERE ====================
+    num_sez += 1
     titolo_sezione(str(num_sez), 'Organizzazione del Cantiere')
     
-    sottotitolo('Premessa Normativa')
-    paragrafo(TESTI_LEGALI['premessa'])
+    pdf.set_font('Helvetica', 'I', 8)
+    pdf.set_text_color(*GRIGIO_MEDIO)
+    pdf.set_x(ML)
+    pdf.cell(W, 4, 'Allegato XV, punto 3.2, lettera c): Descrizione dell\'attivita, delle modalita organizzative e dei turni di lavoro.', ln=1)
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(2)
+    
+    sottotitolo('Accessi e Recinzione')
+    paragrafo(TESTI_LEGALI['organizzazione_accessi'])
+    
+    sottotitolo('Viabilita Interna')
+    paragrafo(TESTI_LEGALI['organizzazione_viabilita'])
+    
+    sottotitolo('Aree di Deposito Materiali')
+    paragrafo(TESTI_LEGALI['organizzazione_depositi'])
+    
+    sottotitolo('Servizi Igienico-Assistenziali')
+    paragrafo(TESTI_LEGALI['organizzazione_servizi'])
     
     sottotitolo("Obblighi dell'Impresa")
     paragrafo(TESTI_LEGALI['obblighi_impresa'])
     
     sottotitolo('Documentazione in Cantiere')
     docs = ["POS vidimato", "PSC (se previsto)", "DUVRI (se previsto)", "Registro infortuni",
-            "Libretti attrezzature", "SDS prodotti", "Attestati formazione", "Idoneita sanitarie"]
+            "Libretti attrezzature", "SDS prodotti", "Attestati formazione", "Idoneita sanitarie",
+            "Tesserini riconoscimento", "Verbali consegna DPI"]
     for doc in docs:
         riga('- ' + doc)
     
-    # ==================== CRONOPROGRAMMA ====================
+    # ==================== SEZ. 10: MACROCLIMA ====================
+    num_sez += 1
+    titolo_sezione(str(num_sez), 'Condizioni Climatiche - Macroclima')
+    
+    paragrafo("Il Datore di Lavoro valuta i rischi derivanti dalle condizioni climatiche stagionali (Art. 28, comma 1, D.Lgs 81/08) e adotta le misure di prevenzione e protezione conseguenti, in funzione del periodo di esecuzione dei lavori.", size=8)
+    
+    pdf.ln(1)
+    sottotitolo('Periodo Estivo - Rischio Colpo di Calore')
+    paragrafo(TESTI_LEGALI['macroclima_estate'], size=8)
+    
+    sottotitolo('Periodo Invernale - Rischio Ipotermia')
+    paragrafo(TESTI_LEGALI['macroclima_inverno'], size=8)
+    
+    # ==================== SEZ. 11: CRONOPROGRAMMA ====================
     if lavorazioni:
         num_sez += 1
         titolo_sezione(str(num_sez), 'Cronoprogramma Lavori')
@@ -1144,7 +1514,7 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
             giorno_fine = min(giorno_corrente + giorni_per_fase - 1, giorni_totali)
             periodo = f"Giorno {giorno_corrente} - {giorno_fine}"
             
-            tabella_riga([str(idx + 1), nome_fase, periodo, ''], cols, idx)
+            tabella_riga([str(idx + 1), nome_fase, periodo, ' '], cols, idx)
             giorno_corrente = giorno_fine + 1
         
         pdf.ln(3)
@@ -1154,9 +1524,108 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
         pdf.cell(W, 4, 'Nota: Le fasi possono sovrapporsi. Il cronoprogramma effettivo sara concordato con il CSE (ove previsto).', ln=1)
         pdf.set_text_color(0, 0, 0)
     
-    # ==================== VALUTAZIONE RISCHI ====================
+    # ==================== SEZ. 12: METODOLOGIA RISCHI ====================
     num_sez += 1
-    titolo_sezione(str(num_sez), 'Valutazione dei Rischi')
+    titolo_sezione(str(num_sez), 'Metodologia di Valutazione dei Rischi')
+    
+    paragrafo(TESTI_LEGALI['metodologia_rischi'], size=8)
+    
+    # Matrice PxG grafica
+    pdf.ln(3)
+    check_spazio(55)
+    sottotitolo('Matrice di Rischio P x G')
+    
+    # Disegna matrice 4x4
+    cell_w = 22
+    cell_h = 10
+    label_w = 30
+    x_start = ML + label_w + 2
+    y_start = pdf.get_y() + 2
+    
+    # Header colonne (Gravita)
+    pdf.set_font('Helvetica', 'B', 7)
+    pdf.set_text_color(*BLU_SCURO)
+    pdf.set_xy(x_start + cell_w * 0.5, y_start - 8)
+    pdf.cell(cell_w * 4, 5, 'GRAVITA (G)', align='C')
+    pdf.set_text_color(0, 0, 0)
+    
+    g_labels = ['G=1 Lieve', 'G=2 Medio', 'G=3 Grave', 'G=4 M.Grave']
+    pdf.set_font('Helvetica', 'B', 6)
+    for i, gl in enumerate(g_labels):
+        pdf.set_text_color(*BLU_SCURO)
+        pdf.set_xy(x_start + i * cell_w, y_start - 3)
+        pdf.cell(cell_w, 4, gl, align='C')
+    
+    # Header righe (Probabilita) + celle
+    p_labels = ['P=4 M.Prob.', 'P=3 Prob.', 'P=2 P.Prob.', 'P=1 Impr.']
+    matrice = [
+        [4, 8, 12, 16],
+        [3, 6, 9, 12],
+        [2, 4, 6, 8],
+        [1, 2, 3, 4]
+    ]
+    
+    for r, (pl, row) in enumerate(zip(p_labels, matrice)):
+        y_row = y_start + r * cell_h
+        # Label riga
+        pdf.set_font('Helvetica', 'B', 6)
+        pdf.set_text_color(*BLU_SCURO)
+        pdf.set_xy(ML, y_row)
+        pdf.cell(label_w, cell_h, pl, align='R')
+        
+        for c, val in enumerate(row):
+            x_cell = x_start + c * cell_w
+            # Colore cella
+            if val <= 2:
+                pdf.set_fill_color(*VERDE_CHIARO)
+                txt_color = VERDE_BADGE
+            elif val <= 4:
+                pdf.set_fill_color(*GIALLO_CHIARO)
+                txt_color = GIALLO_BADGE
+            elif val <= 8:
+                pdf.set_fill_color(255, 220, 200)
+                txt_color = ARANCIONE
+            else:
+                pdf.set_fill_color(*ROSSO_CHIARO)
+                txt_color = ROSSO_BADGE
+            
+            pdf.rect(x_cell, y_row, cell_w, cell_h, 'F')
+            pdf.set_draw_color(*GRIGIO_BORDO)
+            pdf.rect(x_cell, y_row, cell_w, cell_h, 'D')
+            pdf.set_draw_color(0, 0, 0)
+            
+            pdf.set_font('Helvetica', 'B', 10)
+            pdf.set_text_color(*txt_color)
+            pdf.set_xy(x_cell, y_row + 1)
+            pdf.cell(cell_w, cell_h - 2, str(val), align='C')
+    
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_y(y_start + 4 * cell_h + 4)
+    
+    # Legenda colori
+    legenda = [
+        (VERDE_CHIARO, VERDE_BADGE, 'R = 1-2: BASSO'),
+        (GIALLO_CHIARO, GIALLO_BADGE, 'R = 3-4: MEDIO'),
+        ((255, 220, 200), ARANCIONE, 'R = 6-8: ALTO'),
+        (ROSSO_CHIARO, ROSSO_BADGE, 'R = 9-16: MOLTO ALTO'),
+    ]
+    
+    for bg, fg, testo_leg in legenda:
+        check_spazio(6)
+        y_leg = pdf.get_y()
+        pdf.set_fill_color(*bg)
+        pdf.rect(ML + 4, y_leg + 0.5, 10, 4, 'F')
+        pdf.set_font('Helvetica', 'B', 7)
+        pdf.set_text_color(*fg)
+        pdf.set_xy(ML + 16, y_leg)
+        pdf.cell(W - 20, 5, testo_leg)
+        pdf.set_y(y_leg + 5.5)
+    
+    pdf.set_text_color(0, 0, 0)
+    
+    # ==================== SEZ. 13: VALUTAZIONE RISCHI ====================
+    num_sez += 1
+    titolo_sezione(str(num_sez), 'Valutazione dei Rischi per Fase Lavorativa')
     
     for lav_key in lavorazioni:
         if lav_key not in DIZIONARIO_LAVORAZIONI:
@@ -1359,12 +1828,219 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
             pdf.multi_cell(W, 4, 'Note RSPP: ' + pulisci_testo(rischi_ai.get('note_rspp', ''), 300))
             pdf.set_text_color(0, 0, 0)
     
-    # ==================== COORDINAMENTO ====================
+    # ==================== SEZ. 14: RUMORE E VIBRAZIONI ====================
     num_sez += 1
-    titolo_sezione(str(num_sez), 'Coordinamento')
+    titolo_sezione(str(num_sez), 'Esiti Valutazione Rumore e Vibrazioni')
+    
+    pdf.set_font('Helvetica', 'I', 8)
+    pdf.set_text_color(*GRIGIO_MEDIO)
+    pdf.set_x(ML)
+    pdf.cell(W, 4, 'Allegato XV, punto 3.2, lettera f): Esito del rapporto di valutazione del rumore e delle vibrazioni.', ln=1)
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(2)
+    
+    sottotitolo('Rumore - Art. 189-198 D.Lgs 81/08')
+    paragrafo("La valutazione dell'esposizione al rumore e condotta conformemente all'Art. 190 D.Lgs 81/08 e alle Linee Guida ISPESL. I valori di esposizione riportati derivano da banche dati validate (CPT, ISPESL) e/o da misurazioni fonometriche effettuate in condizioni operative analoghe.", size=8)
+    
+    # Tabella valori rumore per lavorazione
+    has_noise_data = False
+    noise_rows = []
+    seen_noise = set()
+    for lav_key in lavorazioni:
+        if lav_key in DIZIONARIO_LAVORAZIONI:
+            dati = DIZIONARIO_LAVORAZIONI[lav_key]
+            nome_fase = dati.get('nome', '')
+            val_esp = dati.get('valori_esposizione', {})
+            # Primary source: valori_esposizione
+            for k, v in val_esp.items():
+                if 'rumore' in k.lower() or 'db' in str(v).lower():
+                    dedup_key = f"{nome_fase}|{v}"
+                    if dedup_key not in seen_noise:
+                        noise_rows.append((nome_fase, v))
+                        seen_noise.add(dedup_key)
+                        has_noise_data = True
+            # Fallback: risks (only if no valori_esposizione for this phase)
+            if nome_fase not in [r[0] for r in noise_rows]:
+                for r in dati.get('rischi', []):
+                    if 'rumore' in r.get('nome', '').lower():
+                        desc = r.get('descrizione', '')
+                        if 'dB' in desc:
+                            dedup_key = f"{nome_fase}|{desc}"
+                            if dedup_key not in seen_noise:
+                                noise_rows.append((nome_fase, desc))
+                                seen_noise.add(dedup_key)
+                                has_noise_data = True
+    
+    if has_noise_data:
+        cols_r = [('Fase Lavorativa', 76), ('Livello Esposizione Lep,d / Lpicco', 110)]
+        tabella_header(cols_r)
+        for idx, (fase, val) in enumerate(noise_rows):
+            tabella_riga([fase, str(val)], cols_r, idx)
+        pdf.ln(2)
+    
+    # Limiti normativi
+    check_spazio(30)
+    pdf.set_fill_color(*GIALLO_CHIARO)
+    pdf.set_font('Helvetica', 'B', 7)
+    pdf.set_text_color(*GIALLO_BADGE)
+    pdf.set_x(ML)
+    pdf.cell(W, 5, '  VALORI LIMITE E DI AZIONE (Art. 189 D.Lgs 81/08)', ln=1, fill=True)
+    pdf.set_text_color(*GRIGIO_SCURO)
+    pdf.set_font('Helvetica', '', 7)
+    for txt in [
+        'Valore inferiore di azione: Lep,d = 80 dB(A) / Lpicco = 135 dB(C) -> Informazione, DPI a disposizione',
+        'Valore superiore di azione: Lep,d = 85 dB(A) / Lpicco = 137 dB(C) -> Formazione, obbligo DPI, sorveglianza sanitaria',
+        'Valore limite di esposizione: Lep,d = 87 dB(A) / Lpicco = 140 dB(C) -> Non deve essere superato (con DPI)'
+    ]:
+        pdf.set_x(ML + 4)
+        pdf.cell(W - 6, 4, txt, ln=1)
+    pdf.set_text_color(0, 0, 0)
+    
+    pdf.ln(3)
+    sottotitolo('Vibrazioni - Art. 199-205 D.Lgs 81/08')
+    paragrafo("La valutazione dell'esposizione a vibrazioni meccaniche (sistema mano-braccio HAV e corpo intero WBV) e condotta conformemente all'Art. 202 D.Lgs 81/08. I valori riportati derivano da banche dati validate e dalle dichiarazioni dei fabbricanti.", size=8)
+    
+    # Tabella valori vibrazioni
+    has_vibr_data = False
+    vibr_rows = []
+    seen_vibr = set()
+    for lav_key in lavorazioni:
+        if lav_key in DIZIONARIO_LAVORAZIONI:
+            dati = DIZIONARIO_LAVORAZIONI[lav_key]
+            nome_fase = dati.get('nome', '')
+            val_esp = dati.get('valori_esposizione', {})
+            # Primary source: valori_esposizione
+            for k, v in val_esp.items():
+                if 'vibrazion' in k.lower() or 'm/s' in str(v).lower():
+                    dedup_key = f"{nome_fase}|{v}"
+                    if dedup_key not in seen_vibr:
+                        vibr_rows.append((nome_fase, v))
+                        seen_vibr.add(dedup_key)
+                        has_vibr_data = True
+            # Fallback: risks (only if no valori_esposizione for this phase)
+            if nome_fase not in [r[0] for r in vibr_rows]:
+                for r in dati.get('rischi', []):
+                    if 'vibrazion' in r.get('nome', '').lower():
+                        desc = r.get('descrizione', '')
+                        if 'm/s' in desc:
+                            dedup_key = f"{nome_fase}|{desc}"
+                            if dedup_key not in seen_vibr:
+                                vibr_rows.append((nome_fase, desc))
+                                seen_vibr.add(dedup_key)
+                                has_vibr_data = True
+    
+    if has_vibr_data:
+        cols_v = [('Fase Lavorativa', 76), ('Livello Esposizione A(8) / Valore di Picco', 110)]
+        tabella_header(cols_v)
+        for idx, (fase, val) in enumerate(vibr_rows):
+            tabella_riga([fase, str(val)], cols_v, idx)
+        pdf.ln(2)
+    
+    check_spazio(25)
+    pdf.set_fill_color(*GIALLO_CHIARO)
+    pdf.set_font('Helvetica', 'B', 7)
+    pdf.set_text_color(*GIALLO_BADGE)
+    pdf.set_x(ML)
+    pdf.cell(W, 5, '  VALORI LIMITE E DI AZIONE VIBRAZIONI', ln=1, fill=True)
+    pdf.set_text_color(*GRIGIO_SCURO)
+    pdf.set_font('Helvetica', '', 7)
+    for txt in [
+        'HAV - Valore di azione: A(8) = 2.5 m/s2 | Valore limite: A(8) = 5 m/s2',
+        'WBV - Valore di azione: A(8) = 0.5 m/s2 | Valore limite: A(8) = 1.0 m/s2'
+    ]:
+        pdf.set_x(ML + 4)
+        pdf.cell(W - 6, 4, txt, ln=1)
+    pdf.set_text_color(0, 0, 0)
+    
+    if not has_noise_data and not has_vibr_data:
+        pdf.ln(2)
+        paragrafo("I valori di esposizione a rumore e vibrazioni sono riportati nelle schede di valutazione rischi per ciascuna fase lavorativa (Sezione precedente). Si rimanda alla documentazione specifica allegata al DVR aziendale per i dati completi delle misurazioni/valutazioni.", size=8)
+    
+    # ==================== SEZ. 15: MATRICE DPI ====================
+    num_sez += 1
+    titolo_sezione(str(num_sez), 'Matrice DPI per Mansione')
+    
+    pdf.set_font('Helvetica', 'I', 8)
+    pdf.set_text_color(*GRIGIO_MEDIO)
+    pdf.set_x(ML)
+    pdf.cell(W, 4, 'Allegato XV, punto 3.2, lettera i): Elenco dei Dispositivi di Protezione Individuale forniti ai lavoratori.', ln=1)
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(2)
+    
+    # Collect all unique DPI from all selected lavorazioni (with smart dedup)
+    all_dpi = {}
+    dpi_dedup_keys = set()
+    
+    def _dpi_dedup_key(nome):
+        """Normalizza nome DPI per deduplicazione."""
+        n = nome.lower().strip()
+        # Normalize similar items
+        n = n.replace('professionali', '').replace('professionale', '')
+        n = n.replace('antipolvere ', '').replace('per fumi', 'FFP2')
+        n = n.replace('per vapori organici', 'vapori org.')
+        # Remove extra spaces
+        while '  ' in n:
+            n = n.replace('  ', ' ')
+        return n.strip()
+    
+    for lav_key in lavorazioni:
+        if lav_key in DIZIONARIO_LAVORAZIONI:
+            for dpi in DIZIONARIO_LAVORAZIONI[lav_key].get('dpi_obbligatori', []):
+                if isinstance(dpi, dict):
+                    nome_dpi = dpi.get('nome', '')
+                    norma_dpi = dpi.get('norma', '')
+                else:
+                    nome_dpi = str(dpi)
+                    norma_dpi = ''
+                if nome_dpi:
+                    dk = _dpi_dedup_key(nome_dpi)
+                    if dk not in dpi_dedup_keys:
+                        dpi_dedup_keys.add(dk)
+                        all_dpi[nome_dpi] = norma_dpi
+    
+    if all_dpi:
+        # Full DPI table
+        dpi_cols = [('DPI', 68), ('Norma di Riferimento', 50), ('Consegnato', 22), ('Formazione', 22), ('Firma', 24)]
+        tabella_header(dpi_cols)
+        
+        for idx, (nome_dpi, norma) in enumerate(all_dpi.items()):
+            tabella_riga([
+                nome_dpi,
+                norma,
+                'Si',
+                'Si',
+                ' '
+            ], dpi_cols, idx)
+        
+        pdf.ln(2)
+        pdf.set_font('Helvetica', 'I', 7)
+        pdf.set_text_color(*GRIGIO_MEDIO)
+        pdf.set_x(ML)
+        pdf.multi_cell(W, 3.5, "I DPI sono forniti conformemente all'Art. 77 D.Lgs 81/08. Il Datore di Lavoro assicura che i DPI siano conformi ai requisiti del Reg. UE 2016/425, adeguati ai rischi, adattati alle condizioni del lavoratore, e mantiene in efficienza i DPI mediante manutenzione, riparazione e sostituzione.")
+        pdf.set_text_color(0, 0, 0)
+    else:
+        paragrafo("I DPI obbligatori per ciascuna fase lavorativa sono indicati nelle schede di valutazione rischi (Sez. 13). La consegna avviene mediante verbale firmato (Sez. 20).")
+    
+    # ==================== SEZ. 16: COORDINAMENTO ====================
+    num_sez += 1
+    titolo_sezione(str(num_sez), 'Coordinamento e Procedure PSC')
+    
+    sottotitolo('Coordinamento tra Imprese')
     paragrafo(TESTI_LEGALI['coordinamento'])
     
-    # ==================== EMERGENZE ====================
+    pdf.ln(2)
+    sottotitolo('Procedure complementari e di dettaglio del PSC')
+    
+    pdf.set_font('Helvetica', 'I', 8)
+    pdf.set_text_color(*GRIGIO_MEDIO)
+    pdf.set_x(ML)
+    pdf.cell(W, 4, 'Allegato XV, punto 3.2, lettere g) e h): Misure preventive integrative e procedure complementari al PSC.', ln=1)
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(1)
+    
+    paragrafo(TESTI_LEGALI['procedure_psc'])
+    
+    # ==================== SEZ. 17: EMERGENZE ====================
     num_sez += 1
     titolo_sezione(str(num_sez), 'Gestione Emergenze')
     paragrafo(TESTI_LEGALI['emergenza'])
@@ -1386,9 +2062,9 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
     
     pdf.set_font('Helvetica', 'B', 11)
     pdf.set_text_color(*GRIGIO_SCURO)
-    for num, desc in [('112', 'Numero Unico Emergenze'), ('115', 'Vigili del Fuoco'), ('118', 'Soccorso Sanitario')]:
+    for num_em, desc in [('112', 'Numero Unico Emergenze'), ('115', 'Vigili del Fuoco'), ('118', 'Soccorso Sanitario')]:
         pdf.set_x(ML + 7)
-        pdf.cell(15, 5, num, ln=0)
+        pdf.cell(15, 5, num_em, ln=0)
         pdf.set_font('Helvetica', '', 9)
         pdf.cell(W - 22, 5, f'  -  {desc}', ln=1)
         pdf.set_font('Helvetica', 'B', 11)
@@ -1408,7 +2084,16 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
     pdf.set_x(ML)
     pdf.cell(W, 5, 'PUNTO DI RACCOLTA: Ingresso cantiere', ln=1)
     
-    # ==================== CHECKLIST ALLEGATI ====================
+    # Procedure dettagliate emergenza
+    pdf.ln(3)
+    check_spazio(40)
+    sottotitolo('Procedura in caso di Infortunio')
+    paragrafo("1) Mantenere la calma e valutare la scena (sicurezza soccorritore). 2) Chiamare il 112 fornendo: indirizzo cantiere, numero feriti, dinamica. 3) L'addetto PS presta le prime cure (NON spostare l'infortunato se trauma spinale sospetto). 4) Accompagnare i soccorsi all'ingresso. 5) Il DdL compila la denuncia INAIL entro 2 giorni (48h).", size=8)
+    
+    sottotitolo('Procedura in caso di Incendio')
+    paragrafo("1) Dare l'allarme (voce / sirena). 2) Se incendio domabile: utilizzare estintori (solo personale formato). 3) Se non domabile: evacuare immediatamente. 4) Chiamare 115. 5) Recarsi al punto di raccolta. 6) Il preposto effettua il censimento.", size=8)
+    
+    # ==================== SEZ. 18: CHECKLIST ALLEGATI ====================
     num_sez += 1
     titolo_sezione(str(num_sez), 'Checklist Allegati')
     
@@ -1433,7 +2118,11 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
         ("Libretti attrezzature", "Da allegare"),
         ("Schede SDS sostanze", "Da allegare" if sostanze else "N.A."),
         (pimus_doc, pimus_stato),
-        ("Verbale consegna DPI", "Da allegare")
+        ("Verbale consegna DPI", "Da allegare"),
+        ("DVR aziendale (estratto)", "Da allegare"),
+        ("Rapporto valutazione rumore", "Da allegare"),
+        ("Iscrizione CCIAA", "Da allegare"),
+        ("Polizza assicurativa RCT/RCO", "Da allegare"),
     ]
     
     cols = [('Documento', 126), ('Stato', 60)]
@@ -1462,14 +2151,14 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
         pdf.line(ML, pdf.get_y(), ML + W, pdf.get_y())
         pdf.set_draw_color(0, 0, 0)
     
-    # ==================== FIRME ====================
+    # ==================== SEZ. 19: FIRME ====================
     num_sez += 1
     titolo_sezione(str(num_sez), 'Dichiarazione e Firme')
     
     pdf.set_font('Helvetica', '', 9)
     pdf.set_text_color(*GRIGIO_SCURO)
     pdf.set_x(ML)
-    pdf.multi_cell(W, 4.5, "Il sottoscritto DICHIARA che il presente POS e conforme all'Allegato XV D.Lgs 81/08, che i lavoratori sono informati/formati sui rischi specifici, e che i DPI saranno forniti e ne sara verificato l'utilizzo.")
+    pdf.multi_cell(W, 4.5, "Il sottoscritto, in qualita di Datore di Lavoro dell'impresa esecutrice, DICHIARA che:\n- Il presente POS e redatto conformemente all'Allegato XV, punto 3.2, del D.Lgs 81/2008;\n- I lavoratori sono stati informati e formati sui rischi specifici delle lavorazioni di cantiere;\n- I DPI sono stati forniti e ne viene verificato il corretto utilizzo;\n- Le attrezzature di lavoro sono conformi e regolarmente verificate;\n- La sorveglianza sanitaria e regolarmente effettuata dal Medico Competente;\n- Il presente POS sara aggiornato in caso di modifiche significative al cantiere.")
     pdf.set_text_color(0, 0, 0)
     
     pdf.ln(8)
@@ -1530,7 +2219,7 @@ def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavora
     pdf.cell(W, 5, f"PROSSIMA REVISIONE POS: {data_rev} (o in caso di modifiche significative al cantiere)", ln=1)
     pdf.set_text_color(0, 0, 0)
     
-    # ==================== VERBALE PRESA VISIONE ====================
+    # ==================== SEZ. 20: VERBALE PRESA VISIONE ====================
     if lavoratori:
         nuova_pagina()
         num_sez += 1
@@ -1694,6 +2383,27 @@ def crea_copertina_allegati():
 # ==============================================================================
 # SESSION STATE
 # ==============================================================================
+def parse_data_italiana(testo):
+    """Converte una stringa data italiana (GG/MM/AAAA) in un oggetto date. Restituisce None se non valida."""
+    if not testo or testo in ('N.D.', '', '__/__/____'):
+        return None
+    for fmt in ('%d/%m/%Y', '%d-%m-%Y', '%Y-%m-%d'):
+        try:
+            return datetime.strptime(testo.strip(), fmt).date()
+        except (ValueError, TypeError):
+            continue
+    return None
+
+
+def format_data_italiana(d):
+    """Converte un oggetto date in stringa GG/MM/AAAA."""
+    if d is None:
+        return ''
+    if isinstance(d, str):
+        return d
+    return d.strftime('%d/%m/%Y')
+
+
 def init_session():
     defaults = {
         'step': 1,
@@ -1940,7 +2650,7 @@ def render_step1():
     user_id = st.session_state.get('user_id', '')
     
     try:
-        from database import get_user_imprese, get_impresa_by_id, impresa_to_ditta_dict, get_lavoratori_template, get_attrezzature_template, save_impresa, save_lavoratori_template, save_attrezzature_template, ditta_to_impresa_dict
+        from database import get_user_imprese, get_impresa_by_id, impresa_to_ditta_dict, get_lavoratori_template, get_attrezzature_template, save_impresa, save_lavoratori_template, save_attrezzature_template, ditta_to_impresa_dict, find_impresa_by_piva
         db_available = True
         
         if user_id:
@@ -2140,45 +2850,42 @@ def render_step1():
                     # Salva nel database se checkbox selezionato
                     if salva_impresa_check:
                         if not db_available:
-                            st.error("❌ Database non disponibile - import fallito")
+                            st.error("❌ Database non disponibile")
                         elif not user_id:
-                            st.error(f"❌ User ID mancante: '{user_id}'")
+                            st.error("❌ User ID mancante")
                         else:
                             try:
-                                st.info(f"🔍 User ID dalla sessione: `{user_id}`")
                                 impresa_data = ditta_to_impresa_dict(st.session_state.ditta, st.session_state.addetti)
-                                st.info(f"📤 Dati da salvare: {impresa_data.get('ragione_sociale')}, P.IVA: {impresa_data.get('piva_cf')}")
+                                piva = impresa_data.get('piva_cf', '')
                                 
-                                # Provo a salvare con log dettagliato
-                                from database import get_supabase_client
-                                client = get_supabase_client()
+                                # Anti-duplicato: controlla se esiste gia con stessa P.IVA
+                                existing = find_impresa_by_piva(user_id, piva)
+                                is_update = existing is not None
                                 
-                                if not client:
-                                    st.error("❌ Client Supabase non disponibile")
-                                else:
-                                    st.info("✅ Client Supabase OK")
+                                # save_impresa gestisce automaticamente insert/update
+                                saved_id = save_impresa(user_id, impresa_data)
+                                
+                                if saved_id:
+                                    # Salva anche lavoratori e attrezzature se presenti
+                                    if st.session_state.lavoratori:
+                                        save_lavoratori_template(saved_id, st.session_state.lavoratori)
+                                    if st.session_state.attrezzature:
+                                        save_attrezzature_template(saved_id, st.session_state.attrezzature)
                                     
-                                    # Provo inserimento diretto con più dettagli
-                                    impresa_data['user_id'] = user_id
-                                    try:
-                                        response = client.table('imprese').insert(impresa_data).execute()
-                                        st.info(f"📋 Response: {response}")
-                                        if response.data:
-                                            saved_id = response.data[0].get('id')
-                                            st.success(f"✅ Impresa salvata! ID: {saved_id}")
-                                            st.session_state.step = 2
-                                            import time
-                                            time.sleep(2)
-                                            st.rerun()
-                                        else:
-                                            st.error(f"❌ Nessun dato nella response: {response}")
-                                    except Exception as insert_err:
-                                        st.error(f"❌ Errore INSERT: {str(insert_err)}")
+                                    if is_update:
+                                        st.success(f"✅ Anagrafica **{impresa_data.get('ragione_sociale')}** aggiornata!")
+                                    else:
+                                        st.success(f"✅ Anagrafica **{impresa_data.get('ragione_sociale')}** salvata!")
+                                    
+                                    st.session_state.step = 2
+                                    import time
+                                    time.sleep(1.5)
+                                    st.rerun()
+                                else:
+                                    st.error("❌ Errore nel salvataggio anagrafica")
                                         
                             except Exception as e:
-                                st.error(f"❌ Errore generale: {str(e)}")
-                                import traceback
-                                st.code(traceback.format_exc())
+                                st.error(f"❌ Errore: {str(e)}")
                     else:
                         # Se non salva, passa direttamente alla fase 2
                         st.session_state.step = 2
@@ -2256,7 +2963,9 @@ def render_step2():
                 idx_f = form_list.index(def_form) if def_form in form_list else 0
                 formazione = st.selectbox(f"Formazione {i+1}", form_list, index=idx_f, key=f"lf_{i}", label_visibility="collapsed")
             with cols[3]:
-                idoneita = st.text_input(f"Idoneità {i+1}", value=def_idon, key=f"li_{i}", placeholder="GG/MM/AAAA", label_visibility="collapsed")
+                idoneita_parsed = parse_data_italiana(def_idon)
+                idoneita_raw = st.date_input(f"Idoneità {i+1}", value=idoneita_parsed, key=f"li_{i}", format="DD/MM/YYYY", label_visibility="collapsed", min_value=date(2020, 1, 1), max_value=date(2035, 12, 31))
+                idoneita = format_data_italiana(idoneita_raw) if idoneita_raw else ''
             
             if nome:
                 lavoratori_temp.append({'nome': nome, 'mansione': mansione, 'formazione': formazione, 'idoneita': idoneita})
@@ -2470,10 +3179,15 @@ def render_step3():
                 placeholder="Es: 15 giorni"
             )
         with c3:
-            data_inizio = st.text_input(
+            data_inizio_default = parse_data_italiana(st.session_state.cantiere.get('data_inizio', '')) or date.today()
+            data_inizio_raw = st.date_input(
                 "Data inizio",
-                value=st.session_state.cantiere.get('data_inizio', date.today().strftime('%d/%m/%Y'))
+                value=data_inizio_default,
+                format="DD/MM/YYYY",
+                min_value=date(2020, 1, 1),
+                max_value=date(2035, 12, 31)
             )
+            data_inizio = format_data_italiana(data_inizio_raw)
         
         st.markdown("##### ⏰ Organizzazione Turni")
         c1, c2 = st.columns(2)
@@ -2545,7 +3259,9 @@ def render_step3():
                 with cols[2]:
                     a_matr = st.text_input(f"att_matr_{i}", value=def_matr, key=f"at_{i}", placeholder="N. matricola", label_visibility="collapsed")
                 with cols[3]:
-                    a_ver = st.text_input(f"att_ver_{i}", value=def_ver, key=f"av_{i}", placeholder="GG/MM/AAAA", label_visibility="collapsed")
+                    ver_parsed = parse_data_italiana(def_ver)
+                    a_ver_raw = st.date_input(f"att_ver_{i}", value=ver_parsed, key=f"av_{i}", format="DD/MM/YYYY", label_visibility="collapsed", min_value=date(2020, 1, 1), max_value=date(2035, 12, 31))
+                    a_ver = format_data_italiana(a_ver_raw) if a_ver_raw else ''
                 
                 if a_nome:
                     attrezzature_temp.append({
@@ -3153,13 +3869,25 @@ def render_step5():
                             if salva_anagrafica:
                                 # Converti ditta nel formato database
                                 impresa_data = ditta_to_impresa_dict(st.session_state.ditta, st.session_state.addetti)
+                                piva = impresa_data.get('piva_cf', '')
+                                
+                                # Anti-duplicato: save_impresa aggiorna se esiste gia
+                                try:
+                                    from database import find_impresa_by_piva
+                                    is_update = find_impresa_by_piva(user_id, piva) is not None
+                                except:
+                                    is_update = False
+                                
                                 saved_id = save_impresa(user_id, impresa_data)
                                 
                                 if saved_id:
                                     # Salva lavoratori e attrezzature collegati
                                     save_lavoratori_template(saved_id, st.session_state.lavoratori)
                                     save_attrezzature_template(saved_id, st.session_state.attrezzature)
-                                    st.info("💾 Anagrafica salvata! Potrai riutilizzarla per i prossimi POS.")
+                                    if is_update:
+                                        st.info("💾 Anagrafica aggiornata con i dati correnti.")
+                                    else:
+                                        st.info("💾 Anagrafica salvata! Potrai riutilizzarla per i prossimi POS.")
                         except Exception as e:
                             # Non bloccare il download se c'è errore nel contatore
                             print(f"Errore contatore/salvataggio: {e}")
@@ -3206,4 +3934,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()# THIS IS JUST A MARKER TO FIND THE END OF FILE
