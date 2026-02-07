@@ -1,17 +1,17 @@
-# 🏗️ CantiereSicuro - Generatore POS
+# 🏗️ POS FACILE - Generatore POS con AI
 
-Sistema completo per la generazione di Piani Operativi di Sicurezza conformi al D.Lgs 81/08.
+Sistema completo per la generazione di Piani Operativi di Sicurezza conformi al D.Lgs 81/08, progettato per geometri, ingegneri e consulenti sicurezza.
 
 ## 📁 Struttura File
 
 ```
-CantiereSicuro/
-├── app.py                 # App principale (generatore POS)
+POSFacile/
+├── app.py                 # App principale (generatore POS a 5 fasi)
 ├── main.py                # Entry point con landing + auth
-├── auth_manager.py        # Gestione login/registrazione
+├── landing.py             # Landing page (versione alternativa)
+├── auth_manager.py        # Gestione login/registrazione (Supabase Auth)
 ├── database.py            # Operazioni database Supabase
 ├── license_manager.py     # Validazione licenze Lemon Squeezy
-├── landing.py             # Landing page
 ├── requirements.txt       # Dipendenze Python
 ├── supabase_schema.sql    # Schema database (da eseguire su Supabase)
 └── .streamlit/
@@ -39,46 +39,50 @@ Crea la cartella `.streamlit` e il file `secrets.toml`:
 
 ```bash
 mkdir -p .streamlit
-cp secrets.toml .streamlit/secrets.toml
+```
+
+Contenuto di `.streamlit/secrets.toml`:
+
+```toml
+SUPABASE_URL = "https://xxx.supabase.co"
+SUPABASE_ANON_KEY = "eyJ..."
+OPENAI_API_KEY = "sk-..."
+
+[lemon_squeezy]
+api_key = "..."
+
+CHECKOUT_STARTER = "https://posfacile.lemonsqueezy.com/checkout/buy/..."
+CHECKOUT_PROFESSIONAL = "https://posfacile.lemonsqueezy.com/checkout/buy/..."
+CHECKOUT_UNLIMITED = "https://posfacile.lemonsqueezy.com/checkout/buy/..."
 ```
 
 ### 4. Avvia l'applicazione
 
-**Opzione A - Solo generatore POS (senza auth):**
-```bash
-streamlit run app.py
-```
-
-**Opzione B - Sistema completo con landing e auth:**
 ```bash
 streamlit run main.py
 ```
 
 ## 💰 Piani e Prezzi
 
-| Piano | Prezzo | POS/mese | Funzionalità |
-|-------|--------|----------|--------------|
-| **Free** | €0 | 1 totale | POS base, no salvataggio |
-| **Base** | €29,99/mese | 5 | Salva anagrafiche, storico |
-| **Pro** | €79,99/mese | 20 | AI avanzata, supporto prioritario |
-| **Unlimited** | €119,99/mese | ∞ | Tutto illimitato |
+| Piano | Prezzo | POS/mese | Target |
+|-------|--------|----------|--------|
+| **Free** | €0 | 1 totale | Prova su cantiere reale |
+| **Starter** | €9,99/mese | 3 | Professionista occasionale |
+| **Professional** | €24,99/mese | 10 | Geometra / consulente attivo |
+| **Unlimited** | €49,99/mese | ∞ | Studio tecnico / alto volume |
+
+## 🎯 Target
+
+Professionisti della sicurezza in cantiere: geometri, ingegneri civili/edili, RSPP, CSP/CSE, consulenti sicurezza. Chi redige POS per conto delle imprese esecutrici.
 
 ## 🔐 Autenticazione
 
-Il sistema usa **Supabase Auth** per:
-- Registrazione utenti con email
-- Login sicuro
-- Reset password via email
+Supabase Auth: registrazione con email, login, reset password.
 
 ## 💳 Pagamenti
 
-I pagamenti sono gestiti da **Lemon Squeezy**:
-1. L'utente acquista un piano
-2. Riceve una chiave licenza via email
-3. Inserisce la chiave nell'app
-4. L'app valida la chiave con l'API Lemon Squeezy
-5. Il piano viene attivato
+Lemon Squeezy: acquisto piano → chiave licenza via email → attivazione nell'app.
 
 ## 📄 Licenza
 
-Tutti i diritti riservati © 2025
+Tutti i diritti riservati © 2026 POS FACILE
