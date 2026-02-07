@@ -476,6 +476,29 @@ DIZIONARIO_LAVORAZIONI = {
         ],
         "attrezzature": ["Tagliapiastrelle elettrico", "Spatola dentata", "Frattazzo", "Livella laser"],
         "sostanze_pericolose": ["Colla cementizia (irritante)", "Fugante epossidico (sensibilizzante)", "Primer acrilico"]
+    },
+    "altro_generico": {
+        "nome": "Altra Lavorazione Generica",
+        "descrizione_tecnica": "Lavorazione specifica non presente nelle categorie standard. Richiede analisi puntuale dei rischi in base alla situazione di cantiere.",
+        "rischi": [
+            {"nome": "Rischi specifici dell'attivita", "gravita": "ALTA", "descrizione": "Rischi derivanti dalla natura specifica delle operazioni (Vedi Analisi AI)", "normativa": "Art. 28 D.Lgs 81/08"},
+            {"nome": "Interferenze", "gravita": "MEDIA", "descrizione": "Rischi da contatto con altre lavorazioni o personale", "normativa": "Art. 26 D.Lgs 81/08"},
+            {"nome": "Movimentazione carichi", "gravita": "MEDIA", "descrizione": "Possibile movimentazione manuale di materiali", "normativa": "Titolo VI D.Lgs 81/08"}
+        ],
+        "dpi_obbligatori": [
+            {"nome": "Scarpe antinfortunistiche", "norma": "EN ISO 20345", "uso": "Sempre"},
+            {"nome": "Guanti di protezione", "norma": "EN 388", "uso": "Durante manipolazioni"},
+            {"nome": "DPI specifici aggiuntivi", "norma": "Da definire", "uso": "In base all'analisi rischi"}
+        ],
+        "misure_prevenzione": [
+            "Analisi preventiva dei rischi specifici prima dell'inizio lavori",
+            "Delimitazione dell'area operativa",
+            "Utilizzo di attrezzature conformi e marchiate CE",
+            "Coordinamento con il preposto per le fasi critiche",
+            "Mantenere ordine e pulizia nell'area di lavoro"
+        ],
+        "attrezzature": ["Attrezzatura specifica da definire"],
+        "formazione_richiesta": ["Formazione specifica per la mansione", "Addestramento attrezzature"]
     }
 }
 
@@ -664,37 +687,47 @@ Se tutto compilato: score 100. Rispondi JSON: {{"score": 100, "elementi_presenti
 # PDF - VERSIONE ULTRA-SEMPLICE
 # ==============================================================================
 def pulisci_testo(text, max_len=200):
-    """Pulisce il testo per renderlo sicuro per il PDF"""
+    """
+    Pulisce il testo per il PDF mantenendo gli accenti italiani.
+    Usa la codifica latin-1 compatibile con i font standard di FPDF.
+    """
     if text is None:
         return "N.D."
     text = str(text).strip()
     if not text:
         return "N.D."
-    # Rimuovi a capo e tab
-    text = text.replace('\n', ' ').replace('\r', ' ').replace('\t', ' ')
-    # Converti caratteri accentati
-    sostituzioni = {
-        'à': 'a', 'è': 'e', 'é': 'e', 'ì': 'i', 'ò': 'o', 'ù': 'u',
-        'À': 'A', 'È': 'E', 'É': 'E', 'Ì': 'I', 'Ò': 'O', 'Ù': 'U',
-        '€': 'EUR', '°': ' ', ''': "'", ''': "'", '"': '"', '"': '"'
+    
+    # 1. Normalizzazione caratteri speciali che rompono i PDF standard
+    replacements = {
+        '€': 'EUR', 
+        '’': "'", '‘': "'", 
+        '“': '"', '”': '"', 
+        '–': '-', '…': '...'
     }
-    for old, new in sostituzioni.items():
+    for old, new in replacements.items():
         text = text.replace(old, new)
-    # Solo caratteri ASCII sicuri
-    result = ""
-    for c in text:
-        if 32 <= ord(c) <= 126:
-            result += c
-        else:
-            result += " "
-    # Rimuovi spazi multipli
-    while "  " in result:
-        result = result.replace("  ", " ")
+    
+    # Rimuovi a capo e tabulazioni eccessive
+    text = text.replace('\n', ' ').replace('\r', ' ').replace('\t', ' ')
+    
+    # 2. Gestione Encoding per FPDF (Helvetica standard usa Latin-1/Windows-1252)
+    try:
+        # Tenta di codificare in latin-1 (supporta accenti italiani). 
+        # 'replace' sostituisce caratteri non supportati (es. Emoji, Cinese) con '?'
+        text = text.encode('latin-1', 'replace').decode('latin-1')
+    except Exception:
+        # Fallback estremo
+        text = text.encode('ascii', 'ignore').decode('ascii')
+
+    # 3. Pulizia finale spazi
+    while "  " in text:
+        text = text.replace("  ", " ")
+        
     # Limita lunghezza
-    result = result.strip()
-    if len(result) > max_len:
-        result = result[:max_len-3] + "..."
-    return result if result else "N.D."
+    if max_len and len(text) > max_len:
+        text = text[:max_len-3] + "..."
+        
+    return text
 
 
 def genera_pdf_pos(ditta, cantiere, addetti, lavorazioni, rischi_ai=None, lavoratori=None, attrezzature=None, sostanze=None):
