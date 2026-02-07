@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-POS FACILE - Database Manager (Supabase)
+CANTIERE SICURO - Database Manager (Supabase)
 Gestisce tutte le operazioni con il database
 """
 
@@ -15,19 +15,10 @@ except ImportError:
 
 
 def get_supabase_client() -> Client:
-    """
-    Restituisce il client Supabase.
-    Priorità: client autenticato (dopo login) > client anon (nuovo).
-    """
+    """Restituisce il client Supabase"""
     if not SUPABASE_AVAILABLE:
         return None
     
-    # 1. Se esiste un client autenticato in session_state (post-login), usa quello
-    #    Questo è fondamentale per le RLS policies che richiedono auth.uid()
-    if hasattr(st, 'session_state') and 'supabase_client' in st.session_state:
-        return st.session_state.supabase_client
-    
-    # 2. Altrimenti crea un client anonimo (per operazioni pre-login)
     try:
         url = st.secrets.get("SUPABASE_URL", "")
         key = st.secrets.get("SUPABASE_ANON_KEY", "")
@@ -35,7 +26,7 @@ def get_supabase_client() -> Client:
         if url and key:
             return create_client(url, key)
     except Exception as e:
-        print(f"Errore connessione Supabase: {e}")
+        st.error(f"Errore connessione Supabase: {e}")
     
     return None
 
@@ -58,30 +49,6 @@ def get_user_profile(user_id: str) -> dict:
         return None
 
 
-def create_user_profile(user_id: str, email: str = None) -> bool:
-    """Crea un profilo utente se non esiste (fallback se il trigger Supabase non lo crea)"""
-    client = get_supabase_client()
-    if not client:
-        return False
-    
-    try:
-        data = {
-            'id': user_id,
-            'email': email or '',
-            'piano': 'free',
-            'pos_generati_totale': 0,
-            'pos_generati_mese': 0
-        }
-        client.table('profiles').insert(data).execute()
-        return True
-    except Exception as e:
-        # Se esiste già (duplicate key), non è un errore
-        if 'duplicate' in str(e).lower() or '23505' in str(e):
-            return True
-        print(f"Errore create_user_profile: {e}")
-        return False
-
-
 def update_user_profile(user_id: str, data: dict) -> bool:
     """Aggiorna il profilo utente"""
     client = get_supabase_client()
@@ -100,8 +67,8 @@ def get_pos_limits(piano: str) -> int:
     """Restituisce il limite POS per piano"""
     limits = {
         'free': 1,      # 1 POS totale per sempre
-        'base': 3,      # 3 POS al mese (Starter)
-        'pro': 10,      # 10 POS al mese (Professional)
+        'base': 5,      # 5 POS al mese
+        'pro': 20,      # 20 POS al mese
         'unlimited': 999999  # Illimitati
     }
     return limits.get(piano, 1)
@@ -216,8 +183,27 @@ def get_impresa_by_id(impresa_id: str) -> dict:
         return None
 
 
+def find_impresa_by_piva(user_id: str, piva_cf: str) -> dict:
+    """Cerca un'impresa esistente per P.IVA/CF dello stesso utente. Restituisce il record o None."""
+    client = get_supabase_client()
+    if not client or not piva_cf:
+        return None
+    
+    try:
+        response = client.table('imprese').select('*').eq('user_id', user_id).eq('piva_cf', piva_cf).execute()
+        if response.data and len(response.data) > 0:
+            return response.data[0]
+        return None
+    except Exception as e:
+        print(f"Errore find_impresa_by_piva: {e}")
+        return None
+
+
 def save_impresa(user_id: str, impresa_data: dict) -> str:
-    """Salva o aggiorna un'impresa. Restituisce l'ID."""
+    """
+    Salva o aggiorna un'impresa. Restituisce l'ID.
+    Se esiste gia un'impresa con la stessa P.IVA per lo stesso utente, aggiorna quella esistente.
+    """
     client = get_supabase_client()
     if not client:
         return None
@@ -226,11 +212,18 @@ def save_impresa(user_id: str, impresa_data: dict) -> str:
         impresa_id = impresa_data.pop('id', None)
         impresa_data['user_id'] = user_id
         
+        # Anti-duplicato: cerca per P.IVA se non abbiamo un ID esplicito
+        if not impresa_id:
+            piva = impresa_data.get('piva_cf', '')
+            existing = find_impresa_by_piva(user_id, piva)
+            if existing:
+                impresa_id = existing.get('id')
+        
         if impresa_id:
-            # Update
+            # Update esistente
             response = client.table('imprese').update(impresa_data).eq('id', impresa_id).execute()
         else:
-            # Insert
+            # Insert nuova
             response = client.table('imprese').insert(impresa_data).execute()
         
         if response.data:
