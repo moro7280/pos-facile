@@ -1,5 +1,5 @@
 -- ============================================================================
--- CANTIERE SICURO - SCHEMA DATABASE SUPABASE
+-- POS FACILE - SCHEMA DATABASE SUPABASE
 -- Esegui questo SQL nel SQL Editor di Supabase
 -- ============================================================================
 
