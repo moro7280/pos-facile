@@ -48,8 +48,30 @@ def inject_css():
             font-family: 'Inter', sans-serif !important;
         }
         
-        #MainMenu, footer, header {visibility: hidden;}
+        /* ===== FIX PRIVACY: NASCONDI ELEMENTI STREAMLIT ===== */
+        
+        /* Nasconde il menu "hamburger" in alto a destra */
+        #MainMenu {visibility: hidden;}
+        
+        /* Nasconde il footer "Made with Streamlit" */
+        footer {visibility: hidden;}
+        
+        /* Nasconde la barra colorata in alto */
+        header {visibility: hidden;}
+        
+        /* Nasconde il pulsante "Deploy" */
         .stDeployButton {display: none;}
+        
+        /* Nasconde la toolbar in basso a destra (quella col link Github) */
+        [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
+        
+        /* Nasconde il widget di stato in alto a destra */
+        [data-testid="stStatusWidget"] {visibility: hidden !important;}
+        
+        /* Nasconde badge specifici di Streamlit Cloud */
+        .viewerBadge_container__1QSob {display: none !important;}
+        
+        /* ================================================= */
         
         .block-container {
             padding-top: 1rem !important;
