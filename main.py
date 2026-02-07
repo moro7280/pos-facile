@@ -39,7 +39,7 @@ def go_to_register():
 
 
 def inject_css():
-    """CSS pulito e professionale"""
+    """CSS pulito e professionale - FIX PRIVACY DEFINITIVO"""
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -48,28 +48,27 @@ def inject_css():
             font-family: 'Inter', sans-serif !important;
         }
         
-        /* ===== FIX PRIVACY: NASCONDI ELEMENTI STREAMLIT ===== */
+        /* ===== FIX PRIVACY: NASCONDI TUTTO ===== */
         
-        /* Nasconde il menu "hamburger" in alto a destra */
-        #MainMenu {visibility: hidden;}
+        /* 1. Nasconde il menu in alto a destra (hamburger) */
+        #MainMenu {visibility: hidden !important; display: none !important;}
         
-        /* Nasconde il footer "Made with Streamlit" */
-        footer {visibility: hidden;}
+        /* 2. Nasconde il footer standard */
+        footer {visibility: hidden !important; display: none !important;}
         
-        /* Nasconde la barra colorata in alto */
-        header {visibility: hidden;}
+        /* 3. Nasconde la barra colorata in alto */
+        header {visibility: hidden !important; display: none !important;}
         
-        /* Nasconde il pulsante "Deploy" */
-        .stDeployButton {display: none;}
-        
-        /* Nasconde la toolbar in basso a destra (quella col link Github) */
+        /* 4. Nasconde la toolbar sviluppatore (in basso a destra/alto a destra) */
         [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
         
-        /* Nasconde il widget di stato in alto a destra */
-        [data-testid="stStatusWidget"] {visibility: hidden !important;}
+        /* 5. Nasconde il badge "Viewer" di Streamlit Cloud (quello col tuo nome/github) */
+        /* Usa il selettore Jolly (*=) per prendere qualsiasi classe contenga 'viewerBadge' */
+        div[class*="viewerBadge"] {visibility: hidden !important; display: none !important;}
+        .viewerBadge_container__1QSob {display: none !important;} /* Vecchio selettore per sicurezza */
         
-        /* Nasconde badge specifici di Streamlit Cloud */
-        .viewerBadge_container__1QSob {display: none !important;}
+        /* 6. Nasconde il pulsante Deploy */
+        .stDeployButton {display: none !important;}
         
         /* ================================================= */
         
