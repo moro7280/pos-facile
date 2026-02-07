@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-CANTIERE SICURO - Database Manager (Supabase)
+POS FACILE - Database Manager (Supabase)
 Gestisce tutte le operazioni con il database
 """
 
@@ -67,8 +67,8 @@ def get_pos_limits(piano: str) -> int:
     """Restituisce il limite POS per piano"""
     limits = {
         'free': 1,      # 1 POS totale per sempre
-        'base': 5,      # 5 POS al mese
-        'pro': 20,      # 20 POS al mese
+        'base': 3,      # 3 POS al mese (Starter)
+        'pro': 10,      # 10 POS al mese (Professional)
         'unlimited': 999999  # Illimitati
     }
     return limits.get(piano, 1)
