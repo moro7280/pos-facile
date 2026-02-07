@@ -2702,18 +2702,26 @@ def render_step5():
         </div>
         """, unsafe_allow_html=True)
         
+        # Link diretti ai checkout (Fallback hardcoded per garantire il funzionamento)
+        LINK_STARTER = "https://posfacile.lemonsqueezy.com/checkout/buy/6154ced3-2892-45fa-a7ef-f08f97c24635"
+        LINK_PRO = "https://posfacile.lemonsqueezy.com/checkout/buy/ff234bb0-1d0b-433c-8fbb-a63e907755e6"
+        LINK_UNLIMITED = "https://posfacile.lemonsqueezy.com/checkout/buy/59eda380-a79c-45aa-9cba-6962a249a71d"
+
         # Pulsanti upgrade
         st.markdown("#### 🚀 Passa a un piano superiore")
         col1, col2, col3 = st.columns(3)
+        
+        # Recupera link dai secrets o usa quelli diretti come fallback sicuro
+        checkout_starter = st.secrets.get("CHECKOUT_STARTER", LINK_STARTER)
+        checkout_professional = st.secrets.get("CHECKOUT_PROFESSIONAL", LINK_PRO)
+        checkout_unlimited = st.secrets.get("CHECKOUT_UNLIMITED", LINK_UNLIMITED)
+
         with col1:
-            checkout_starter = st.secrets.get("CHECKOUT_STARTER", "#")
-            st.markdown(f'<a href="{checkout_starter}" target="_blank" style="text-decoration:none;"><div style="background:#3B82F6;color:white;padding:15px;border-radius:10px;text-align:center;font-weight:600;">⭐ Starter - €9,99/mese<br><small>3 POS/mese</small></div></a>', unsafe_allow_html=True)
+            st.markdown(f'<a href="{checkout_starter}" target="_blank" style="text-decoration:none;"><div style="background:#3B82F6;color:white;padding:15px;border-radius:10px;text-align:center;font-weight:600;box-shadow: 0 4px 6px rgba(0,0,0,0.1);transition: transform 0.2s;">⭐ Starter - €9,99/mese<br><small>3 POS/mese</small></div></a>', unsafe_allow_html=True)
         with col2:
-            checkout_professional = st.secrets.get("CHECKOUT_PROFESSIONAL", "#")
-            st.markdown(f'<a href="{checkout_professional}" target="_blank" style="text-decoration:none;"><div style="background:#FF6600;color:white;padding:15px;border-radius:10px;text-align:center;font-weight:600;">💎 Professional - €24,99/mese<br><small>10 POS/mese</small></div></a>', unsafe_allow_html=True)
+            st.markdown(f'<a href="{checkout_professional}" target="_blank" style="text-decoration:none;"><div style="background:#FF6600;color:white;padding:15px;border-radius:10px;text-align:center;font-weight:600;box-shadow: 0 4px 6px rgba(0,0,0,0.1);transition: transform 0.2s;">💎 Professional - €24,99/mese<br><small>10 POS/mese</small></div></a>', unsafe_allow_html=True)
         with col3:
-            checkout_unlimited = st.secrets.get("CHECKOUT_UNLIMITED", "#")
-            st.markdown(f'<a href="{checkout_unlimited}" target="_blank" style="text-decoration:none;"><div style="background:#10B981;color:white;padding:15px;border-radius:10px;text-align:center;font-weight:600;">🚀 Unlimited - €49,99/mese<br><small>POS illimitati</small></div></a>', unsafe_allow_html=True)
+            st.markdown(f'<a href="{checkout_unlimited}" target="_blank" style="text-decoration:none;"><div style="background:#10B981;color:white;padding:15px;border-radius:10px;text-align:center;font-weight:600;box-shadow: 0 4px 6px rgba(0,0,0,0.1);transition: transform 0.2s;">🚀 Unlimited - €49,99/mese<br><small>POS illimitati</small></div></a>', unsafe_allow_html=True)
         
         st.markdown("---")
         if st.button("← Torna indietro", use_container_width=True):
