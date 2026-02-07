@@ -15,16 +15,22 @@ except ImportError:
 
 
 def get_supabase_client() -> Client:
-    """Restituisce il client Supabase"""
+    """Restituisce il client Supabase, riutilizzando quello in sessione se disponibile"""
     if not SUPABASE_AVAILABLE:
         return None
+    
+    # Riusa il client autenticato se esiste
+    if 'supabase_client' in st.session_state:
+        return st.session_state.supabase_client
     
     try:
         url = st.secrets.get("SUPABASE_URL", "")
         key = st.secrets.get("SUPABASE_ANON_KEY", "")
         
         if url and key:
-            return create_client(url, key)
+            client = create_client(url, key)
+            st.session_state.supabase_client = client
+            return client
     except Exception as e:
         print(f"Errore connessione Supabase: {e}")
     
@@ -115,8 +121,12 @@ def logout_user():
     st.session_state.user_id = None
     st.session_state.user_email = None
     
+    # Rimuovi il client autenticato dalla sessione
+    if 'supabase_client' in st.session_state:
+        del st.session_state.supabase_client
+    
     # Reset altri stati dell'app
-    keys_to_clear = ['ditta', 'cantiere', 'lavoratori', 'attrezzature', 'sostanze', 'step']
+    keys_to_clear = ['ditta', 'cantiere', 'lavoratori', 'attrezzature', 'sostanze', 'step', 'user_profile', 'user_plan']
     for key in keys_to_clear:
         if key in st.session_state:
             del st.session_state[key]
