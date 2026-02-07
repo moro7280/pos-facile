@@ -239,13 +239,20 @@ def render_subscription_sidebar():
     
     try:
         # Tenta di importare le funzioni DB solo se il file esiste
-        from database import get_user_profile, activate_license as db_act_func, create_user_profile
+        from database import get_user_profile, activate_license as db_act_func
         db_available = True
         db_activate_license_func = db_act_func
+        
+        # create_user_profile è opzionale
+        try:
+            from database import create_user_profile
+        except ImportError:
+            create_user_profile = None
+        
         profile = get_user_profile(user_id)
         
         # Se il profilo non esiste, proviamo a crearlo
-        if not profile:
+        if not profile and create_user_profile:
             try:
                 create_user_profile(user_id)
                 profile = get_user_profile(user_id)
@@ -254,10 +261,9 @@ def render_subscription_sidebar():
                 
     except ImportError:
         db_available = False
-        # st.sidebar.warning("Modulo database non trovato. Uso profilo in memoria.")
     except Exception as e:
         db_available = False
-        # st.sidebar.error(f"Errore connessione DB: {e}. Uso profilo in memoria.")
+        print(f"Errore connessione DB: {e}")
     
     # Se ancora non abbiamo un profilo (no DB o errore), usa quello di default in session state
     if not profile:
