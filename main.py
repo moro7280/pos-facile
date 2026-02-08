@@ -902,23 +902,20 @@ def main():
     init_auth_state()
     
     # ---- CALLBACK: gestisce redirect da email Supabase ----
-    # Deve essere PRIMA del routing. Se gestisce un callback, fa rerun.
-    if AUTH_AVAILABLE:
-        if not st.session_state.get('_cb_done', False):
-            handled = handle_auth_callback()
-            if handled:
-                st.session_state._cb_done = True
-                st.rerun()
-        else:
-            # Reset flag dopo il rerun
-            st.session_state._cb_done = False
+    if AUTH_AVAILABLE and not st.session_state.get('_cb_done', False):
+        handled = handle_auth_callback()
+        if handled:
+            st.session_state._cb_done = True
+            st.rerun()
+    if st.session_state.get('_cb_done', False):
+        st.session_state._cb_done = False
     
     # ---- ROUTING ----
     user_logged_in = is_authenticated()
-    needs_password_reset = (st.session_state.get('auth_mode') == 'update_password')
+    needs_reset = (st.session_state.get('auth_mode') == 'update_password')
     
-    if user_logged_in and not needs_password_reset:
-        # --> DASHBOARD (utente autenticato, non in recovery)
+    if user_logged_in and not needs_reset:
+        # --> DASHBOARD
         st.markdown("""
         <style>
             [data-testid="stSidebar"] {
@@ -952,11 +949,11 @@ def main():
         except ImportError:
             st.error("❌ File app.py non trovato.")
     
-    elif st.session_state.get('show_auth', False) or needs_password_reset:
+    elif st.session_state.get('show_auth', False) or needs_reset:
         # --> AUTH / RECOVERY
         col1, col2, col3 = st.columns([1, 2, 1])
         with col1:
-            if not needs_password_reset:
+            if not needs_reset:
                 if st.button("← Torna alla Home", key="back_home"):
                     st.session_state.show_auth = False
                     st.session_state.auth_mode = 'login'
