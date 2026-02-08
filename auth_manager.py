@@ -101,40 +101,49 @@ def logout_user():
     st.session_state.user = None
     st.rerun()
 
-# --- CALLBACK & JS FIX (Modificato per catturare errori nel hash) ---
+# --- CALLBACK & JS FIX (IL CUORE DEL PROBLEMA) ---
 def handle_auth_callback():
-    # 1. FIX JS: Cattura SIA access_token CHE error nell'hash (#)
+    # 1. FIX JS: Cattura hash (#) dalla finestra PRINCIPALE (parent)
+    # Senza 'parent', lo script cerca nel suo iframe vuoto e fallisce.
     js = """
     <script>
-    const hash = window.location.hash;
-    if (hash && (hash.includes('access_token') || hash.includes('error'))) {
-        const params = new URLSearchParams(hash.substring(1));
-        const newUrl = new URL(window.location.href);
-        params.forEach((v, k) => newUrl.searchParams.set(k, v));
-        newUrl.hash = '';
-        window.location.href = newUrl.toString();
+    try {
+        var parentLocation = window.parent.location;
+        if (parentLocation.hash && (parentLocation.hash.includes('access_token') || parentLocation.hash.includes('error'))) {
+            console.log("Hash detected in parent, fixing...");
+            var params = new URLSearchParams(parentLocation.hash.substring(1));
+            var newUrl = new URL(parentLocation.href);
+            
+            // Sposta i parametri dall'hash alla query string (?) dove Python può leggerli
+            params.forEach((v, k) => newUrl.searchParams.set(k, v));
+            
+            // Pulisce l'hash e ricarica
+            newUrl.hash = '';
+            parentLocation.href = newUrl.toString();
+        }
+    } catch (e) {
+        console.log("Error accessing parent window:", e);
     }
     </script>
     """
     components.html(js, height=0, width=0)
 
-    # 2. Gestione parametri URL (ora puliti dal JS)
+    # 2. Gestione parametri URL (ora visibili grazie al JS)
     params = st.query_params
     
-    # GESTIONE ERRORI (Ora visibili grazie al JS sopra)
+    # GESTIONE ERRORI
     if "error" in params:
         error_code = params.get("error_code", "")
         desc = params.get("error_description", "Errore sconosciuto")
         
         st.session_state.show_auth = True
-        st.session_state.auth_mode = 'login' # Torna al login per riprovare
+        st.session_state.auth_mode = 'login' 
         
         if error_code == "otp_expired":
-            st.session_state.auth_message = ("error", "⚠️ Link scaduto o già utilizzato. Richiedi un nuovo reset password.")
+            st.session_state.auth_message = ("error", "⚠️ Link scaduto. Richiedi un nuovo reset.")
         else:
             st.session_state.auth_message = ("error", f"❌ Errore: {desc}")
             
-        # Pulisci URL per evitare loop
         st.query_params.clear()
         return True
 
@@ -147,20 +156,14 @@ def handle_auth_callback():
                 if res.user:
                     st.session_state.authenticated = True
                     st.session_state.user = res.user
-                    # Gestione NAV
                     nav = params.get("nav")
-                    if nav == "update_password":
-                        st.session_state.auth_mode = "update_password"
-                    elif nav == "login":
-                        st.session_state.auth_mode = "login"
-                        st.session_state.auth_message = ("success", "Email confermata!")
-                    
+                    if nav == "update_password": st.session_state.auth_mode = "update_password"
+                    elif nav == "login": st.session_state.auth_mode = "login"; st.session_state.auth_message = ("success", "Email confermata!")
                     st.query_params.clear()
                     return True
-            except Exception:
-                pass
+            except: pass
     
-    # Token implicito (Recovery da hash spostato in query)
+    # Token implicito (Recovery da hash spostato in query dal JS)
     if "access_token" in params:
         client = get_supabase_client()
         if client:
@@ -170,13 +173,13 @@ def handle_auth_callback():
                 st.session_state.user = client.auth.get_user().user
                 
                 nav = params.get("nav")
+                # Se c'è nav=update_password o type=recovery, forza modalità update
                 if nav == "update_password" or params.get("type") == "recovery":
                     st.session_state.auth_mode = "update_password"
                 
                 st.query_params.clear()
                 return True
-            except:
-                pass
+            except: pass
                 
     return False
 
@@ -184,7 +187,6 @@ def handle_auth_callback():
 def render_auth_page(default_mode='login'):
     st.title("🔐 Accesso Utente")
     
-    # Mostra messaggio
     if st.session_state.auth_message:
         tipo, testo = st.session_state.auth_message
         if tipo == 'success': st.success(testo)
@@ -247,7 +249,7 @@ def render_auth_page(default_mode='login'):
                         st.success("Fatto! Ora accedi.")
                         time.sleep(2)
                         st.session_state.auth_mode = 'login'
-                        logout_user() # Forza logout pulito
+                        logout_user() 
                         st.rerun()
                     else: st.error(msg)
                 else: st.error("Password non valide")
