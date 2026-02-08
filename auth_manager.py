@@ -83,7 +83,7 @@ def register_user(email: str, password: str) -> tuple:
     """Registra un nuovo utente con redirect URL per conferma email."""
     client = get_supabase_client()
     if not client:
-        return False, "Servizio non disponibile"
+        return False, "⚠️ Servizio temporaneamente non disponibile. Riprova tra qualche minuto."
     
     try:
         app_url = get_app_url()
@@ -97,23 +97,31 @@ def register_user(email: str, password: str) -> tuple:
         if response.user:
             return True, "Registrazione completata! Controlla la tua email e clicca il link di conferma."
         else:
-            return False, "Errore durante la registrazione"
+            return False, "❌ Errore durante la registrazione. Riprova."
             
     except Exception as e:
         error_msg = str(e)
         if "User already registered" in error_msg:
-            return False, "Email gia registrata. Prova ad accedere."
+            return False, "📧 Email gia registrata. Prova ad accedere."
         elif "Password should be at least" in error_msg:
-            return False, "La password deve essere di almeno 6 caratteri"
+            return False, "🔒 La password deve essere di almeno 6 caratteri."
+        elif "rate limit" in error_msg.lower():
+            return False, "⏳ Troppe richieste. Attendi qualche minuto e riprova."
+        elif "already been registered" in error_msg.lower() or "already registered" in error_msg.lower():
+            return False, "📧 Email gia registrata. Prova ad accedere."
+        elif "invalid" in error_msg.lower() and "email" in error_msg.lower():
+            return False, "📧 Indirizzo email non valido."
+        elif "signup" in error_msg.lower() and "disabled" in error_msg.lower():
+            return False, "🚫 Le registrazioni sono temporaneamente sospese. Riprova piu tardi."
         else:
-            return False, f"Errore: {error_msg}"
+            return False, f"❌ Si e verificato un errore. Riprova tra qualche minuto."
 
 
 def login_user(email: str, password: str) -> tuple:
     """Effettua il login."""
     client = get_supabase_client()
     if not client:
-        return False, "Servizio non disponibile"
+        return False, "⚠️ Servizio temporaneamente non disponibile. Riprova tra qualche minuto."
     
     try:
         response = client.auth.sign_in_with_password({
@@ -128,16 +136,20 @@ def login_user(email: str, password: str) -> tuple:
             st.session_state.user_email = response.user.email
             return True, "Login effettuato con successo!"
         else:
-            return False, "Credenziali non valide"
+            return False, "❌ Email o password non corretti."
             
     except Exception as e:
         error_msg = str(e)
         if "Invalid login credentials" in error_msg:
-            return False, "Email o password non corretti"
+            return False, "❌ Email o password non corretti."
         elif "Email not confirmed" in error_msg:
-            return False, "Email non ancora confermata. Controlla la tua casella di posta."
+            return False, "📧 Email non ancora confermata. Controlla la tua casella di posta e clicca il link di conferma."
+        elif "rate limit" in error_msg.lower():
+            return False, "⏳ Troppi tentativi. Attendi qualche minuto e riprova."
+        elif "invalid" in error_msg.lower() and "email" in error_msg.lower():
+            return False, "📧 Indirizzo email non valido."
         else:
-            return False, f"Errore: {error_msg}"
+            return False, "❌ Si e verificato un errore. Riprova tra qualche minuto."
 
 
 def logout_user():
@@ -164,7 +176,7 @@ def reset_password(email: str) -> tuple:
     """Invia email per reset password con redirect URL."""
     client = get_supabase_client()
     if not client:
-        return False, "Servizio non disponibile"
+        return False, "⚠️ Servizio temporaneamente non disponibile. Riprova tra qualche minuto."
     
     try:
         app_url = get_app_url()
@@ -174,28 +186,39 @@ def reset_password(email: str) -> tuple:
         else:
             client.auth.reset_password_email(email)
         
-        return True, "Email inviata! Controlla la posta e clicca il link per reimpostare la password."
+        return True, "📧 Email inviata! Controlla la posta e clicca il link per reimpostare la password."
     except Exception as e:
-        return False, f"Errore: {str(e)}"
+        error_msg = str(e).lower()
+        if "rate limit" in error_msg:
+            return False, "⏳ Troppe richieste. Attendi qualche minuto e riprova."
+        elif "user not found" in error_msg:
+            return False, "📧 Nessun account trovato con questa email."
+        else:
+            return False, "❌ Si e verificato un errore. Riprova tra qualche minuto."
 
 
 def update_user_password(new_password: str) -> tuple:
     """Aggiorna la password dell'utente (durante il flusso di recovery)."""
     client = get_supabase_client()
     if not client:
-        return False, "Servizio non disponibile"
+        return False, "⚠️ Servizio temporaneamente non disponibile. Riprova tra qualche minuto."
     
     try:
         response = client.auth.update_user({"password": new_password})
         if response and response.user:
             return True, "Password aggiornata con successo! Ora puoi accedere."
         else:
-            return False, "Errore durante l'aggiornamento della password."
+            return False, "❌ Errore durante l'aggiornamento della password. Riprova."
     except Exception as e:
         error_msg = str(e)
         if "same_password" in error_msg.lower() or "same password" in error_msg.lower():
-            return False, "La nuova password deve essere diversa dalla precedente."
-        return False, f"Errore: {error_msg}"
+            return False, "🔒 La nuova password deve essere diversa dalla precedente."
+        elif "Password should be at least" in error_msg:
+            return False, "🔒 La password deve essere di almeno 6 caratteri."
+        elif "rate limit" in error_msg.lower():
+            return False, "⏳ Troppe richieste. Attendi qualche minuto e riprova."
+        else:
+            return False, "❌ Si e verificato un errore. Riprova tra qualche minuto."
 
 
 def is_authenticated() -> bool:
@@ -238,7 +261,7 @@ def handle_auth_callback():
         desc = str(error_desc or error).replace("+", " ")
         st.session_state.show_auth = True
         st.session_state.auth_mode = 'login'
-        st.session_state.auth_message = ('error', f"Errore: {desc}")
+        st.session_state.auth_message = ('error', f"❌ Si e verificato un errore: {desc}")
         _clear_auth_params()
         return True
     
@@ -285,7 +308,7 @@ def _handle_code_exchange(code: str) -> bool:
     if not client:
         st.session_state.show_auth = True
         st.session_state.auth_mode = 'login'
-        st.session_state.auth_message = ('error', "Servizio di autenticazione non disponibile.")
+        st.session_state.auth_message = ('error', "Servizio di autenticazione non disponibile. Riprova tra qualche minuto.")
         _clear_auth_params()
         return True
     
@@ -336,7 +359,7 @@ def _handle_code_exchange(code: str) -> bool:
         else:
             st.session_state.show_auth = True
             st.session_state.auth_mode = 'login'
-            st.session_state.auth_message = ('error', "Link non valido o scaduto. Riprova.")
+            st.session_state.auth_message = ('error', "❌ Link non valido o scaduto. Riprova la registrazione o il recupero password.")
             _clear_auth_params()
             return True
             
@@ -349,11 +372,11 @@ def _handle_code_exchange(code: str) -> bool:
         
         if "already" in error_msg or "expired" in error_msg or "invalid" in error_msg or "used" in error_msg or "redeemed" in error_msg:
             st.session_state.auth_message = ('warning', 
-                "Questo link e gia stato utilizzato o e scaduto. "
+                "⚠️ Questo link e gia stato utilizzato o e scaduto. "
                 "Se hai gia confermato l'email, puoi accedere normalmente.")
         else:
             st.session_state.auth_message = ('warning', 
-                "Link gia utilizzato o scaduto. Se hai confermato l'email, prova ad accedere.")
+                "⚠️ Link gia utilizzato o scaduto. Se hai confermato l'email, prova ad accedere.")
         
         _clear_auth_params()
         return True
@@ -453,7 +476,7 @@ def render_login_form():
                     success, msg = login_user(email, password)
                     if success: st.success(msg); st.rerun()
                     else: st.error(msg)
-            else: st.warning("Inserisci email e password")
+            else: st.warning("⚠️ Inserisci email e password")
     
     st.markdown("---")
     col1, col2 = st.columns(2)
@@ -476,11 +499,11 @@ def render_register_form():
         confirm = st.text_input("🔒 Conferma Password *", type="password")
         if st.form_submit_button("🚀 Registrati Gratis →", use_container_width=True, type="primary"):
             if not email:
-                st.error("Inserisci la tua email")
+                st.error("⚠️ Inserisci la tua email")
             elif password != confirm:
-                st.error("Le password non coincidono")
+                st.error("🔒 Le password non coincidono")
             elif len(password) < 6:
-                st.error("Password troppo corta (minimo 6 caratteri)")
+                st.error("🔒 Password troppo corta (minimo 6 caratteri)")
             else:
                 with st.spinner("Registrazione..."):
                     success, msg = register_user(email, password)
@@ -504,11 +527,11 @@ def render_new_password_form():
         
         if st.form_submit_button("✅ Aggiorna Password", use_container_width=True, type="primary"):
             if not new_password:
-                st.error("Inserisci la nuova password")
+                st.error("⚠️ Inserisci la nuova password")
             elif new_password != confirm_password:
-                st.error("Le password non coincidono")
+                st.error("🔒 Le password non coincidono")
             elif len(new_password) < 6:
-                st.error("Password troppo corta (minimo 6 caratteri)")
+                st.error("🔒 Password troppo corta (minimo 6 caratteri)")
             else:
                 with st.spinner("Aggiornamento password..."):
                     success, msg = update_user_password(new_password)
@@ -541,7 +564,7 @@ def render_reset_password_form():
                     if success: st.success(msg)
                     else: st.error(msg)
             else:
-                st.warning("Inserisci la tua email")
+                st.warning("⚠️ Inserisci la tua email")
     
     st.markdown("---")
     if st.button("🔐 Torna al Login", key="switch_to_login_from_reset", use_container_width=True):
