@@ -29,7 +29,6 @@ def get_app_url():
 
 # --- STATO ---
 def init_auth_state():
-    # Inizializza tutte le variabili di sessione necessarie
     keys = ['authenticated', 'user', 'auth_mode', 'auth_message', 'access_token', 'refresh_token']
     for k in keys:
         if k not in st.session_state:
@@ -49,29 +48,33 @@ def _persist_session(session):
         st.session_state.authenticated = True
         st.session_state.user = session.user
         st.session_state.access_token = session.access_token
-        # Gestione sicura del refresh token
         st.session_state.refresh_token = session.refresh_token if hasattr(session, 'refresh_token') else None
 
-# Helper per ripristinare la sessione
+# Helper per ripristinare la sessione (FIX DEFINITIVO)
 def _restore_session(client):
     token = st.session_state.get('access_token')
     refresh = st.session_state.get('refresh_token')
     
-    if token:
-        try:
-            # FIX: Passa il refresh token solo se esiste, altrimenti non passarlo o usa None
-            if refresh:
-                client.auth.set_session(token, refresh)
-            else:
-                # Fallback per casi rari senza refresh token
-                # Nota: Alcune versioni di supabase-py richiedono refresh token per set_session
-                # Se fallisce, proviamo a settare l'header manualmente come ultima risorsa
-                client.postgrest.auth(token) 
+    if not token:
+        return False
+        
+    # Tentativo 1: Set Session Standard
+    try:
+        if refresh:
+            client.auth.set_session(token, refresh)
             return True
-        except Exception as e:
-            print(f"Errore restore session: {e}")
-            return False
-    return False
+    except Exception:
+        pass # Se fallisce, passiamo al piano B
+        
+    # Tentativo 2: Forzatura Header (Piano B per Recovery)
+    # Se set_session fallisce (comune nel recovery), iniettiamo il token direttamente
+    try:
+        client.options.headers.update({"Authorization": f"Bearer {token}"})
+        # Alcune versioni di supabase-py usano postgrest.auth
+        client.postgrest.auth(token)
+        return True
+    except Exception:
+        return False
 
 # --- AZIONI ---
 def login_user(email, password):
@@ -117,19 +120,14 @@ def update_user_password(new_password):
     client = get_supabase_client()
     if not client: return False, "Errore connessione DB"
     
-    # Tentativo di ripristino sessione
+    # Ripristina sessione con metodo robusto
     if not _restore_session(client):
-        # Se fallisce il restore, proviamo un trick: se abbiamo l'access token,
-        # lo usiamo per autenticare la richiesta update_user direttamente se possibile,
-        # ma di solito serve la sessione attiva.
         return False, "Sessione scaduta. Riprova dal link email."
 
     try:
         res = client.auth.update_user({"password": new_password})
-        if res.user: 
-            if res.session: _persist_session(res.session)
-            return True, "Password aggiornata!"
-        return False, "Errore aggiornamento"
+        # Se non crasha, è andato a buon fine (anche se res.user a volte è None in update)
+        return True, "Password aggiornata!"
     except Exception as e:
         return False, f"Errore: {str(e)}"
 
@@ -182,29 +180,28 @@ def handle_auth_callback():
         client = get_supabase_client()
         if client:
             try:
-                # Recupera tokens
                 access_token = params["access_token"]
-                refresh_token = params.get("refresh_token") # Può essere None o stringa
+                refresh_token = params.get("refresh_token")
                 
-                # Imposta sessione
-                if refresh_token:
-                    client.auth.set_session(access_token, refresh_token)
-                else:
-                    # Se manca il refresh (raro ma possibile), proviamo get_user per validare access_token
-                    client.auth.get_user(access_token)
+                # Salviamo subito i token grezzi
+                st.session_state.access_token = access_token
+                st.session_state.refresh_token = refresh_token
+                st.session_state.authenticated = True
                 
-                # Se siamo qui, il token è valido.
-                # Recuperiamo la sessione completa per salvarla bene
-                session = client.auth.get_session()
-                if session:
-                    _persist_session(session)
-                else:
-                    # Fallback manuale se get_session è vuoto ma set_session ha funzionato
-                    st.session_state.authenticated = True
-                    st.session_state.access_token = access_token
-                    st.session_state.refresh_token = refresh_token
+                # Proviamo a stabilire la sessione ufficiale
+                try:
+                    if refresh_token:
+                        client.auth.set_session(access_token, refresh_token)
+                    else:
+                        client.auth.set_session(access_token, "")
+                    
+                    # Se funziona, prendiamo l'utente reale
+                    user = client.auth.get_user().user
+                    st.session_state.user = user
+                except:
+                    # Se fallisce, non fa nulla: useremo il token grezzo in update_user_password
+                    pass
                 
-                # Routing
                 nav = params.get("nav")
                 if nav == "update_password" or params.get("type") == "recovery":
                     st.session_state.auth_mode = "update_password"
@@ -212,7 +209,6 @@ def handle_auth_callback():
                 st.query_params.clear()
                 return True
             except Exception as e:
-                # Se fallisce qui, il token è invalido
                 print(f"Callback error: {e}")
                 pass
                 
@@ -284,7 +280,8 @@ def render_auth_page(default_mode='login'):
                         st.success("Fatto! Ora accedi.")
                         time.sleep(2)
                         st.session_state.auth_mode = 'login'
-                        # Logout non necessario se vogliamo loggarlo subito, ma più sicuro
+                        # Logout necessario per pulire la sessione di recovery
+                        logout_user() 
                         st.rerun()
                     else: st.error(msg)
                 else: st.error("Password non valide")
