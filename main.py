@@ -2,6 +2,7 @@
 """
 POS FACILE - Landing Page V10 FINAL
 Fix: Accesso risolto (rimosso menu duplicato)
+Update: Aggiunto redirect automatico al login dopo conferma email (nav=login)
 """
 
 import streamlit as st
@@ -900,25 +901,32 @@ def main():
     inject_css()
     init_auth_state()
     
+    # --- GESTIONE REDIRECT SUPABASE (NUOVO) ---
+    # Intercetta il parametro ?nav=login e manda l'utente alla schermata di login
+    if st.query_params.get("nav") == "login":
+        st.session_state.show_auth = True
+        st.session_state.auth_mode = 'login'
+        st.success("✅ Email confermata con successo! Ora puoi effettuare il login.")
+        # Pulisci i parametri per evitare che il messaggio compaia sempre al refresh
+        st.query_params.clear()
+
     if 'auth_mode' not in st.session_state:
         st.session_state.auth_mode = 'register'
     
     # ---- Gestione callback email Supabase (conferma / recovery) ----
-    # Deve essere PRIMA del routing per intercettare ?code=... e ?type=...
     if AUTH_AVAILABLE and not st.session_state.get('_callback_processed', False):
         callback_handled = handle_auth_callback()
         if callback_handled:
             st.session_state._callback_processed = True
             st.rerun()
-    # Reset del flag al prossimo giro (dopo il rerun)
+    # Reset del flag al prossimo giro
     if st.session_state.get('_callback_processed', False):
         st.session_state._callback_processed = False
     
     if is_authenticated():
-        # CSS per sidebar SEMPRE FISSA (non chiudibile)
+        # CSS per sidebar SEMPRE FISSA
         st.markdown("""
         <style>
-            /* Sidebar SEMPRE visibile e fissa */
             [data-testid="stSidebar"] {
                 display: block !important;
                 width: 300px !important;
@@ -928,7 +936,6 @@ def main():
                 position: relative !important;
                 visibility: visible !important;
             }
-            
             [data-testid="stSidebar"][aria-expanded="false"] {
                 display: block !important;
                 width: 300px !important;
@@ -937,40 +944,19 @@ def main():
                 transform: none !important;
                 visibility: visible !important;
             }
-            
-            section[data-testid="stSidebar"] > div {
-                width: 300px !important;
-            }
-            
-            /* NASCONDI SOLO il pulsante freccia di chiusura (primo bottone della sidebar) */
-            [data-testid="collapsedControl"],
-            [data-testid="stSidebarCollapseButton"] {
-                display: none !important;
-            }
-            
-            /* Rimuovi lo spazio del pulsante chiusura */
-            [data-testid="stSidebarUserContent"] {
-                padding-top: 1rem !important;
-            }
-            
-            /* I pulsanti di navigazione nella sidebar devono essere VISIBILI */
-            [data-testid="stSidebar"] .stButton > button {
-                display: flex !important;
-                visibility: visible !important;
-                width: 100% !important;
-            }
+            section[data-testid="stSidebar"] > div { width: 300px !important; }
+            [data-testid="collapsedControl"], [data-testid="stSidebarCollapseButton"] { display: none !important; }
+            [data-testid="stSidebarUserContent"] { padding-top: 1rem !important; }
+            [data-testid="stSidebar"] .stButton > button { display: flex !important; visibility: visible !important; width: 100% !important; }
         </style>
         """, unsafe_allow_html=True)
         
-        # Gestione errori license_manager
         try:
             render_subscription_sidebar()
         except Exception as e:
-            # Se c'è un errore, mostra sidebar minimale
             with st.sidebar:
                 st.markdown("### 💎 Abbonamento")
                 st.info("Piano: **Free**")
-                st.caption("1 POS disponibile")
         
         try:
             from app import main as run_pos_app
