@@ -2,7 +2,7 @@
 """
 POS FACILE - Landing Page V10 FINAL
 Fix: Accesso risolto
-Update: Logica prioritaria per Reset Password (impedisce redirect errato alla home)
+Update: Logica prioritaria per Reset Password
 """
 
 import streamlit as st
@@ -15,24 +15,22 @@ st.set_page_config(
 )
 
 # --- IMPORT MODULI ---
+# Questa sezione è protetta: se manca un file, l'app non crasha ma mostra un avviso
 try:
     from auth_manager import init_auth_state, is_authenticated, render_auth_page, render_user_menu, handle_auth_callback
     from license_manager import render_subscription_sidebar
     AUTH_AVAILABLE = True
 except ImportError as e:
-    # Se c'è un errore di importazione, stampiamo l'errore nella console per debugging
-    print(f"ERRORE IMPORT MODULI: {e}")
+    # Fallback in caso di errore per permettere almeno l'apertura della pagina
     AUTH_AVAILABLE = False
+    print(f"ERRORE CRITICO IMPORT: {e}") # Stampa l'errore vero nella console dei log
     
-    # Funzioni di fallback per evitare crash se i moduli mancano
     def init_auth_state(): 
-        if 'show_auth' not in st.session_state:
-            st.session_state.show_auth = False
-        if 'auth_mode' not in st.session_state:
-            st.session_state.auth_mode = 'register'
+        if 'show_auth' not in st.session_state: st.session_state.show_auth = False
+        if 'auth_mode' not in st.session_state: st.session_state.auth_mode = 'register'
     def is_authenticated(): return False
     def render_auth_page(default_mode='login'): 
-        st.warning(f"⚠️ Modulo Auth non trovato o errore nel codice. Dettagli: {e}")
+        st.error(f"⚠️ Errore critico nel modulo auth_manager: {e}")
     def render_user_menu(): pass
     def render_subscription_sidebar(): pass
     def handle_auth_callback(): return False
@@ -906,21 +904,13 @@ def main():
     init_auth_state()
     
     # --- GESTIONE REDIRECT SUPABASE (NUOVO) ---
-    # Recupera i parametri dall'URL
-    query_nav = st.query_params.get("nav")
-
-    # 1. Conferma Email -> Vai al Login
-    if query_nav == "login":
+    # Intercetta il parametro ?nav=login e manda l'utente alla schermata di login
+    if st.query_params.get("nav") == "login":
         st.session_state.show_auth = True
         st.session_state.auth_mode = 'login'
         st.success("✅ Email confermata con successo! Ora puoi effettuare il login.")
+        # Pulisci i parametri per evitare che il messaggio compaia sempre al refresh
         st.query_params.clear()
-
-    # 2. Reset Password -> Vai al modulo "Nuova Password"
-    elif query_nav == "update_password":
-        st.session_state.show_auth = True
-        st.session_state.auth_mode = 'update_password'
-        # Non puliamo i params qui perché il token nell'URL serve al componente auth per validare la richiesta
 
     if 'auth_mode' not in st.session_state:
         st.session_state.auth_mode = 'register'
