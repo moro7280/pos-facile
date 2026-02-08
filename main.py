@@ -15,7 +15,7 @@ st.set_page_config(
 
 # --- IMPORT MODULI ---
 try:
-    from auth_manager import init_auth_state, is_authenticated, render_auth_page, render_user_menu
+    from auth_manager import init_auth_state, is_authenticated, render_auth_page, render_user_menu, handle_auth_callback
     from license_manager import render_subscription_sidebar
     AUTH_AVAILABLE = True
 except ImportError:
@@ -26,10 +26,11 @@ except ImportError:
         if 'auth_mode' not in st.session_state:
             st.session_state.auth_mode = 'register'
     def is_authenticated(): return False
-    def render_auth_page(): 
+    def render_auth_page(default_mode='login'): 
         st.warning("⚠️ Modulo Auth non trovato.")
     def render_user_menu(): pass
     def render_subscription_sidebar(): pass
+    def handle_auth_callback(): return False
 
 
 def go_to_register():
@@ -901,6 +902,17 @@ def main():
     
     if 'auth_mode' not in st.session_state:
         st.session_state.auth_mode = 'register'
+    
+    # ---- Gestione callback email Supabase (conferma / recovery) ----
+    # Deve essere PRIMA del routing per intercettare ?code=... e ?type=...
+    if AUTH_AVAILABLE and not st.session_state.get('_callback_processed', False):
+        callback_handled = handle_auth_callback()
+        if callback_handled:
+            st.session_state._callback_processed = True
+            st.rerun()
+    # Reset del flag al prossimo giro (dopo il rerun)
+    if st.session_state.get('_callback_processed', False):
+        st.session_state._callback_processed = False
     
     if is_authenticated():
         # CSS per sidebar SEMPRE FISSA (non chiudibile)
