@@ -2,7 +2,7 @@
 """
 POS FACILE - Auth Manager (Supabase Auth)
 Gestisce login, registrazione e sessioni utente
-Fix: Rimossa chiave statica per evitare crash DuplicateElementKey
+Fix: Navigazione login/registrazione via session state (no tabs)
 """
 
 import streamlit as st
@@ -15,22 +15,16 @@ except ImportError:
 
 
 def get_supabase_client() -> Client:
-    """Restituisce il client Supabase, riutilizzando quello in sessione se disponibile"""
+    """Restituisce il client Supabase"""
     if not SUPABASE_AVAILABLE:
         return None
-    
-    # Riusa il client autenticato se esiste
-    if 'supabase_client' in st.session_state:
-        return st.session_state.supabase_client
     
     try:
         url = st.secrets.get("SUPABASE_URL", "")
         key = st.secrets.get("SUPABASE_ANON_KEY", "")
         
         if url and key:
-            client = create_client(url, key)
-            st.session_state.supabase_client = client
-            return client
+            return create_client(url, key)
     except Exception as e:
         print(f"Errore connessione Supabase: {e}")
     
@@ -47,6 +41,10 @@ def init_auth_state():
         st.session_state.user_id = None
     if 'user_email' not in st.session_state:
         st.session_state.user_email = None
+    if 'show_auth' not in st.session_state:
+        st.session_state.show_auth = False
+    if 'auth_mode' not in st.session_state:
+        st.session_state.auth_mode = 'register'
 
 
 def register_user(email: str, password: str) -> tuple:
@@ -121,12 +119,8 @@ def logout_user():
     st.session_state.user_id = None
     st.session_state.user_email = None
     
-    # Rimuovi il client autenticato dalla sessione
-    if 'supabase_client' in st.session_state:
-        del st.session_state.supabase_client
-    
     # Reset altri stati dell'app
-    keys_to_clear = ['ditta', 'cantiere', 'lavoratori', 'attrezzature', 'sostanze', 'step', 'user_profile', 'user_plan']
+    keys_to_clear = ['ditta', 'cantiere', 'lavoratori', 'attrezzature', 'sostanze', 'step']
     for key in keys_to_clear:
         if key in st.session_state:
             del st.session_state[key]
@@ -158,15 +152,30 @@ def get_current_user_email() -> str:
 
 
 def render_auth_page(default_mode='login'):
-    st.markdown("""<style>.auth-container {max-width: 400px; margin: 0 auto; padding: 2rem;} .auth-header {text-align: center; margin-bottom: 2rem;} .auth-header h1 {color: #FF6600; font-size: 2.5rem;}</style>""", unsafe_allow_html=True)
+    """Pagina di autenticazione con navigazione login/registrazione via session state."""
+    
+    # Inizializza auth_mode se non presente
+    if 'auth_mode' not in st.session_state:
+        st.session_state.auth_mode = default_mode
+    
+    st.markdown("""<style>
+        .auth-container {max-width: 400px; margin: 0 auto; padding: 2rem;}
+        .auth-header {text-align: center; margin-bottom: 2rem;}
+        .auth-header h1 {color: #FF6600; font-size: 2.5rem;}
+        .auth-switch {text-align: center; margin-top: 1.5rem; padding: 15px; background: #F8FAFC; border-radius: 10px; border: 1px solid #E2E8F0;}
+        .auth-switch a {color: #FF6600; font-weight: 600; text-decoration: none;}
+    </style>""", unsafe_allow_html=True)
     
     st.markdown("""<div class="auth-header"><h1>🏗️ POS FACILE</h1><p style="color: #666; font-size: 18px;">Generatore POS per professionisti della sicurezza</p></div>""", unsafe_allow_html=True)
     
-    tab1, tab2, tab3 = st.tabs(["🔐 Accedi", "📝 Registrati", "🔑 Recupero"])
+    mode = st.session_state.get('auth_mode', default_mode)
     
-    with tab1: render_login_form()
-    with tab2: render_register_form()
-    with tab3: render_reset_password_form()
+    if mode == 'register':
+        render_register_form()
+    elif mode == 'reset':
+        render_reset_password_form()
+    else:
+        render_login_form()
 
 
 def render_login_form():
@@ -181,34 +190,60 @@ def render_login_form():
                     if success: st.success(msg); st.rerun()
                     else: st.error(msg)
             else: st.warning("Inserisci dati")
+    
+    # Link a registrazione
+    st.markdown("---")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("📝 Non hai un account? **Registrati**", key="switch_to_register", use_container_width=True):
+            st.session_state.auth_mode = 'register'
+            st.rerun()
+    with col2:
+        if st.button("🔑 Password dimenticata?", key="switch_to_reset", use_container_width=True):
+            st.session_state.auth_mode = 'reset'
+            st.rerun()
 
 
 def render_register_form():
     with st.form("register_form"):
-        st.markdown("### Registrati")
-        email = st.text_input("📧 Email *")
+        st.markdown("### Crea il tuo Account")
+        st.markdown("*Il primo POS è gratuito!*")
+        email = st.text_input("📧 Email *", placeholder="email@esempio.com")
         password = st.text_input("🔒 Password *", type="password", placeholder="Min 6 caratteri")
         confirm = st.text_input("🔒 Conferma Password *", type="password")
-        if st.form_submit_button("Registrati →", use_container_width=True, type="primary"):
+        if st.form_submit_button("🚀 Registrati Gratis →", use_container_width=True, type="primary"):
             if password != confirm: st.error("Le password non coincidono")
-            elif len(password) < 6: st.error("Password troppo corta")
+            elif len(password) < 6: st.error("Password troppo corta (min 6 caratteri)")
             else:
                 with st.spinner("Registrazione..."):
                     success, msg = register_user(email, password)
                     if success: st.success(msg)
                     else: st.error(msg)
+    
+    # Link a login
+    st.markdown("---")
+    if st.button("🔐 Hai già un account? **Accedi**", key="switch_to_login", use_container_width=True):
+        st.session_state.auth_mode = 'login'
+        st.rerun()
 
 
 def render_reset_password_form():
     with st.form("reset_form"):
         st.markdown("### Recupero Password")
+        st.markdown("*Inserisci la tua email per ricevere il link di reset.*")
         email = st.text_input("📧 Email")
-        if st.form_submit_button("Invia Link", use_container_width=True):
+        if st.form_submit_button("Invia Link di Reset", use_container_width=True):
             if email:
                 with st.spinner("Invio..."):
                     success, msg = reset_password(email)
                     if success: st.success(msg)
                     else: st.error(msg)
+    
+    # Link a login
+    st.markdown("---")
+    if st.button("🔐 Torna al Login", key="switch_to_login_from_reset", use_container_width=True):
+        st.session_state.auth_mode = 'login'
+        st.rerun()
 
 
 def render_user_menu():
