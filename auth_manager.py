@@ -38,21 +38,18 @@ def get_supabase_client() -> Client:
 def get_app_url() -> str:
     """
     Restituisce l'URL base dell'app per i redirect Supabase.
-    
-    CONFIGURAZIONE NECESSARIA in .streamlit/secrets.toml:
-        APP_URL = "https://posfacile.streamlit.app"
-    
-    E in Supabase Dashboard > Authentication > URL Configuration:
-        - Site URL: https://posfacile.streamlit.app
-        - Redirect URLs: https://posfacile.streamlit.app
+    Prende il valore da secrets.toml o usa un default hardcoded se manca.
     """
     try:
+        # Prima cerca nei secrets
         url = st.secrets.get("APP_URL", "")
         if url:
             return url.rstrip("/")
+            
+        # Fallback se non è impostato nei secrets (utile per evitare errori)
+        return "https://pos-facile.streamlit.app"
     except Exception:
-        pass
-    return ""
+        return "https://pos-facile.streamlit.app"
 
 
 # ==============================================================================
@@ -80,17 +77,18 @@ def init_auth_state():
 # ==============================================================================
 
 def register_user(email: str, password: str) -> tuple:
-    """Registra un nuovo utente con redirect URL per conferma email."""
+    """Registra un nuovo utente con redirect URL esplicito al login."""
     client = get_supabase_client()
     if not client:
         return False, "⚠️ Servizio temporaneamente non disponibile. Riprova tra qualche minuto."
     
     try:
-        app_url = get_app_url()
+        base_url = get_app_url()
         sign_up_params = {"email": email, "password": password}
         
-        if app_url:
-            sign_up_params["options"] = {"email_redirect_to": app_url}
+        # FIX: Forziamo il redirect alla pagina di login dopo la conferma
+        redirect_url = f"{base_url}/?nav=login"
+        sign_up_params["options"] = {"email_redirect_to": redirect_url}
         
         response = client.auth.sign_up(sign_up_params)
         
@@ -102,19 +100,13 @@ def register_user(email: str, password: str) -> tuple:
     except Exception as e:
         error_msg = str(e)
         if "User already registered" in error_msg:
-            return False, "📧 Email gia registrata. Prova ad accedere."
+            return False, "📧 Email già registrata. Prova ad accedere."
         elif "Password should be at least" in error_msg:
             return False, "🔒 La password deve essere di almeno 6 caratteri."
         elif "rate limit" in error_msg.lower():
             return False, "⏳ Troppe richieste. Attendi qualche minuto e riprova."
-        elif "already been registered" in error_msg.lower() or "already registered" in error_msg.lower():
-            return False, "📧 Email gia registrata. Prova ad accedere."
-        elif "invalid" in error_msg.lower() and "email" in error_msg.lower():
-            return False, "📧 Indirizzo email non valido."
-        elif "signup" in error_msg.lower() and "disabled" in error_msg.lower():
-            return False, "🚫 Le registrazioni sono temporaneamente sospese. Riprova piu tardi."
         else:
-            return False, f"❌ Si e verificato un errore. Riprova tra qualche minuto."
+            return False, f"❌ Si è verificato un errore: {error_msg}"
 
 
 def login_user(email: str, password: str) -> tuple:
@@ -143,13 +135,9 @@ def login_user(email: str, password: str) -> tuple:
         if "Invalid login credentials" in error_msg:
             return False, "❌ Email o password non corretti."
         elif "Email not confirmed" in error_msg:
-            return False, "📧 Email non ancora confermata. Controlla la tua casella di posta e clicca il link di conferma."
-        elif "rate limit" in error_msg.lower():
-            return False, "⏳ Troppi tentativi. Attendi qualche minuto e riprova."
-        elif "invalid" in error_msg.lower() and "email" in error_msg.lower():
-            return False, "📧 Indirizzo email non valido."
+            return False, "📧 Email non ancora confermata. Controlla la posta."
         else:
-            return False, "❌ Si e verificato un errore. Riprova tra qualche minuto."
+            return False, "❌ Errore di accesso. Riprova."
 
 
 def logout_user():
@@ -166,6 +154,7 @@ def logout_user():
     st.session_state.user_id = None
     st.session_state.user_email = None
     
+    # Pulisce i dati di sessione del POS
     keys_to_clear = ['ditta', 'cantiere', 'lavoratori', 'attrezzature', 'sostanze', 'step']
     for key in keys_to_clear:
         if key in st.session_state:
@@ -173,52 +162,57 @@ def logout_user():
 
 
 def reset_password(email: str) -> tuple:
-    """Invia email per reset password con redirect URL."""
+    """
+    Invia email per reset password con redirect URL SPECIFICO.
+    Questo è il punto critico per far funzionare il main.py.
+    """
     client = get_supabase_client()
     if not client:
-        return False, "⚠️ Servizio temporaneamente non disponibile. Riprova tra qualche minuto."
+        return False, "⚠️ Servizio temporaneamente non disponibile."
     
     try:
-        app_url = get_app_url()
+        base_url = get_app_url()
         
-        if app_url:
-            client.auth.reset_password_email(email, {"redirect_to": app_url})
-        else:
-            client.auth.reset_password_email(email)
+        # --- FIX PUNTO 1: Redirect forzato a ?nav=update_password ---
+        # Questo dice a Supabase: "Dopo il click, manda l'utente alla pagina di update"
+        redirect_url = f"{base_url}/?nav=update_password"
+        
+        client.auth.reset_password_email(
+            email, 
+            options={"redirect_to": redirect_url}
+        )
         
         return True, "📧 Email inviata! Controlla la posta e clicca il link per reimpostare la password."
     except Exception as e:
         error_msg = str(e).lower()
         if "rate limit" in error_msg:
-            return False, "⏳ Troppe richieste. Attendi qualche minuto e riprova."
+            return False, "⏳ Troppe richieste. Attendi qualche minuto."
         elif "user not found" in error_msg:
             return False, "📧 Nessun account trovato con questa email."
         else:
-            return False, "❌ Si e verificato un errore. Riprova tra qualche minuto."
+            return False, f"❌ Errore invio email: {str(e)}"
 
 
 def update_user_password(new_password: str) -> tuple:
     """Aggiorna la password dell'utente (durante il flusso di recovery)."""
     client = get_supabase_client()
     if not client:
-        return False, "⚠️ Servizio temporaneamente non disponibile. Riprova tra qualche minuto."
+        return False, "⚠️ Servizio temporaneamente non disponibile."
     
     try:
         response = client.auth.update_user({"password": new_password})
         if response and response.user:
             return True, "Password aggiornata con successo! Ora puoi accedere."
         else:
-            return False, "❌ Errore durante l'aggiornamento della password. Riprova."
+            return False, "❌ Errore durante l'aggiornamento."
     except Exception as e:
         error_msg = str(e)
-        if "same_password" in error_msg.lower() or "same password" in error_msg.lower():
+        if "same_password" in error_msg.lower():
             return False, "🔒 La nuova password deve essere diversa dalla precedente."
         elif "Password should be at least" in error_msg:
             return False, "🔒 La password deve essere di almeno 6 caratteri."
-        elif "rate limit" in error_msg.lower():
-            return False, "⏳ Troppe richieste. Attendi qualche minuto e riprova."
         else:
-            return False, "❌ Si e verificato un errore. Riprova tra qualche minuto."
+            return False, "❌ Errore generico. Riprova."
 
 
 def is_authenticated() -> bool:
@@ -240,28 +234,16 @@ def get_current_user_email() -> str:
 def handle_auth_callback():
     """
     Gestisce i redirect da Supabase dopo click su link email.
-    
-    Flusso PKCE (default Supabase):
-      1. Utente clicca link email
-      2. Supabase redirige a: https://app.url/?code=XXXX
-      3. L'app scambia il codice per una sessione
-    
-    Flusso legacy/implicit:
-      - ?type=signup&access_token=...  -> Conferma email
-      - ?type=recovery&access_token=... -> Reset password
-    
-    Ritorna True se ha gestito un callback, False altrimenti.
     """
     params = st.query_params
     
     # --- Errori Supabase ---
     error = params.get("error")
-    error_desc = params.get("error_description")
     if error:
-        desc = str(error_desc or error).replace("+", " ")
+        desc = params.get("error_description", str(error))
         st.session_state.show_auth = True
         st.session_state.auth_mode = 'login'
-        st.session_state.auth_message = ('error', f"❌ Si e verificato un errore: {desc}")
+        st.session_state.auth_message = ('error', f"❌ Errore: {desc}")
         _clear_auth_params()
         return True
     
@@ -270,32 +252,20 @@ def handle_auth_callback():
     if code:
         return _handle_code_exchange(str(code))
     
-    # --- Token diretto (flusso implicit/legacy) ---
-    auth_type = params.get("type")
+    # --- Token diretto (flusso legacy) ---
     access_token = params.get("access_token")
-    refresh_token = params.get("refresh_token")
-    
-    if auth_type == "signup":
+    if access_token:
+        # Se arriva un token diretto, è un caso raro o legacy, ma lo gestiamo
+        _set_session_from_token(str(access_token), params.get("refresh_token"))
+        # Decidiamo dove andare in base al tipo (se presente) o allo stato
+        auth_type = params.get("type", "")
+        
         st.session_state.show_auth = True
-        st.session_state.auth_mode = 'login'
-        st.session_state.auth_message = ('success', "✅ Email confermata! Ora puoi accedere.")
-        _clear_auth_params()
-        return True
-    
-    if auth_type == "recovery":
-        if access_token:
-            _set_session_from_token(str(access_token), str(refresh_token) if refresh_token else None)
-        st.session_state.show_auth = True
-        st.session_state.auth_mode = 'new_password'
-        st.session_state.auth_message = ('info', "Imposta la tua nuova password.")
-        _clear_auth_params()
-        return True
-    
-    if auth_type == "magiclink" and access_token:
-        _set_session_from_token(str(access_token), str(refresh_token) if refresh_token else None)
-        st.session_state.show_auth = True
-        st.session_state.auth_mode = 'login'
-        st.session_state.auth_message = ('success', "✅ Accesso confermato!")
+        if auth_type == "recovery":
+            st.session_state.auth_mode = 'new_password' # Vecchio nome per update_password
+        else:
+            st.session_state.auth_mode = 'login'
+            
         _clear_auth_params()
         return True
     
@@ -303,14 +273,10 @@ def handle_auth_callback():
 
 
 def _handle_code_exchange(code: str) -> bool:
-    """Scambia il codice PKCE per una sessione e determina il tipo di flusso."""
+    """Scambia il codice PKCE per una sessione."""
     client = get_supabase_client()
     if not client:
-        st.session_state.show_auth = True
-        st.session_state.auth_mode = 'login'
-        st.session_state.auth_message = ('error', "Servizio di autenticazione non disponibile. Riprova tra qualche minuto.")
-        _clear_auth_params()
-        return True
+        return False
     
     try:
         response = client.auth.exchange_code_for_session({"auth_code": code})
@@ -318,103 +284,69 @@ def _handle_code_exchange(code: str) -> bool:
         if response and response.user:
             user = response.user
             
-            # Determina se e un recovery:
-            # Supabase include recovery_sent_at nel profilo utente se il flusso e recovery
-            is_recovery = False
-            try:
-                if hasattr(user, 'recovery_sent_at') and user.recovery_sent_at:
-                    is_recovery = True
-            except Exception:
-                pass
+            # --- INTEGRAZIONE CON MAIN.PY ---
+            # main.py controlla 'nav' per decidere cosa mostrare.
+            # Qui possiamo settare lo stato auth_mode per coerenza immediata.
             
-            # Altro indicatore: appMetadata o il fatto che l'utente abbia aal1
-            # In pratica controlliamo se abbiamo session con aal
-            if not is_recovery:
-                try:
-                    if hasattr(response, 'session') and response.session:
-                        # Se ha un session token ma l'email e gia confermata da prima,
-                        # potrebbe essere recovery. Controlliamo user.email_confirmed_at
-                        # vs last_sign_in_at
-                        pass
-                except Exception:
-                    pass
+            nav_param = st.query_params.get("nav")
             
-            if is_recovery:
-                # Recovery: imposta sessione per permettere update_user
+            if nav_param == "update_password":
+                # Caso Reset Password
                 st.session_state.authenticated = True
                 st.session_state.user = user
                 st.session_state.user_id = user.id
                 st.session_state.user_email = user.email
+                
                 st.session_state.show_auth = True
-                st.session_state.auth_mode = 'new_password'
-                st.session_state.auth_message = ('info', "Imposta la tua nuova password.")
-            else:
-                # Conferma email: rimanda al login
+                st.session_state.auth_mode = 'update_password' # DEVE coincidere con main.py
+                st.session_state.auth_message = ('info', "🔐 Inserisci la tua nuova password.")
+                
+            elif nav_param == "login":
+                # Caso Conferma Registrazione
                 st.session_state.show_auth = True
                 st.session_state.auth_mode = 'login'
-                st.session_state.auth_message = ('success', "✅ Email confermata con successo! Ora puoi accedere.")
-            
-            _clear_auth_params()
-            return True
-        else:
-            st.session_state.show_auth = True
-            st.session_state.auth_mode = 'login'
-            st.session_state.auth_message = ('error', "❌ Link non valido o scaduto. Riprova la registrazione o il recupero password.")
+                st.session_state.auth_message = ('success', "✅ Email confermata! Effettua il login.")
+                # Non logghiamo automaticamente dopo la conferma per sicurezza, ma si potrebbe fare
+                
+            else:
+                # Fallback generico (es. login magico)
+                st.session_state.authenticated = True
+                st.session_state.user = user
+                st.session_state.user_id = user.id
+                
             _clear_auth_params()
             return True
             
     except Exception as e:
-        error_msg = str(e).lower()
-        
-        # Codice gia usato o scaduto - probabilmente l'email e gia confermata
         st.session_state.show_auth = True
         st.session_state.auth_mode = 'login'
-        
-        if "already" in error_msg or "expired" in error_msg or "invalid" in error_msg or "used" in error_msg or "redeemed" in error_msg:
-            st.session_state.auth_message = ('warning', 
-                "⚠️ Questo link e gia stato utilizzato o e scaduto. "
-                "Se hai gia confermato l'email, puoi accedere normalmente.")
-        else:
-            st.session_state.auth_message = ('warning', 
-                "⚠️ Link gia utilizzato o scaduto. Se hai confermato l'email, prova ad accedere.")
-        
+        st.session_state.auth_message = ('error', f"Link non valido o scaduto: {str(e)}")
         _clear_auth_params()
         return True
+    
+    return False
 
 
 def _set_session_from_token(access_token: str, refresh_token: str = None):
-    """Imposta la sessione da un token (flusso legacy/implicit)."""
+    """Imposta la sessione manualmente (flusso implicito)."""
     client = get_supabase_client()
-    if not client:
-        return
-    
+    if not client: return
     try:
         if refresh_token:
             client.auth.set_session(access_token, refresh_token)
-        
-        user_response = client.auth.get_user(access_token)
-        if user_response and user_response.user:
-            st.session_state.authenticated = True
-            st.session_state.user = user_response.user
-            st.session_state.user_id = user_response.user.id
-            st.session_state.user_email = user_response.user.email
-    except Exception as e:
-        print(f"Errore set session from token: {e}")
+        else:
+            client.auth.get_user(access_token)
+    except:
+        pass
 
 
 def _clear_auth_params():
-    """Pulisce i parametri URL di autenticazione."""
-    try:
-        auth_keys = ['code', 'type', 'access_token', 'refresh_token', 
-                     'error', 'error_description', 'error_code']
-        for key in auth_keys:
-            if key in st.query_params:
-                del st.query_params[key]
-    except Exception:
-        try:
-            st.query_params.clear()
-        except Exception:
-            pass
+    """Pulisce l'URL dai parametri sensibili."""
+    params_to_remove = ['code', 'error', 'error_description', 'access_token', 'refresh_token', 'type']
+    # Nota: Non rimuoviamo 'nav' qui perché serve al main.py
+    for key in params_to_remove:
+        if key in st.query_params:
+            del st.query_params[key]
 
 
 # ==============================================================================
@@ -422,7 +354,7 @@ def _clear_auth_params():
 # ==============================================================================
 
 def render_auth_page(default_mode='login'):
-    """Pagina di autenticazione con navigazione via session state."""
+    """Renderizza la pagina di auth corretta."""
     
     if 'auth_mode' not in st.session_state:
         st.session_state.auth_mode = default_mode
@@ -434,12 +366,12 @@ def render_auth_page(default_mode='login'):
     
     st.markdown("""<div class="auth-header"><h1>🏗️ POS FACILE</h1><p style="color: #666; font-size: 18px;">Generatore POS per professionisti della sicurezza</p></div>""", unsafe_allow_html=True)
     
-    # Mostra messaggi dal callback
     _show_auth_message()
     
     mode = st.session_state.get('auth_mode', default_mode)
     
-    if mode == 'new_password':
+    # Mapping delle modalità (supporta sia vecchi nomi che nuovi)
+    if mode == 'new_password' or mode == 'update_password':
         render_new_password_form()
     elif mode == 'register':
         render_register_form()
@@ -450,135 +382,99 @@ def render_auth_page(default_mode='login'):
 
 
 def _show_auth_message():
-    """Mostra e pulisce i messaggi pendenti."""
+    """Mostra banner di notifica."""
     msg = st.session_state.get('auth_message')
     if msg:
-        msg_type, msg_text = msg
-        if msg_type == 'success':
-            st.success(msg_text)
-        elif msg_type == 'error':
-            st.error(msg_text)
-        elif msg_type == 'warning':
-            st.warning(msg_text)
-        elif msg_type == 'info':
-            st.info(msg_text)
+        m_type, m_text = msg
+        if m_type == 'success': st.success(m_text)
+        elif m_type == 'error': st.error(m_text)
+        elif m_type == 'warning': st.warning(m_text)
+        elif m_type == 'info': st.info(m_text)
         st.session_state.auth_message = None
 
 
 def render_login_form():
     with st.form("login_form"):
         st.markdown("### Accedi")
-        email = st.text_input("📧 Email", placeholder="email@esempio.com")
+        email = st.text_input("📧 Email")
         password = st.text_input("🔒 Password", type="password")
         if st.form_submit_button("Accedi →", use_container_width=True, type="primary"):
             if email and password:
                 with st.spinner("Accesso..."):
                     success, msg = login_user(email, password)
-                    if success: st.success(msg); st.rerun()
+                    if success: st.rerun()
                     else: st.error(msg)
-            else: st.warning("⚠️ Inserisci email e password")
+            else: st.warning("Inserisci credenziali.")
     
     st.markdown("---")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("📝 Non hai un account? **Registrati**", key="switch_to_register", use_container_width=True):
-            st.session_state.auth_mode = 'register'
-            st.rerun()
-    with col2:
-        if st.button("🔑 Password dimenticata?", key="switch_to_reset", use_container_width=True):
-            st.session_state.auth_mode = 'reset'
-            st.rerun()
+    c1, c2 = st.columns(2)
+    if c1.button("📝 Registrati", use_container_width=True):
+        st.session_state.auth_mode = 'register'
+        st.rerun()
+    if c2.button("🔑 Recupera Password", use_container_width=True):
+        st.session_state.auth_mode = 'reset'
+        st.rerun()
 
 
 def render_register_form():
     with st.form("register_form"):
-        st.markdown("### Crea il tuo Account")
-        st.markdown("*Il primo POS e gratuito!*")
-        email = st.text_input("📧 Email *", placeholder="email@esempio.com")
-        password = st.text_input("🔒 Password *", type="password", placeholder="Min 6 caratteri")
-        confirm = st.text_input("🔒 Conferma Password *", type="password")
-        if st.form_submit_button("🚀 Registrati Gratis →", use_container_width=True, type="primary"):
-            if not email:
-                st.error("⚠️ Inserisci la tua email")
-            elif password != confirm:
-                st.error("🔒 Le password non coincidono")
-            elif len(password) < 6:
-                st.error("🔒 Password troppo corta (minimo 6 caratteri)")
-            else:
+        st.markdown("### Registrati")
+        email = st.text_input("📧 Email")
+        password = st.text_input("🔒 Password", type="password")
+        confirm = st.text_input("🔒 Conferma Password", type="password")
+        if st.form_submit_button("Crea Account", use_container_width=True, type="primary"):
+            if password == confirm and len(password) >= 6:
                 with st.spinner("Registrazione..."):
                     success, msg = register_user(email, password)
                     if success: st.success(msg)
                     else: st.error(msg)
-    
+            else: st.error("Password non valide (min 6 caratteri).")
+            
     st.markdown("---")
-    if st.button("🔐 Hai gia un account? **Accedi**", key="switch_to_login", use_container_width=True):
-        st.session_state.auth_mode = 'login'
-        st.rerun()
-
-
-def render_new_password_form():
-    """Form per impostare una nuova password (dopo click su link recovery)."""
-    st.markdown("### 🔐 Imposta Nuova Password")
-    st.markdown("Scegli una nuova password per il tuo account.")
-    
-    with st.form("new_password_form"):
-        new_password = st.text_input("🔒 Nuova Password *", type="password", placeholder="Min 6 caratteri")
-        confirm_password = st.text_input("🔒 Conferma Nuova Password *", type="password")
-        
-        if st.form_submit_button("✅ Aggiorna Password", use_container_width=True, type="primary"):
-            if not new_password:
-                st.error("⚠️ Inserisci la nuova password")
-            elif new_password != confirm_password:
-                st.error("🔒 Le password non coincidono")
-            elif len(new_password) < 6:
-                st.error("🔒 Password troppo corta (minimo 6 caratteri)")
-            else:
-                with st.spinner("Aggiornamento password..."):
-                    success, msg = update_user_password(new_password)
-                    if success:
-                        st.success(msg)
-                        logout_user()
-                        st.session_state.show_auth = True
-                        st.session_state.auth_mode = 'login'
-                        st.session_state.auth_message = ('success', "✅ Password aggiornata! Accedi con la nuova password.")
-                        st.rerun()
-                    else:
-                        st.error(msg)
-    
-    st.markdown("---")
-    if st.button("🔐 Torna al Login", key="switch_to_login_from_newpw", use_container_width=True):
-        logout_user()
+    if st.button("Torna al Login", use_container_width=True):
         st.session_state.auth_mode = 'login'
         st.rerun()
 
 
 def render_reset_password_form():
     with st.form("reset_form"):
-        st.markdown("### Recupero Password")
-        st.markdown("*Inserisci la tua email per ricevere il link di reset.*")
-        email = st.text_input("📧 Email")
-        if st.form_submit_button("Invia Link di Reset", use_container_width=True):
-            if email:
-                with st.spinner("Invio..."):
-                    success, msg = reset_password(email)
-                    if success: st.success(msg)
-                    else: st.error(msg)
-            else:
-                st.warning("⚠️ Inserisci la tua email")
-    
+        st.markdown("### Reset Password")
+        email = st.text_input("📧 La tua Email")
+        if st.form_submit_button("Invia Link", use_container_width=True):
+            with st.spinner("Invio..."):
+                success, msg = reset_password(email)
+                if success: st.success(msg)
+                else: st.error(msg)
+                
     st.markdown("---")
-    if st.button("🔐 Torna al Login", key="switch_to_login_from_reset", use_container_width=True):
+    if st.button("Indietro", use_container_width=True):
         st.session_state.auth_mode = 'login'
         st.rerun()
 
 
+def render_new_password_form():
+    st.info("🔐 Sei in modalità recupero password.")
+    with st.form("new_password_form"):
+        new_pass = st.text_input("Nuova Password", type="password")
+        conf_pass = st.text_input("Conferma Password", type="password")
+        if st.form_submit_button("Aggiorna Password", use_container_width=True, type="primary"):
+            if new_pass == conf_pass and len(new_pass) >= 6:
+                success, msg = update_user_password(new_pass)
+                if success:
+                    st.success(msg)
+                    st.session_state.auth_mode = 'login'
+                    logout_user() # Logout per forzare login pulito
+                    st.rerun()
+                else:
+                    st.error(msg)
+            else:
+                st.error("Le password non coincidono o sono troppo corte.")
+
+
 def render_user_menu():
-    """Renderizza il menu utente nella sidebar"""
     if is_authenticated():
         st.sidebar.markdown("---")
-        st.sidebar.markdown("### 👤 Account")
-        st.sidebar.write(f"**{get_current_user_email()}**")
-        
-        if st.sidebar.button("🚪 Logout", use_container_width=True):
+        st.sidebar.write(f"👤 **{get_current_user_email()}**")
+        if st.sidebar.button("Esci"):
             logout_user()
             st.rerun()
