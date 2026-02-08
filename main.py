@@ -39,7 +39,7 @@ def go_to_register():
 
 
 def inject_css():
-    """CSS pulito e professionale - FIX PRIVACY DEFINITIVO"""
+    """CSS pulito e professionale"""
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -48,29 +48,8 @@ def inject_css():
             font-family: 'Inter', sans-serif !important;
         }
         
-        /* ===== FIX PRIVACY: NASCONDI TUTTO ===== */
-        
-        /* 1. Nasconde il menu in alto a destra (hamburger) */
-        #MainMenu {visibility: hidden !important; display: none !important;}
-        
-        /* 2. Nasconde il footer standard */
-        footer {visibility: hidden !important; display: none !important;}
-        
-        /* 3. Nasconde la barra colorata in alto */
-        header {visibility: hidden !important; display: none !important;}
-        
-        /* 4. Nasconde la toolbar sviluppatore (in basso a destra/alto a destra) */
-        [data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
-        
-        /* 5. Nasconde il badge "Viewer" di Streamlit Cloud (quello col tuo nome/github) */
-        /* Usa il selettore Jolly (*=) per prendere qualsiasi classe contenga 'viewerBadge' */
-        div[class*="viewerBadge"] {visibility: hidden !important; display: none !important;}
-        .viewerBadge_container__1QSob {display: none !important;} /* Vecchio selettore per sicurezza */
-        
-        /* 6. Nasconde il pulsante Deploy */
-        .stDeployButton {display: none !important;}
-        
-        /* ================================================= */
+        #MainMenu, footer, header {visibility: hidden;}
+        .stDeployButton {display: none;}
         
         .block-container {
             padding-top: 1rem !important;
@@ -997,10 +976,7 @@ def main():
         st.markdown("<br>", unsafe_allow_html=True)
         with col2:
             if AUTH_AVAILABLE:
-                try:
-                    render_auth_page(default_mode=st.session_state.auth_mode)
-                except TypeError:
-                    render_auth_page()
+                render_auth_page(default_mode=st.session_state.get('auth_mode', 'register'))
             else:
                 st.info("📝 **Pagina di Registrazione**")
                 st.write("Il modulo di autenticazione non è ancora configurato.")
