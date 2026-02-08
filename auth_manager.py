@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-POS FACILE - Auth Manager v4
-Risolve: hash fragment invisibile a Streamlit, perdita sessione tra rerun,
-fallback REST API per update password.
+POS FACILE - Auth Manager v5 (DEFINITIVO)
+
+SOLUZIONE: Supabase manda token nel #hash che Streamlit non legge.
+Invece di JS bridge (non funziona su Streamlit Cloud), modifichiamo
+il template email Supabase per usare {{ .TokenHash }} nei ?query params.
+Python li legge, chiama verify_otp(), e ottiene la sessione.
 """
 
 import streamlit as st
-import streamlit.components.v1 as components
 import time
 
 try:
@@ -46,7 +48,6 @@ def init_auth_state():
         'show_auth': False,
         'auth_mode': 'login',
         'auth_message': None,
-        # Token di recovery - salvati qui sopravvivono ai rerun
         '_rcv_access': None,
         '_rcv_refresh': None,
     }
@@ -75,7 +76,7 @@ def _tr(msg):
     if "password should" in m:        return "La password deve essere di almeno 6 caratteri."
     if "same_password" in m or "same password" in m:
         return "La nuova password deve essere diversa dalla precedente."
-    if "otp_expired" in m or "expired" in m:
+    if "otp_expired" in m or "expired" in m or "otp" in m:
         return "Link scaduto. Richiedi un nuovo link."
     if "session" in m and "missing" in m:
         return "Sessione scaduta. Richiedi un nuovo link."
@@ -103,10 +104,11 @@ def register_user(email, password):
     client = get_supabase_client()
     if not client: return False, "Servizio non disponibile."
     try:
+        base_url = get_app_url()
         res = client.auth.sign_up({
             "email": email,
             "password": password,
-            "options": {"email_redirect_to": f"{get_app_url()}/?nav=login"}
+            "options": {"email_redirect_to": f"{base_url}/?nav=login"}
         })
         if res.user:
             return True, "Registrazione completata! Controlla la tua email."
@@ -118,25 +120,33 @@ def reset_password(email):
     client = get_supabase_client()
     if not client: return False, "Servizio non disponibile."
     try:
-        client.auth.reset_password_email(email, options={
-            "redirect_to": f"{get_app_url()}/?nav=update_password"
-        })
+        client.auth.reset_password_email(email)
         return True, "Email inviata! Controlla la posta e clicca il link."
     except Exception as e:
         return False, _tr(str(e))
 
 
+def verify_recovery_token(token_hash):
+    """Verifica token_hash da URL, ritorna (True, session) o (False, errore)."""
+    client = get_supabase_client()
+    if not client:
+        return False, "Servizio non disponibile."
+    try:
+        res = client.auth.verify_otp({
+            "token_hash": token_hash,
+            "type": "recovery"
+        })
+        if res and res.session:
+            return True, res.session
+        return False, "Link non valido o scaduto."
+    except Exception as e:
+        return False, _tr(str(e))
+
+
 def update_user_password(new_password):
-    """
-    Aggiorna password con token di recovery salvato in session_state.
-    3 tentativi in cascata:
-      1. set_session() + update_user() (standard)
-      2. Header forzato + update_user() (fallback SDK)
-      3. REST API diretta con requests (fallback nucleare)
-    """
+    """Aggiorna password con token recovery salvato in session_state."""
     access_token = st.session_state.get('_rcv_access')
     refresh_token = st.session_state.get('_rcv_refresh')
-
     if not access_token:
         return False, "Sessione di recupero scaduta. Richiedi un nuovo link."
 
@@ -144,17 +154,17 @@ def update_user_password(new_password):
     if not client:
         return False, "Servizio non disponibile."
 
-    # --- TENTATIVO 1: set_session + update_user ---
+    # TENTATIVO 1: set_session + update_user
     try:
         if refresh_token:
             client.auth.set_session(access_token, refresh_token)
-        res = client.auth.update_user({"password": new_password})
+        client.auth.update_user({"password": new_password})
         _clear_recovery()
         return True, "Password aggiornata!"
     except Exception:
         pass
 
-    # --- TENTATIVO 2: Forza header + update_user ---
+    # TENTATIVO 2: Header forzato
     try:
         client.options.headers["Authorization"] = f"Bearer {access_token}"
         client.postgrest.auth(access_token)
@@ -164,7 +174,7 @@ def update_user_password(new_password):
     except Exception:
         pass
 
-    # --- TENTATIVO 3: REST API diretta ---
+    # TENTATIVO 3: REST API diretta
     try:
         import requests as req
         resp = req.put(
@@ -196,8 +206,6 @@ def logout_user():
     if client:
         try: client.auth.sign_out()
         except: pass
-
-    # Reset SOLO le chiavi di auth (non distruggere tutto session_state)
     for k in ['authenticated', 'user', '_rcv_access', '_rcv_refresh',
               'ditta', 'cantiere', 'lavoratori', 'attrezzature', 'sostanze', 'step']:
         if k in st.session_state:
@@ -210,64 +218,44 @@ def logout_user():
 
 def handle_auth_callback():
     """
-    Gestisce i redirect da email Supabase.
+    Gestisce redirect da email Supabase. Tutto via query params, zero hash.
 
-    FLUSSO RECOVERY (il piu complesso):
-    1. Utente clicca link -> browser va a:
-       pos-facile.streamlit.app/?nav=update_password#access_token=XX&type=recovery
-    2. PRIMO caricamento: Python vede ?nav=update_password ma NON il #hash.
-       JS bridge (sotto) converte hash -> query params e fa location.replace().
-    3. SECONDO caricamento: Python vede ?access_token=XX&type=recovery.
-       Salva token in session_state. Mostra form nuova password.
-    4. Utente compila form -> update_user_password usa i token salvati.
-
-    FLUSSO CONFERMA EMAIL:
-       pos-facile.streamlit.app/?nav=login  ->  mostra login + messaggio successo
+    RECOVERY: ?token_hash=XXX&type=recovery
+      -> verify_otp() -> sessione -> form nuova password
+    CONFERMA: ?nav=login oppure ?code=XXX
+      -> mostra login con successo
     """
-
-    # STEP 1: JS bridge - converte #hash in ?query
-    _inject_hash_bridge()
-
     params = st.query_params
 
-    # STEP 2: Errori
+    # --- ERRORI ---
     if "error" in params:
-        desc = str(params.get("error_description", params.get("error", ""))).replace("+", " ")
+        desc = str(params.get("error_description", "")).replace("+", " ")
         st.session_state.show_auth = True
         st.session_state.auth_mode = 'login'
-        st.session_state.auth_message = ("error", _tr(desc))
-        _safe_clear_params()
+        st.session_state.auth_message = ("error", _tr(desc) if desc else "Si e verificato un errore.")
+        _safe_clear()
         return True
 
-    # STEP 3: Token dal hash (dopo JS bridge)
-    access_token = params.get("access_token")
-    if access_token:
-        refresh_token = params.get("refresh_token")
-        token_type = params.get("type", "")
-        nav = params.get("nav", "")
-
-        # PERSISTERE i token in session_state
-        st.session_state._rcv_access = access_token
-        st.session_state._rcv_refresh = refresh_token
-
-        if token_type == "recovery" or nav == "update_password":
+    # --- RECOVERY: token_hash nei query params ---
+    token_hash = params.get("token_hash")
+    if token_hash:
+        ok, result = verify_recovery_token(token_hash)
+        if ok:
+            session = result
+            st.session_state._rcv_access = session.access_token
+            st.session_state._rcv_refresh = session.refresh_token if hasattr(session, 'refresh_token') else None
             st.session_state.show_auth = True
             st.session_state.auth_mode = 'update_password'
-            st.session_state.authenticated = True  # Temporaneo per routing
+            st.session_state.authenticated = True
             st.session_state.auth_message = ("info", "Imposta la tua nuova password.")
-        elif token_type == "signup":
-            st.session_state.show_auth = True
-            st.session_state.auth_mode = 'login'
-            st.session_state.auth_message = ("success", "Email confermata! Ora puoi accedere.")
         else:
             st.session_state.show_auth = True
             st.session_state.auth_mode = 'login'
-            st.session_state.auth_message = ("success", "Accesso confermato!")
-
-        _safe_clear_params()
+            st.session_state.auth_message = ("error", result)
+        _safe_clear()
         return True
 
-    # STEP 4: PKCE code (conferma email)
+    # --- PKCE code (conferma email) ---
     code = params.get("code")
     if code:
         client = get_supabase_client()
@@ -282,60 +270,36 @@ def handle_auth_callback():
                     st.session_state.auth_message = ("error", "Link non valido o scaduto.")
             except Exception:
                 st.session_state.auth_message = ("warning",
-                    "Link gia utilizzato o scaduto. Se hai confermato, prova ad accedere.")
-        _safe_clear_params()
+                    "Link gia utilizzato. Se hai confermato, prova ad accedere.")
+        _safe_clear()
         return True
 
-    # STEP 5: ?nav= senza token (primo caricamento - JS bridge non ha ancora agito)
+    # --- NAV parameter ---
     nav = params.get("nav")
     if nav == "login":
         st.session_state.show_auth = True
         st.session_state.auth_mode = 'login'
         st.session_state.auth_message = ("success", "Email confermata! Ora puoi accedere.")
-        _safe_clear_params()
+        _safe_clear()
         return True
 
     if nav == "update_password":
-        # Se abbiamo gia il token (da caricamento precedente)
         if st.session_state.get('_rcv_access'):
             st.session_state.show_auth = True
             st.session_state.auth_mode = 'update_password'
             st.session_state.authenticated = True
+            _safe_clear()
             return True
-        # Altrimenti: aspettiamo il JS bridge (non fare nulla, non pulire params)
-        return False
+        st.session_state.show_auth = True
+        st.session_state.auth_mode = 'reset'
+        st.session_state.auth_message = ("error", "Link non valido. Richiedi un nuovo link di recupero.")
+        _safe_clear()
+        return True
 
     return False
 
 
-def _inject_hash_bridge():
-    """
-    JS che gira nel browser. Se l'URL parent contiene #access_token,
-    lo converte in ?access_token e fa location.replace (no history entry).
-    """
-    js = """
-    <script>
-    (function(){
-        function convert(w){
-            try{
-                var h=w.location.hash;
-                if(!h||h.length<2||!h.includes('access_token'))return false;
-                var hp=new URLSearchParams(h.substring(1));
-                var base=w.location.origin+w.location.pathname;
-                var ep=new URLSearchParams(w.location.search);
-                hp.forEach(function(v,k){ep.set(k,v)});
-                w.location.replace(base+'?'+ep.toString());
-                return true;
-            }catch(e){return false}
-        }
-        if(!convert(window.parent)){convert(window.top)}
-    })();
-    </script>
-    """
-    components.html(js, height=0, width=0)
-
-
-def _safe_clear_params():
+def _safe_clear():
     try: st.query_params.clear()
     except: pass
 
@@ -349,20 +313,18 @@ def render_auth_page(default_mode='login'):
         .auth-header{text-align:center;margin-bottom:2rem}
         .auth-header h1{color:#FF6600;font-size:2.5rem}
     </style>""", unsafe_allow_html=True)
-
     st.markdown("""<div class="auth-header"><h1>🏗️ POS FACILE</h1>
         <p style="color:#666">Generatore POS per professionisti della sicurezza</p>
     </div>""", unsafe_allow_html=True)
 
-    # Messaggi dal callback
     msg = st.session_state.get('auth_message')
     if msg:
         tipo, testo = msg
-        getattr(st, tipo if tipo in ('success','error','warning','info') else 'info')(testo)
+        fn = getattr(st, tipo, None) if tipo in ('success','error','warning','info') else None
+        (fn or st.info)(testo)
         st.session_state.auth_message = None
 
     mode = st.session_state.get('auth_mode', default_mode)
-
     if mode == 'update_password':   _render_update_password()
     elif mode == 'register':        _render_register()
     elif mode == 'reset':           _render_reset()
@@ -380,7 +342,6 @@ def _render_login():
                 if ok: st.success(msg); st.rerun()
                 else: st.error(msg)
             else: st.warning("Inserisci email e password.")
-
     st.markdown("---")
     c1, c2 = st.columns(2)
     with c1:
@@ -406,7 +367,6 @@ def _render_register():
                 ok, msg = register_user(email, p1)
                 if ok: st.success(msg)
                 else: st.error(msg)
-
     st.markdown("---")
     if st.button("🔐 Hai gia un account? **Accedi**", key="sw_log", use_container_width=True):
         st.session_state.auth_mode = 'login'; st.rerun()
@@ -423,15 +383,12 @@ def _render_reset():
                 if ok: st.success(msg)
                 else: st.error(msg)
             else: st.warning("Inserisci la tua email.")
-
     st.markdown("---")
     if st.button("🔐 Torna al Login", key="sw_log2", use_container_width=True):
         st.session_state.auth_mode = 'login'; st.rerun()
 
 
 def _render_update_password():
-    """Form nuova password dopo recovery."""
-
     if not st.session_state.get('_rcv_access'):
         st.error("Sessione di recupero scaduta. Richiedi un nuovo link.")
         st.markdown("---")
@@ -440,11 +397,9 @@ def _render_update_password():
         return
 
     st.markdown("### 🔐 Imposta Nuova Password")
-
     with st.form("update_pwd_form"):
         p1 = st.text_input("🔒 Nuova Password *", type="password", placeholder="Min 6 caratteri")
         p2 = st.text_input("🔒 Conferma *", type="password")
-
         if st.form_submit_button("✅ Aggiorna Password", use_container_width=True, type="primary"):
             if not p1: st.error("Inserisci la nuova password.")
             elif p1 != p2: st.error("Le password non coincidono.")
@@ -462,7 +417,6 @@ def _render_update_password():
                     st.rerun()
                 else:
                     st.error(msg)
-
     st.markdown("---")
     if st.button("🔐 Torna al Login", key="sw_log3", use_container_width=True):
         _clear_recovery()
@@ -475,9 +429,8 @@ def _render_update_password():
 def render_user_menu():
     if is_authenticated():
         st.sidebar.markdown("---")
-        st.sidebar.markdown("### 👤 Account")
         email = get_current_user_email()
-        if email: st.sidebar.write(f"**{email}**")
+        if email: st.sidebar.write(f"👤 **{email}**")
         if st.sidebar.button("🚪 Logout", use_container_width=True):
             logout_user()
             st.rerun()
