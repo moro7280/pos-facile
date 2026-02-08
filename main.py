@@ -2,7 +2,7 @@
 """
 POS FACILE - Landing Page V10 FINAL
 Fix: Accesso risolto
-Update: Aggiunto gestione completa redirect (conferma email + reset password)
+Update: Logica prioritaria per Reset Password (impedisce redirect errato alla home)
 """
 
 import streamlit as st
@@ -916,8 +916,7 @@ def main():
     elif query_nav == "update_password":
         st.session_state.show_auth = True
         st.session_state.auth_mode = 'update_password'
-        st.info("🔐 Inserisci la tua nuova password.")
-        # Non puliamo i params qui perché il token nell'URL potrebbe servire al componente auth
+        # Non puliamo i params qui perché il token nell'URL serve al componente auth per validare la richiesta
 
     if 'auth_mode' not in st.session_state:
         st.session_state.auth_mode = 'register'
@@ -932,7 +931,15 @@ def main():
     if st.session_state.get('_callback_processed', False):
         st.session_state._callback_processed = False
     
-    if is_authenticated():
+    # --- LOGICA DI ROUTING IMPORTANTE ---
+    # Se l'utente è autenticato (es. via link di recupero) MA deve aggiornare la password,
+    # NON mostriamo la dashboard, ma forziamo la pagina di Auth.
+    
+    user_logged_in = is_authenticated()
+    user_needs_reset = (st.session_state.auth_mode == 'update_password')
+
+    if user_logged_in and not user_needs_reset:
+        # --> DASHBOARD (SOLO se non deve resettare la password)
         # CSS per sidebar SEMPRE FISSA
         st.markdown("""
         <style>
@@ -973,11 +980,13 @@ def main():
         except ImportError:
             st.error("❌ File app.py non trovato.")
     
-    elif st.session_state.get('show_auth', False):
+    elif st.session_state.get('show_auth', False) or user_needs_reset:
+        # --> PAGINA DI AUTENTICAZIONE / RESET
         col1, col2, col3 = st.columns([1, 2, 1])
         with col1:
             if st.button("← Torna alla Home", key="back_home"):
                 st.session_state.show_auth = False
+                st.session_state.auth_mode = 'login' # Reset mode
                 st.rerun()
         
         st.markdown("<br>", unsafe_allow_html=True)
@@ -989,6 +998,7 @@ def main():
                 st.write("Il modulo di autenticazione non è ancora configurato.")
     
     else:
+        # --> LANDING PAGE
         render_navbar()
         render_hero()
         render_stats_bar() 
