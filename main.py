@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 POS FACILE - Landing Page V10 FINAL
-Fix: Accesso risolto
-Update: Logica prioritaria per Reset Password
+Fix: Accesso risolto & Debugging Attivo
 """
 
 import streamlit as st
+import traceback
 
 # --- CONFIGURAZIONE PAGINA ---
 st.set_page_config(
@@ -14,26 +14,21 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- IMPORT MODULI ---
-# Questa sezione è protetta: se manca un file, l'app non crasha ma mostra un avviso
+# --- IMPORT MODULI CON GESTIONE ERRORI REALE ---
 try:
-    from auth_manager import init_auth_state, is_authenticated, render_auth_page, render_user_menu, handle_auth_callback
-    from license_manager import render_subscription_sidebar
+    import auth_manager
     AUTH_AVAILABLE = True
-except ImportError as e:
-    # Fallback in caso di errore per permettere almeno l'apertura della pagina
-    AUTH_AVAILABLE = False
-    print(f"ERRORE CRITICO IMPORT: {e}") # Stampa l'errore vero nella console dei log
-    
-    def init_auth_state(): 
-        if 'show_auth' not in st.session_state: st.session_state.show_auth = False
-        if 'auth_mode' not in st.session_state: st.session_state.auth_mode = 'register'
-    def is_authenticated(): return False
-    def render_auth_page(default_mode='login'): 
-        st.error(f"⚠️ Errore critico nel modulo auth_manager: {e}")
-    def render_user_menu(): pass
-    def render_subscription_sidebar(): pass
-    def handle_auth_callback(): return False
+except Exception:
+    st.error("❌ ERRORE CRITICO: Impossibile caricare auth_manager.py")
+    st.code(traceback.format_exc())
+    st.stop()
+
+try:
+    from license_manager import render_subscription_sidebar
+except ImportError:
+    def render_subscription_sidebar(): 
+        with st.sidebar:
+            st.info("Piano: Free (Modulo licenze non trovato)")
 
 
 def go_to_register():
@@ -564,11 +559,6 @@ def render_mockup():
     """, unsafe_allow_html=True)
 
 
-def render_trust():
-    """Trust badges (Optional - teniamo semplice)"""
-    pass
-
-
 def render_features():
     """Features"""
     st.markdown("<br>", unsafe_allow_html=True)
@@ -901,98 +891,54 @@ def render_footer():
 # ============================================================================
 def main():
     inject_css()
-    init_auth_state()
     
-    # --- GESTIONE REDIRECT SUPABASE (NUOVO) ---
-    # Intercetta il parametro ?nav=login e manda l'utente alla schermata di login
-    if st.query_params.get("nav") == "login":
-        st.session_state.show_auth = True
-        st.session_state.auth_mode = 'login'
-        st.success("✅ Email confermata con successo! Ora puoi effettuare il login.")
-        # Pulisci i parametri per evitare che il messaggio compaia sempre al refresh
-        st.query_params.clear()
-
-    if 'auth_mode' not in st.session_state:
-        st.session_state.auth_mode = 'register'
+    # Inizializza stato autenticazione
+    auth_manager.init_auth_state()
     
-    # ---- Gestione callback email Supabase (conferma / recovery) ----
-    if AUTH_AVAILABLE and not st.session_state.get('_callback_processed', False):
-        callback_handled = handle_auth_callback()
-        if callback_handled:
-            st.session_state._callback_processed = True
-            st.rerun()
-    # Reset del flag al prossimo giro
-    if st.session_state.get('_callback_processed', False):
-        st.session_state._callback_processed = False
+    # 1. GESTIONE CALLBACK EMAIL (Prima di tutto!)
+    # Se c'è un token nell'URL (hash o query), questo lo gestisce
+    if auth_manager.handle_auth_callback():
+        st.rerun()
     
-    # --- LOGICA DI ROUTING IMPORTANTE ---
-    # Se l'utente è autenticato (es. via link di recupero) MA deve aggiornare la password,
-    # NON mostriamo la dashboard, ma forziamo la pagina di Auth.
-    
-    user_logged_in = is_authenticated()
-    user_needs_reset = (st.session_state.auth_mode == 'update_password')
-
-    if user_logged_in and not user_needs_reset:
-        # --> DASHBOARD (SOLO se non deve resettare la password)
-        # CSS per sidebar SEMPRE FISSA
+    # 2. ROUTING APP
+    if auth_manager.is_authenticated():
+        # --- UTENTE LOGGATO (DASHBOARD) ---
+        # CSS per sidebar fissa
         st.markdown("""
         <style>
-            [data-testid="stSidebar"] {
-                display: block !important;
-                width: 300px !important;
-                min-width: 300px !important;
-                max-width: 300px !important;
-                transform: none !important;
-                position: relative !important;
-                visibility: visible !important;
-            }
-            [data-testid="stSidebar"][aria-expanded="false"] {
-                display: block !important;
-                width: 300px !important;
-                min-width: 300px !important;
-                margin-left: 0 !important;
-                transform: none !important;
-                visibility: visible !important;
-            }
-            section[data-testid="stSidebar"] > div { width: 300px !important; }
-            [data-testid="collapsedControl"], [data-testid="stSidebarCollapseButton"] { display: none !important; }
-            [data-testid="stSidebarUserContent"] { padding-top: 1rem !important; }
-            [data-testid="stSidebar"] .stButton > button { display: flex !important; visibility: visible !important; width: 100% !important; }
+            [data-testid="stSidebar"] { min-width: 300px; max-width: 300px; }
         </style>
         """, unsafe_allow_html=True)
         
-        try:
-            render_subscription_sidebar()
-        except Exception as e:
-            with st.sidebar:
-                st.markdown("### 💎 Abbonamento")
-                st.info("Piano: **Free**")
+        render_subscription_sidebar()
+        
+        # Menu utente in sidebar
+        with st.sidebar:
+            st.write(f"👤 {st.session_state.user.email}")
+            if st.button("Esci"):
+                auth_manager.logout_user()
         
         try:
             from app import main as run_pos_app
             run_pos_app()
         except ImportError:
-            st.error("❌ File app.py non trovato.")
+            st.error("❌ File app.py non trovato. Carica il modulo dell'applicazione.")
     
-    elif st.session_state.get('show_auth', False) or user_needs_reset:
-        # --> PAGINA DI AUTENTICAZIONE / RESET
+    elif st.session_state.get('show_auth', False) or st.session_state.auth_mode == 'update_password':
+        # --- PAGINA DI AUTENTICAZIONE (Login / Register / Reset) ---
         col1, col2, col3 = st.columns([1, 2, 1])
         with col1:
             if st.button("← Torna alla Home", key="back_home"):
                 st.session_state.show_auth = False
-                st.session_state.auth_mode = 'login' # Reset mode
+                st.session_state.auth_mode = 'login'
                 st.rerun()
         
         st.markdown("<br>", unsafe_allow_html=True)
         with col2:
-            if AUTH_AVAILABLE:
-                render_auth_page(default_mode=st.session_state.get('auth_mode', 'register'))
-            else:
-                st.info("📝 **Pagina di Registrazione**")
-                st.write("Il modulo di autenticazione non è ancora configurato.")
+            auth_manager.render_auth_page()
     
     else:
-        # --> LANDING PAGE
+        # --- LANDING PAGE (Sito Pubblico) ---
         render_navbar()
         render_hero()
         render_stats_bar() 
