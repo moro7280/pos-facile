@@ -21,7 +21,6 @@ def get_supabase_client():
         return None
 
 def get_app_url():
-    # Restituisce l'URL base pulito
     try:
         url = st.secrets.get("APP_URL", "https://pos-facile.streamlit.app")
         return url.rstrip("/")
@@ -38,9 +37,34 @@ def init_auth_state():
         st.session_state.auth_mode = 'login'
     if 'auth_message' not in st.session_state:
         st.session_state.auth_message = None
+    # NUOVO: Persistenza Token
+    if 'access_token' not in st.session_state:
+        st.session_state.access_token = None
+    if 'refresh_token' not in st.session_state:
+        st.session_state.refresh_token = None
 
 def is_authenticated():
     return st.session_state.get('authenticated', False)
+
+# Helper per salvare la sessione tra i vari refresh di Streamlit
+def _persist_session(session):
+    if session:
+        st.session_state.authenticated = True
+        st.session_state.user = session.user
+        st.session_state.access_token = session.access_token
+        st.session_state.refresh_token = session.refresh_token
+
+# Helper per ripristinare la sessione nel client prima di un'azione
+def _restore_session(client):
+    token = st.session_state.get('access_token')
+    refresh = st.session_state.get('refresh_token')
+    if token:
+        try:
+            client.auth.set_session(token, refresh or "")
+            return True
+        except Exception:
+            return False
+    return False
 
 # --- AZIONI ---
 def login_user(email, password):
@@ -48,9 +72,8 @@ def login_user(email, password):
     if not client: return False, "Errore connessione DB"
     try:
         res = client.auth.sign_in_with_password({"email": email, "password": password})
-        if res.user:
-            st.session_state.authenticated = True
-            st.session_state.user = res.user
+        if res.user and res.session:
+            _persist_session(res.session) # Salva sessione
             return True, "Login OK"
         return False, "Credenziali errate"
     except Exception as e:
@@ -76,7 +99,6 @@ def reset_password(email):
     if not client: return False, "Errore connessione DB"
     try:
         base_url = get_app_url()
-        # Redirect specifico per la pagina di update
         res = client.auth.reset_password_email(email, options={
             "redirect_to": f"{base_url}/?nav=update_password"
         })
@@ -87,63 +109,64 @@ def reset_password(email):
 def update_user_password(new_password):
     client = get_supabase_client()
     if not client: return False, "Errore connessione DB"
+    
+    # FONDAMENTALE: Ripristina la sessione prima di aggiornare
+    if not _restore_session(client):
+        return False, "Sessione scaduta. Riprova il login."
+
     try:
         res = client.auth.update_user({"password": new_password})
-        if res.user: return True, "Password aggiornata!"
+        if res.user: 
+            # Aggiorna anche la sessione salvata con i nuovi dati se necessario
+            if res.session: _persist_session(res.session)
+            return True, "Password aggiornata!"
         return False, "Errore aggiornamento"
     except Exception as e:
         return False, str(e)
 
 def logout_user():
     client = get_supabase_client()
-    if client: client.auth.sign_out()
+    if client: 
+        try: client.auth.sign_out()
+        except: pass
+    
     st.session_state.authenticated = False
     st.session_state.user = None
+    st.session_state.access_token = None
+    st.session_state.refresh_token = None
     st.rerun()
 
-# --- CALLBACK & JS FIX (IL CUORE DEL PROBLEMA) ---
+# --- CALLBACK & JS FIX ---
 def handle_auth_callback():
-    # 1. FIX JS: Cattura hash (#) dalla finestra PRINCIPALE (parent)
-    # Senza 'parent', lo script cerca nel suo iframe vuoto e fallisce.
+    # 1. FIX JS: Cattura hash (#) dalla finestra PRINCIPALE
     js = """
     <script>
     try {
         var parentLocation = window.parent.location;
         if (parentLocation.hash && (parentLocation.hash.includes('access_token') || parentLocation.hash.includes('error'))) {
-            console.log("Hash detected in parent, fixing...");
             var params = new URLSearchParams(parentLocation.hash.substring(1));
             var newUrl = new URL(parentLocation.href);
-            
-            // Sposta i parametri dall'hash alla query string (?) dove Python può leggerli
             params.forEach((v, k) => newUrl.searchParams.set(k, v));
-            
-            // Pulisce l'hash e ricarica
             newUrl.hash = '';
             parentLocation.href = newUrl.toString();
         }
-    } catch (e) {
-        console.log("Error accessing parent window:", e);
-    }
+    } catch (e) {}
     </script>
     """
     components.html(js, height=0, width=0)
 
-    # 2. Gestione parametri URL (ora visibili grazie al JS)
     params = st.query_params
     
     # GESTIONE ERRORI
     if "error" in params:
         error_code = params.get("error_code", "")
         desc = params.get("error_description", "Errore sconosciuto")
-        
         st.session_state.show_auth = True
         st.session_state.auth_mode = 'login' 
-        
         if error_code == "otp_expired":
             st.session_state.auth_message = ("error", "⚠️ Link scaduto. Richiedi un nuovo reset.")
         else:
             st.session_state.auth_message = ("error", f"❌ Errore: {desc}")
-            
         st.query_params.clear()
         return True
 
@@ -153,9 +176,9 @@ def handle_auth_callback():
         if client:
             try:
                 res = client.auth.exchange_code_for_session({"auth_code": params["code"]})
-                if res.user:
-                    st.session_state.authenticated = True
-                    st.session_state.user = res.user
+                if res.user and res.session:
+                    _persist_session(res.session) # PERSISTENZA
+                    
                     nav = params.get("nav")
                     if nav == "update_password": st.session_state.auth_mode = "update_password"
                     elif nav == "login": st.session_state.auth_mode = "login"; st.session_state.auth_message = ("success", "Email confermata!")
@@ -163,17 +186,18 @@ def handle_auth_callback():
                     return True
             except: pass
     
-    # Token implicito (Recovery da hash spostato in query dal JS)
+    # Token implicito (Recovery)
     if "access_token" in params:
         client = get_supabase_client()
         if client:
             try:
                 client.auth.set_session(params["access_token"], params.get("refresh_token", ""))
-                st.session_state.authenticated = True
-                st.session_state.user = client.auth.get_user().user
+                # Recupera la sessione completa per avere anche il refresh token corretto
+                session = client.auth.get_session()
+                if session:
+                    _persist_session(session) # PERSISTENZA
                 
                 nav = params.get("nav")
-                # Se c'è nav=update_password o type=recovery, forza modalità update
                 if nav == "update_password" or params.get("type") == "recovery":
                     st.session_state.auth_mode = "update_password"
                 
@@ -249,7 +273,7 @@ def render_auth_page(default_mode='login'):
                         st.success("Fatto! Ora accedi.")
                         time.sleep(2)
                         st.session_state.auth_mode = 'login'
-                        logout_user() 
+                        logout_user() # Forza logout pulito
                         st.rerun()
                     else: st.error(msg)
                 else: st.error("Password non valide")
