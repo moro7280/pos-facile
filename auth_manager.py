@@ -50,7 +50,7 @@ def _persist_session(session):
         st.session_state.access_token = session.access_token
         st.session_state.refresh_token = session.refresh_token if hasattr(session, 'refresh_token') else None
 
-# Helper per ripristinare la sessione (FIX DEFINITIVO)
+# Helper per ripristinare la sessione (LOGICA "FORZATA")
 def _restore_session(client):
     token = st.session_state.get('access_token')
     refresh = st.session_state.get('refresh_token')
@@ -58,19 +58,18 @@ def _restore_session(client):
     if not token:
         return False
         
-    # Tentativo 1: Set Session Standard
+    # Tentativo 1: Standard (pulito)
     try:
         if refresh:
             client.auth.set_session(token, refresh)
             return True
     except Exception:
-        pass # Se fallisce, passiamo al piano B
+        pass 
         
-    # Tentativo 2: Forzatura Header (Piano B per Recovery)
-    # Se set_session fallisce (comune nel recovery), iniettiamo il token direttamente
+    # Tentativo 2: Forzatura Header (Nucleare)
+    # Se il refresh token è bruciato (comune nel recovery), usiamo solo l'access token
     try:
         client.options.headers.update({"Authorization": f"Bearer {token}"})
-        # Alcune versioni di supabase-py usano postgrest.auth
         client.postgrest.auth(token)
         return True
     except Exception:
@@ -120,15 +119,31 @@ def update_user_password(new_password):
     client = get_supabase_client()
     if not client: return False, "Errore connessione DB"
     
-    # Ripristina sessione con metodo robusto
-    if not _restore_session(client):
+    # Tentativo di ripristino sessione
+    session_ok = _restore_session(client)
+    
+    # Se _restore_session fallisce ma abbiamo un token, proviamo a forzare l'aggiornamento comunque
+    # perché l'access token potrebbe essere ancora valido per l'API user.update
+    if not session_ok and not st.session_state.get('access_token'):
         return False, "Sessione scaduta. Riprova dal link email."
 
     try:
         res = client.auth.update_user({"password": new_password})
-        # Se non crasha, è andato a buon fine (anche se res.user a volte è None in update)
+        
+        # Supabase a volte non restituisce 'user' nell'oggetto response durante l'update
+        # quindi consideriamo successo se non lancia eccezioni
         return True, "Password aggiornata!"
     except Exception as e:
+        # Ultimo tentativo: riprova l'aggiornamento admin-style (se permesso) o con header espliciti
+        try:
+            token = st.session_state.get('access_token')
+            if token:
+                client.postgrest.auth(token)
+                client.auth.update_user({"password": new_password})
+                return True, "Password aggiornata!"
+        except:
+            pass
+            
         return False, f"Errore: {str(e)}"
 
 def logout_user():
@@ -175,7 +190,7 @@ def handle_auth_callback():
         st.query_params.clear()
         return True
 
-    # RECUPERO SESSIONE (Implicit Flow - Recovery)
+    # RECUPERO SESSIONE
     if "access_token" in params:
         client = get_supabase_client()
         if client:
@@ -183,24 +198,22 @@ def handle_auth_callback():
                 access_token = params["access_token"]
                 refresh_token = params.get("refresh_token")
                 
-                # Salviamo subito i token grezzi
+                # Salviamo i token grezzi
                 st.session_state.access_token = access_token
                 st.session_state.refresh_token = refresh_token
                 st.session_state.authenticated = True
                 
-                # Proviamo a stabilire la sessione ufficiale
+                # Proviamo a stabilire la sessione formale
                 try:
                     if refresh_token:
                         client.auth.set_session(access_token, refresh_token)
                     else:
                         client.auth.set_session(access_token, "")
                     
-                    # Se funziona, prendiamo l'utente reale
                     user = client.auth.get_user().user
                     st.session_state.user = user
                 except:
-                    # Se fallisce, non fa nulla: useremo il token grezzo in update_user_password
-                    pass
+                    pass # Ignoriamo errori qui, ci basta il token grezzo
                 
                 nav = params.get("nav")
                 if nav == "update_password" or params.get("type") == "recovery":
@@ -208,8 +221,7 @@ def handle_auth_callback():
                 
                 st.query_params.clear()
                 return True
-            except Exception as e:
-                print(f"Callback error: {e}")
+            except Exception:
                 pass
                 
     return False
@@ -280,7 +292,6 @@ def render_auth_page(default_mode='login'):
                         st.success("Fatto! Ora accedi.")
                         time.sleep(2)
                         st.session_state.auth_mode = 'login'
-                        # Logout necessario per pulire la sessione di recovery
                         logout_user() 
                         st.rerun()
                     else: st.error(msg)
