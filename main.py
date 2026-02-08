@@ -14,12 +14,25 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- IMPORT MODULI (SENZA PROTEZIONE ERRORI) ---
-# Copia questo al posto del blocco try/except originale per vedere l'errore reale
-from auth_manager import init_auth_state, is_authenticated, render_auth_page, render_user_menu, handle_auth_callback
-from license_manager import render_subscription_sidebar
-AUTH_AVAILABLE = True
-        st.warning("⚠️ Modulo Auth non trovato.")
+# --- IMPORT MODULI ---
+try:
+    from auth_manager import init_auth_state, is_authenticated, render_auth_page, render_user_menu, handle_auth_callback
+    from license_manager import render_subscription_sidebar
+    AUTH_AVAILABLE = True
+except ImportError as e:
+    # Se c'è un errore di importazione, stampiamo l'errore nella console per debugging
+    print(f"ERRORE IMPORT MODULI: {e}")
+    AUTH_AVAILABLE = False
+    
+    # Funzioni di fallback per evitare crash se i moduli mancano
+    def init_auth_state(): 
+        if 'show_auth' not in st.session_state:
+            st.session_state.show_auth = False
+        if 'auth_mode' not in st.session_state:
+            st.session_state.auth_mode = 'register'
+    def is_authenticated(): return False
+    def render_auth_page(default_mode='login'): 
+        st.warning(f"⚠️ Modulo Auth non trovato o errore nel codice. Dettagli: {e}")
     def render_user_menu(): pass
     def render_subscription_sidebar(): pass
     def handle_auth_callback(): return False
