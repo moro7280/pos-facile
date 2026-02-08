@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 POS FACILE - Landing Page V10 FINAL
-Fix: Accesso risolto (rimosso menu duplicato)
-Update: Aggiunto redirect automatico al login dopo conferma email (nav=login)
+Fix: Accesso risolto
+Update: Aggiunto gestione completa redirect (conferma email + reset password)
 """
 
 import streamlit as st
@@ -902,13 +902,22 @@ def main():
     init_auth_state()
     
     # --- GESTIONE REDIRECT SUPABASE (NUOVO) ---
-    # Intercetta il parametro ?nav=login e manda l'utente alla schermata di login
-    if st.query_params.get("nav") == "login":
+    # Recupera i parametri dall'URL
+    query_nav = st.query_params.get("nav")
+
+    # 1. Conferma Email -> Vai al Login
+    if query_nav == "login":
         st.session_state.show_auth = True
         st.session_state.auth_mode = 'login'
         st.success("✅ Email confermata con successo! Ora puoi effettuare il login.")
-        # Pulisci i parametri per evitare che il messaggio compaia sempre al refresh
         st.query_params.clear()
+
+    # 2. Reset Password -> Vai al modulo "Nuova Password"
+    elif query_nav == "update_password":
+        st.session_state.show_auth = True
+        st.session_state.auth_mode = 'update_password'
+        st.info("🔐 Inserisci la tua nuova password.")
+        # Non puliamo i params qui perché il token nell'URL potrebbe servire al componente auth
 
     if 'auth_mode' not in st.session_state:
         st.session_state.auth_mode = 'register'
